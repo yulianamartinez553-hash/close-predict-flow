@@ -127,10 +127,11 @@ export function Hero() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
             className="absolute left-1/2 top-6 h-[460px] w-[300px] -translate-x-1/2 overflow-hidden rounded-[32px] border border-white/15 shadow-[0_40px_120px_-30px_rgba(139,63,214,0.6)] sm:w-[330px] lg:h-[540px]"
+            style={{ background: "radial-gradient(120% 80% at 50% 0%, #5B2A8C 0%, #2B1142 55%, #1E0A33 100%)" }}
           >
-            <img src={caroPortrait} alt="Caro Chaparro, mentora y estratega de ventas" className="h-full w-full object-cover" />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep via-ink-deep/60 to-transparent p-5 pt-20">
-              <div className="display text-[11px] uppercase tracking-[0.3em] text-white/70">Mentora · Estratega</div>
+            <img src={caroPortrait} alt="Caro Chaparro, mentora y estratega de ventas" className="absolute inset-x-0 bottom-0 mx-auto h-[94%] w-auto object-contain object-bottom" />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep via-ink-deep/70 to-transparent p-5 pt-24">
+              <div className="display text-[11px] uppercase tracking-[0.3em] text-gold/80">Mentora · Estratega</div>
               <div
                 className="serif mt-1 text-2xl text-white sm:text-3xl"
                 style={{ WebkitTextStroke: "1px #8B3FD6" }}

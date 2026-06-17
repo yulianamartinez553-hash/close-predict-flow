@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diagnóstico Comercial — Caro Chaparro</title>
+<meta name="description" content="6 preguntas para identificar dónde se están fugando tus ventas.">
+
+<!-- Tipografías: serif editorial para títulos, sans limpia para cuerpo -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   DIAGNÓSTICO COMERCIAL — CARO CHAPARRO
+   Hoja de estilos
+   ------------------------------------------------------------
+   Índice:
+   1. Variables / tokens de marca
+   2. Reset base
+   3. Tipografía
+   4. Fondo animado de partículas
+   5. Barra de progreso
+   6. Layout de pantallas
+   7. Pantalla intro
+   8. Preguntas (eyebrow, título, opciones)
+   9. Botones y navegación
+   10. Overlay de transición (morph)
+   11. Pantalla de resultado
+   12. Tarjeta de WhatsApp
+   13. Animaciones
+   14. Responsive
+   15. Accesibilidad / reduced motion
+   ============================================================ */
+
+/* ---------- 1. VARIABLES / TOKENS DE MARCA ---------- */
+:root{
+  --purple-deep:   #40358F;
+  --purple-light:  #8174E8;
+  --purple-soft:   #ECEAFB; /* lavanda muy suave, para tarjetas sobre fondo morado */
+  --gray-bg:       #F2F2F2;
+  --gray-text:     #777777;
+  --white:         #FFFFFF;
+  --gold:          #F4C542;
+  --gold-soft:     #FBE6A8;
+
+  --ink:           #241F3D; /* texto principal sobre fondo claro */
+  --ink-soft:      #4A4564;
+
+  --font-display:  'Playfair Display', 'Georgia', serif;
+  --font-body:     'Poppins', 'Helvetica Neue', Arial, sans-serif;
+
+  --radius-lg:     22px;
+  --radius-md:     14px;
+  --radius-sm:     10px;
+  --radius-pill:   999px;
+
+  --ease-premium:  cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-card:   0 18px 50px rgba(64, 53, 143, 0.12);
+  --shadow-card-dark: 0 18px 50px rgba(0, 0, 0, 0.25);
+
+  --vh: 100dvh; /* sobrescrito por JS como fallback en navegadores viejos */
+}
+
+/* ---------- 2. RESET BASE ---------- */
+*, *::before, *::after{ box-sizing: border-box; }
+html, body{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--gray-bg);
+  overflow-x: hidden;
+}
+body{
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.1s linear; /* el cambio real lo hace el overlay morph */
+}
+button{ font-family: inherit; }
+input, select{ font-family: inherit; }
+ul, p, h1, h2, h3{ margin: 0; }
+img{ max-width: 100%; display: block; }
+
+:focus-visible{
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- 3. TIPOGRAFÍA ---------- */
+.wordmark{
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  font-size: 12px;
+  text-align: center;
+  color: var(--purple-deep);
+  margin-bottom: 18px;
+}
+[data-bg="dark"] .wordmark{ color: var(--gold-soft); }
+
+.title-display{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(28px, 7vw, 38px);
+  line-height: 1.15;
+  text-align: center;
+  color: var(--purple-deep);
+  margin-bottom: 14px;
+}
+
+.subtitle{
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(14px, 4vw, 16px);
+  line-height: 1.55;
+  text-align: center;
+  color: var(--gray-text);
+  margin-bottom: 36px;
+}
+
+/* ---------- 4. FONDO ATMOSFÉRICO: BLOBS + PARTÍCULAS ---------- */
+.ambient-glow{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.blob{
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  transition: opacity 0.7s ease;
+}
+
+/* Manchas lavanda del fondo gris: el movimiento real (rebote en los
+   bordes) lo controla script.js vía transform; aquí solo definimos
+   tamaño, color y el punto de referencia (0,0) que usa esa física. */
+.blob-purple{
+  background: radial-gradient(circle, var(--purple-light), transparent 72%);
+  filter: blur(70px);
+  top: 0;
+  left: 0;
+}
+.blob-purple--lg{
+  width: 58vmax; height: 58vmax;
+  opacity: 0.4;
+}
+.blob-purple--sm{
+  width: 24vmax; height: 24vmax;
+  opacity: 0.5;
+  filter: blur(55px);
+}
+/* Se ocultan suavemente cuando la pantalla pasa a fondo morado.
+   Siguen moviéndose en segundo plano: solo se desvanecen. */
+body.bg-dark .blob-purple{ opacity: 0; }
+
+/* Manchas del fondo morado: doradas y violeta profundo, sutiles, en reposo */
+.blob-deep{
+  mix-blend-mode: screen;
+  opacity: 0;
+  filter: blur(70px);
+}
+body.bg-dark .blob-deep{ opacity: 0.42; }
+
+.blob-deep--gold{
+  width: 38vmax; height: 38vmax;
+  bottom: -16vmax; right: -8vmax;
+  background: radial-gradient(circle, var(--gold), transparent 70%);
+  animation: driftB 32s ease-in-out infinite alternate;
+}
+body.bg-dark .blob-deep--gold{ opacity: 0.3; }
+
+.blob-deep--purple{
+  width: 32vmax; height: 32vmax;
+  bottom: 6vmax; left: -6vmax;
+  background: radial-gradient(circle, var(--purple-deep), transparent 70%);
+  animation: driftC 22s ease-in-out infinite alternate;
+}
+
+@keyframes driftB{
+  from{ transform: translate(0, 0) scale(1); }
+  to{ transform: translate(-7vmax, -6vmax) scale(1.08); }
+}
+@keyframes driftC{
+  from{ transform: translate(0, 0) scale(1); }
+  to{ transform: translate(5vmax, -5vmax) scale(1.15); }
+}
+
+#particles-canvas{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---------- 5. BARRA DE PROGRESO ---------- */
+.progress-track{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(119, 119, 119, 0.18);
+  z-index: 50;
+}
+[data-bg="dark"] ~ .progress-track,
+body.bg-dark .progress-track{
+  background: rgba(255, 255, 255, 0.18);
+}
+.progress-fill{
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--purple-light), var(--gold));
+  border-radius: 0 4px 4px 0;
+  transition: width 0.6s var(--ease-premium);
+}
+
+/* ---------- 6. LAYOUT DE PANTALLAS ---------- */
+.diag-app{
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.screen{
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: max(28px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+}
+.screen--active{
+  display: flex;
+}
+
+.screen-inner{
+  width: 100%;
+  max-width: 460px;
+  padding: 16px 4px;
+}
+
+.screen-inner--intro{
+  padding-top: 8vh;
+}
+
+/* Colores de texto sobre fondo morado */
+[data-bg="dark"] .q-title,
+[data-bg="dark"] .diag-title{
+  color: var(--white);
+}
+[data-bg="dark"] .q-eyebrow{
+  color: var(--gold-soft);
+}
+
+/* ---------- 7. PANTALLA INTRO ---------- */
+.field-group{
+  margin-bottom: 28px;
+}
+.field-label{
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.input-wrap{
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border: 1.5px solid rgba(64, 53, 143, 0.14);
+  border-radius: var(--radius-md);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.input-wrap:focus-within{
+  border-color: var(--purple-light);
+  box-shadow: 0 0 0 4px rgba(129, 116, 232, 0.14);
+}
+.input-icon{
+  padding: 0 0 0 18px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--purple-light);
+}
+.input-field{
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 16px 16px 16px 10px;
+  font-size: 15px;
+  color: var(--ink);
+}
+.input-field::placeholder{ color: #B8B4CC; }
+
+.field-hint{
+  display: block;
+  font-size: 12.5px;
+  color: var(--gray-text);
+  margin-top: 8px;
+  padding-left: 4px;
+}
+.field-error{
+  display: block;
+  font-size: 12.5px;
+  color: #C0392B;
+  margin-top: 6px;
+  padding-left: 4px;
+  min-height: 16px;
+}
+
+/* ---------- 8. PREGUNTAS ---------- */
+.q-eyebrow{
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-align: center;
+  color: var(--purple-light);
+  margin-bottom: 16px;
+}
+
+.q-title{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(21px, 6vw, 26px);
+  line-height: 1.32;
+  text-align: center;
+  color: var(--ink);
+  margin-bottom: 30px;
+}
+
+.options{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.option{
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  background: var(--white);
+  border: 1.5px solid rgba(64, 53, 143, 0.12);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: childEnter 0.5s var(--ease-premium) forwards;
+  transition: border-color 0.22s ease, background-color 0.22s ease,
+              transform 0.18s ease, box-shadow 0.22s ease;
+}
+.option:nth-child(1){ animation-delay: 0.22s; }
+.option:nth-child(2){ animation-delay: 0.30s; }
+.option:nth-child(3){ animation-delay: 0.38s; }
+.option:nth-child(4){ animation-delay: 0.46s; }
+[data-bg="dark"] .option{
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.option:hover{
+  border-color: var(--purple-light);
+  transform: translateY(-1px);
+}
+[data-bg="dark"] .option:hover{
+  border-color: var(--gold-soft);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.option-letter{
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--gray-bg);
+  color: var(--purple-deep);
+  transition: background-color 0.22s ease, color 0.22s ease;
+}
+[data-bg="dark"] .option-letter{
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--white);
+}
+
+.option-text{
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  padding-top: 3px;
+}
+[data-bg="dark"] .option-text{ color: var(--purple-soft); }
+.option-text em{
+  font-style: normal;
+  color: var(--gray-text);
+}
+[data-bg="dark"] .option-text em{ color: rgba(236, 234, 251, 0.65); }
+
+.option.is-selected{
+  border-color: var(--purple-deep);
+  background: var(--purple-soft);
+  box-shadow: 0 6px 18px rgba(64, 53, 143, 0.14);
+}
+[data-bg="dark"] .option.is-selected{
+  border-color: var(--gold);
+  background: rgba(244, 197, 66, 0.14);
+}
+.option.is-selected .option-letter{
+  background: var(--purple-deep);
+  color: var(--white);
+}
+[data-bg="dark"] .option.is-selected .option-letter{
+  background: var(--gold);
+  color: var(--purple-deep);
+}
+.option.is-selected .option-text{ color: var(--ink); font-weight: 500; }
+[data-bg="dark"] .option.is-selected .option-text{ color: var(--white); }
+
+/* ---------- 9. BOTONES Y NAVEGACIÓN ---------- */
+.btn{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  padding: 16px 26px;
+  transition: transform 0.18s var(--ease-premium), box-shadow 0.25s ease, opacity 0.2s ease;
+}
+.btn:active{ transform: scale(0.97); }
+.btn:disabled{
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn--full{ width: 100%; }
+
+.btn--primary{
+  background: linear-gradient(135deg, var(--purple-deep), var(--purple-light));
+  color: var(--white);
+  box-shadow: 0 12px 28px rgba(64, 53, 143, 0.28);
+}
+.btn--primary:not(:disabled):hover{
+  box-shadow: 0 16px 34px rgba(64, 53, 143, 0.36);
+}
+
+.btn--ghost{
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid rgba(64, 53, 143, 0.2);
+}
+[data-bg="dark"] .btn--ghost{
+  color: var(--purple-soft);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn--gold{
+  background: linear-gradient(135deg, var(--gold), #E8B530);
+  color: var(--purple-deep);
+  box-shadow: 0 12px 28px rgba(244, 197, 66, 0.35);
+}
+
+.nav-row{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nav-row .btn--ghost{ flex: 0 0 auto; }
+.nav-row .btn--primary{ flex: 1; }
+.nav-row--single .btn--primary{ width: 100%; }
+
+.arrow{ font-size: 15px; line-height: 1; }
+
+/* ---------- 10. OVERLAY DE TRANSICIÓN (morph) ---------- */
+.morph-overlay{
+  position: fixed;
+  z-index: 80;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+  opacity: 0;
+  background: var(--purple-deep);
+  overflow: hidden;
+}
+.morph-overlay.is-active{
+  pointer-events: auto;
+}
+.morph-shimmer{
+  position: absolute;
+  top: -60%;
+  left: -35%;
+  width: 55%;
+  height: 220%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-140%) rotate(10deg);
+  opacity: 0;
+}
+.morph-overlay.is-expanding .morph-shimmer{
+  animation: shimmerSweep 0.85s ease-out 0.05s forwards;
+}
+@keyframes shimmerSweep{
+  0%{ transform: translateX(-140%) rotate(10deg); opacity: 0; }
+  15%{ opacity: 1; }
+  100%{ transform: translateX(260%) rotate(10deg); opacity: 0; }
+}
+
+/* ---------- 11. PANTALLA DE RESULTADO ---------- */
+.screen-inner--result{ max-width: 520px; }
+
+.title-display--result{ margin-bottom: 8px; }
+
+.gold-divider{
+  width: 56px;
+  height: 3px;
+  margin: 0 auto 30px;
+  background: linear-gradient(90deg, var(--gold), var(--purple-light));
+  border-radius: 4px;
+}
+
+.diag-card{
+  position: relative;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px 26px;
+  margin-bottom: 36px;
+  box-shadow: var(--shadow-card);
+  border-top: 4px solid var(--gold);
+  overflow: hidden;
+}
+.diag-eyebrow{
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--purple-light);
+  background: var(--purple-soft);
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 16px;
+}
+.diag-title{
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(19px, 5.4vw, 23px);
+  line-height: 1.35;
+  color: var(--purple-deep);
+  margin-bottom: 14px;
+}
+.diag-text{
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.indicators-heading{
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-align: center;
+  color: var(--purple-deep);
+  margin-bottom: 18px;
+}
+
+.indicators-grid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+.indicator-card{
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 20px 20px 18px;
+  box-shadow: 0 8px 24px rgba(64, 53, 143, 0.08);
+  border: 1px solid rgba(64, 53, 143, 0.07);
+  transition: box-shadow 0.4s ease;
+}
+.indicator-card.is-strong{
+  box-shadow: 0 0 0 1px rgba(244, 197, 66, 0.4), 0 10px 32px rgba(129, 116, 232, 0.32);
+}
+
+.indicator-top{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+.indicator-name{
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.indicator-percent{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--purple-deep);
+  white-space: nowrap;
+}
+.indicator-card.is-strong .indicator-percent{
+  background: linear-gradient(135deg, var(--purple-deep), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.indicator-bar-track{
+  width: 100%;
+  height: 8px;
+  background: var(--gray-bg);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.indicator-bar-fill{
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--purple-light), var(--purple-deep));
+  transition: width 1.4s var(--ease-premium);
+}
+.indicator-card.is-strong .indicator-bar-fill{
+  background: linear-gradient(90deg, var(--purple-light), var(--gold));
+  box-shadow: 0 0 14px rgba(244, 197, 66, 0.65), 0 0 4px rgba(129, 116, 232, 0.8);
+}
+
+.indicator-interpretation{
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--gray-text);
+}
+
+/* ---------- 12. TARJETA DE WHATSAPP ---------- */
+.whatsapp-card{
+  position: relative;
+  background: linear-gradient(165deg, var(--purple-deep), #322B72);
+  border-radius: var(--radius-lg);
+  padding: 30px 24px 26px;
+  border-top: 4px solid var(--gold);
+  box-shadow: var(--shadow-card-dark);
+  text-align: center;
+}
+.whatsapp-title{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(19px, 5.4vw, 22px);
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.whatsapp-text{
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--purple-soft);
+  margin-bottom: 18px;
+}
+.whatsapp-cta-text{
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gold-soft);
+  margin-bottom: 18px;
+}
+
+.whatsapp-form{ text-align: left; }
+
+.phone-input-row{
+  display: flex;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: 6px;
+}
+.select-wrap{ flex-shrink: 0; }
+.country-select{
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 12px 6px 12px 12px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+}
+.phone-input{
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+  color: var(--ink);
+  padding: 12px 14px 12px 4px;
+  min-width: 0;
+}
+.phone-input::placeholder{ color: #B8B4CC; }
+
+.whatsapp-form .field-error{
+  color: var(--gold-soft);
+  margin-bottom: 12px;
+}
+
+.whatsapp-confirmation{
+  background: rgba(244, 197, 66, 0.14);
+  border: 1px solid rgba(244, 197, 66, 0.4);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-top: 4px;
+}
+.whatsapp-confirmation p{
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--white);
+  text-align: center;
+}
+
+.whatsapp-footnote{
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 18px;
+}
+
+/* ---------- 13. ANIMACIONES ---------- */
+@keyframes childEnter{
+  from{ opacity: 0; transform: translateY(15px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+.reveal{
+  opacity: 0;
+  transform: translateY(15px);
+  animation: childEnter 0.6s var(--ease-premium) forwards;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes shakeError{
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.is-shaking{ animation: shakeError 0.5s; }
+
+.indicator-card{
+  opacity: 0;
+  transform: translateY(10px);
+  animation: cardEnter 0.6s var(--ease-premium) forwards;
+}
+@keyframes cardEnter{
+  to{ opacity: 1; transform: translateY(0); }
+}
+.indicator-card:nth-child(1){ animation-delay: 0.05s; }
+.indicator-card:nth-child(2){ animation-delay: 0.15s; }
+.indicator-card:nth-child(3){ animation-delay: 0.25s; }
+.indicator-card:nth-child(4){ animation-delay: 0.35s; }
+
+/* ---------- 14. RESPONSIVE ---------- */
+@media (min-width: 560px){
+  .screen-inner{ max-width: 480px; }
+  .indicators-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 860px){
+  .screen{ padding: 48px 24px; }
+  .screen-inner--intro{ padding-top: 6vh; }
+}
+
+@media (max-height: 700px){
+  .screen-inner--intro{ padding-top: 4vh; }
+  .subtitle{ margin-bottom: 24px; }
+}
+
+/* ---------- 15. ACCESIBILIDAD / REDUCED MOTION ---------- */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     ATMÓSFERA DE FONDO: blobs de luz que derivan lentamente
+     (capa detrás de las partículas, aporta profundidad y movimiento)
+     ============================================ -->
+<div class="ambient-glow" aria-hidden="true">
+  <span class="blob blob-purple blob-purple--lg"></span>
+  <span class="blob blob-purple blob-purple--sm"></span>
+  <span class="blob blob-deep blob-deep--gold"></span>
+  <span class="blob blob-deep blob-deep--purple"></span>
+</div>
+
+<!-- ============================================
+     FONDO ANIMADO DE PARTÍCULAS (persistente)
+     ============================================ -->
+<canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+<!-- ============================================
+     BARRA DE PROGRESO SUPERIOR
+     ============================================ -->
+<div class="progress-track" role="progressbar" aria-label="Progreso del diagnóstico" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
+  <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<!-- ============================================
+     OVERLAY DE TRANSICIÓN (morph del botón)
+     ============================================ -->
+<div class="morph-overlay" id="morphOverlay" aria-hidden="true">
+  <div class="morph-shimmer"></div>
+</div>
+
+<!-- ============================================
+     CONTENEDOR PRINCIPAL DE LA EXPERIENCIA
+     ============================================ -->
+<main class="diag-app" id="diagApp">
+
+  <!-- ============ PANTALLA: INTRO ============ -->
+  <section class="screen screen--active" data-screen="intro" data-bg="light" id="screen-intro">
+    <div class="screen-inner screen-inner--intro">
+      <p class="wordmark reveal" style="--d:0.05s">CARO CHAPARRO</p>
+      <h1 class="title-display reveal" style="--d:0.13s">Diagnóstico Comercial</h1>
+      <p class="subtitle reveal" style="--d:0.21s">6 preguntas para identificar<br>dónde se están fugando tus ventas</p>
+
+      <div class="field-group reveal" style="--d:0.30s">
+        <label class="field-label" for="userEmail">Correo electrónico</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">@</span>
+          <input
+            type="email"
+            id="userEmail"
+            class="input-field"
+            placeholder="tucorreo@gmail.com"
+            autocomplete="email"
+            inputmode="email"
+          >
+        </div>
+        <span class="field-hint">Tu Gmail de ventas y/o personal</span>
+        <span class="field-error" id="emailError" role="alert"></span>
+      </div>
+
+      <button class="btn btn--primary btn--full reveal" id="btnStart" type="button" style="--d:0.40s">
+        <span>Comenzar diagnóstico</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ PREGUNTA 1 / fondo claro ============ -->
+  <section class="screen" data-screen="q1" data-bg="light" id="screen-q1">
+    <div class="screen-inner">
+      <p class="q-eyebrow reveal" style="--d:0.05s">Pregunta 1 de 6</p>
+      <h2 class="q-title reveal" style="--d:0.13s">¿Cuánto facturas en promedio al mes con tu negocio digital?</h2>
+
+      <div class="options" data-question="q1" role="radiogroup" aria-label="Pregunta 1">
+        <button class="option" type="button" data-value="A">
+          <span class="option-letter">A</span>
+          <span class="option-text">todavía estoy construyendo <em>(- $2K/mes)</em></span>
+        </button>
+        <button class="option" type="button" data-value="B">
+          <span class="option-letter">B</span>
+          <span class="option-text">tengo clientes pero es inconsistente <em>(Entre $2K y $5K/mes)</em></span>
+        </button>
+        <button class="option" type="button" data-value="C">
+          <span class="option-letter">C</span>
+          <span class="option-text">vendo bien pero todo depende de mí <em>(Entre $5K y $10K/mes)</em></span>
+        </button>
+        <button class="option" type="button" data-value="D">
+          <span class="option-letter">D</span>
+          <span class="option-text">facturo bien pero el cierre sigue fallando <em>(Más de $10K/mes)</em></span>
+        </button>
+      </div>
+
+      <div class="nav-row nav-row--single reveal" style="--d:0.56s">
+        <button class="btn btn--primary btn--nav" data-next type="button" disabled>
+          <span>Siguiente</span> <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PREGUNTA 2 / fondo morado ============ -->
+  <section class="screen" data-screen="q2" data-bg="dark" id="screen-q2">
+    <div class="screen-inner">
+      <p class="q-eyebrow reveal" style="--d:0.05s">Pregunta 2 de 6</p>
+      <h2 class="q-title reveal" style="--d:0.13s">¿Qué pasa con tus ventas cuando tú no estás disponible unos días?</h2>
+
+      <div class="options" data-question="q2" role="radiogroup" aria-label="Pregunta 2">
+        <button class="option" type="button" data-value="A">
+          <span class="option-letter">A</span>
+          <span class="option-text">Se detienen completamente</span>
+        </button>
+        <button class="option" type="button" data-value="B">
+          <span class="option-letter">B</span>
+          <span class="option-text">Bajan mucho — dependen de cuánta energía le meto ese mes</span>
+        </button>
+        <button class="option" type="button" data-value="C">
+          <span class="option-letter">C</span>
+          <span class="option-text">Tengo ayuda pero los resultados no son los mismos sin mí</span>
+        </button>
+        <button class="option" type="button" data-value="D">
+          <span class="option-letter">D</span>
+          <span class="option-text">Tengo leads entrando pero muchos no terminan comprando</span>
+        </button>
+      </div>
+
+      <div class="nav-row reveal" style="--d:0.56s">
+        <button class="btn btn--ghost btn--nav" data-prev type="button">
+          <span class="arrow">←</span> <span>Anterior</span>
+        </button>
+        <button class="btn btn--primary btn--nav" data-next type="button" disabled>
+          <span>Siguiente</span> <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PREGUNTA 3 / fondo claro ============ -->
+  <section class="screen" data-screen="q3" data-bg="light" id="screen-q3">
+    <div class="screen-inner">
+      <p class="q-eyebrow reveal" style="--d:0.05s">Pregunta 3 de 6</p>
+      <h2 class="q-title reveal" style="--d:0.13s">De cada 10 personas interesadas, ¿cuántas terminan comprando?</h2>
+
+      <div class="options" data-question="q3" role="radiogroup" aria-label="Pregunta 3">
+        <button class="option" type="button" data-value="A">
+          <span class="option-letter">A</span>
+          <span class="option-text">1 o 2 — la mayoría se pierde en el camino</span>
+        </button>
+        <button class="option" type="button" data-value="B">
+          <span class="option-letter">B</span>
+          <span class="option-text">3 o 4 — cierro cuando me esfuerzo pero no es constante</span>
+        </button>
+        <button class="option" type="button" data-value="C">
+          <span class="option-letter">C</span>
+          <span class="option-text">5 o más — cierro bien pero no doy abasto sola</span>
+        </button>
+        <button class="option" type="button" data-value="D">
+          <span class="option-letter">D</span>
+          <span class="option-text">Tengo buenos leads pero se enfrían antes de cerrar</span>
+        </button>
+      </div>
+
+      <div class="nav-row reveal" style="--d:0.56s">
+        <button class="btn btn--ghost btn--nav" data-prev type="button">
+          <span class="arrow">←</span> <span>Anterior</span>
+        </button>
+        <button class="btn btn--primary btn--nav" data-next type="button" disabled>
+          <span>Siguiente</span> <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PREGUNTA 4 / fondo morado ============ -->
+  <section class="screen" data-screen="q4" data-bg="dark" id="screen-q4">
+    <div class="screen-inner">
+      <p class="q-eyebrow reveal" style="--d:0.05s">Pregunta 4 de 6</p>
+      <h2 class="q-title reveal" style="--d:0.13s">¿Cómo describes tu proceso de ventas hoy?</h2>
+
+      <div class="options" data-question="q4" role="radiogroup" aria-label="Pregunta 4">
+        <button class="option" type="button" data-value="A">
+          <span class="option-letter">A</span>
+          <span class="option-text">No tengo proceso, cada venta es diferente</span>
+        </button>
+        <button class="option" type="button" data-value="B">
+          <span class="option-letter">B</span>
+          <span class="option-text">Tengo un proceso en mi cabeza pero no está documentado</span>
+        </button>
+        <button class="option" type="button" data-value="C">
+          <span class="option-letter">C</span>
+          <span class="option-text">Está documentado pero solo yo sé ejecutarlo bien</span>
+        </button>
+        <button class="option" type="button" data-value="D">
+          <span class="option-letter">D</span>
+          <span class="option-text">Tengo proceso pero los leads se pierden en algún punto</span>
+        </button>
+      </div>
+
+      <div class="nav-row reveal" style="--d:0.56s">
+        <button class="btn btn--ghost btn--nav" data-prev type="button">
+          <span class="arrow">←</span> <span>Anterior</span>
+        </button>
+        <button class="btn btn--primary btn--nav" data-next type="button" disabled>
+          <span>Siguiente</span> <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PREGUNTA 5 / fondo claro ============ -->
+  <section class="screen" data-screen="q5" data-bg="light" id="screen-q5">
+    <div class="screen-inner">
+      <p class="q-eyebrow reveal" style="--d:0.05s">Pregunta 5 de 6</p>
+      <h2 class="q-title reveal" style="--d:0.13s">¿Qué has intentado para mejorar tus ventas?</h2>
+
+      <div class="options" data-question="q5" role="radiogroup" aria-label="Pregunta 5">
+        <button class="option" type="button" data-value="A">
+          <span class="option-letter">A</span>
+          <span class="option-text">Nada todavía, no sé por dónde empezar</span>
+        </button>
+        <button class="option" type="button" data-value="B">
+          <span class="option-letter">B</span>
+          <span class="option-text">Publico contenido pero las ventas siguen siendo irregulares</span>
+        </button>
+        <button class="option" type="button" data-value="C">
+          <span class="option-letter">C</span>
+          <span class="option-text">Contraté ayuda pero los resultados no fueron los mismos sin mí</span>
+        </button>
+        <button class="option" type="button" data-value="D">
+          <span class="option-letter">D</span>
+          <span class="option-text">Uso ManyChat o automatizaciones pero el cierre sigue fallando</span>
+        </button>
+      </div>
+
+      <div class="nav-row reveal" style="--d:0.56s">
+        <button class="btn btn--ghost btn--nav" data-prev type="button">
+          <span class="arrow">←</span> <span>Anterior</span>
+        </button>
+        <button class="btn btn--primary btn--nav" data-next type="button" disabled>
+          <span>Siguiente</span> <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PREGUNTA 6 / fondo morado ============ -->
+  <section class="screen" data-screen="q6" data-bg="dark" id="screen-q6">
+    <div class="screen-inner">
+      <p class="q-eyebrow reveal" style="--d:0.05s">Pregunta 6 de 6</p>
+      <h2 class="q-title reveal" style="--d:0.13s">¿Cuál es tu mayor preocupación cuando intentas cerrar una venta?</h2>
+
+      <div class="options" data-question="q6" role="radiogroup" aria-label="Pregunta 6">
+        <button class="option" type="button" data-value="A">
+          <span class="option-letter">A</span>
+          <span class="option-text">No sé si el lead está calificado antes de hablar con él</span>
+        </button>
+        <button class="option" type="button" data-value="B">
+          <span class="option-letter">B</span>
+          <span class="option-text">Las objeciones me frenan y no siempre sé cómo manejarlas</span>
+        </button>
+        <button class="option" type="button" data-value="C">
+          <span class="option-letter">C</span>
+          <span class="option-text">Que cuando delegue, nadie cierre igual que yo</span>
+        </button>
+        <button class="option" type="button" data-value="D">
+          <span class="option-letter">D</span>
+          <span class="option-text">El seguimiento — los leads se enfrían y los pierdo</span>
+        </button>
+      </div>
+
+      <div class="nav-row reveal" style="--d:0.56s">
+        <button class="btn btn--ghost btn--nav" data-prev type="button">
+          <span class="arrow">←</span> <span>Anterior</span>
+        </button>
+        <button class="btn btn--primary btn--nav" data-next type="button" disabled id="btnFinish">
+          <span>Ver mi diagnóstico</span> <span class="arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANTALLA: RESULTADO ============ -->
+  <section class="screen" data-screen="result" data-bg="light" id="screen-result">
+    <div class="screen-inner screen-inner--result">
+
+      <p class="wordmark reveal" style="--d:0.05s">CARO CHAPARRO</p>
+      <h2 class="title-display title-display--result reveal" style="--d:0.13s">Tu diagnóstico comercial</h2>
+      <div class="gold-divider reveal" aria-hidden="true" style="--d:0.20s"></div>
+
+      <!-- Tarjeta de diagnóstico principal -->
+      <div class="diag-card reveal" id="diagCard" style="--d:0.28s">
+        <span class="diag-eyebrow" id="diagEyebrow">SISTEMA EN CONSTRUCCIÓN</span>
+        <h3 class="diag-title" id="diagTitle">Ya tienes oferta. Lo que falta es el proceso que la sostenga.</h3>
+        <p class="diag-text" id="diagText">
+          Tus ventas existen, pero no son predecibles. Algunos meses cierras bien, otros depende de cuánta energía le metes. Eso no es un problema de oferta — es un problema de sistema. Y es exactamente lo que se puede resolver.
+        </p>
+      </div>
+
+      <!-- Indicadores -->
+      <h3 class="indicators-heading reveal" style="--d:0.38s">TUS INDICADORES</h3>
+      <div class="indicators-grid" id="indicatorsGrid">
+
+        <div class="indicator-card" data-indicator="consistencia">
+          <div class="indicator-top">
+            <span class="indicator-name">Consistencia comercial</span>
+            <span class="indicator-percent"><span class="percent-number" data-target="0">0</span>%</span>
+          </div>
+          <div class="indicator-bar-track">
+            <div class="indicator-bar-fill"></div>
+          </div>
+          <p class="indicator-interpretation"></p>
+        </div>
+
+        <div class="indicator-card" data-indicator="proceso">
+          <div class="indicator-top">
+            <span class="indicator-name">Proceso documentado</span>
+            <span class="indicator-percent"><span class="percent-number" data-target="0">0</span>%</span>
+          </div>
+          <div class="indicator-bar-track">
+            <div class="indicator-bar-fill"></div>
+          </div>
+          <p class="indicator-interpretation"></p>
+        </div>
+
+        <div class="indicator-card" data-indicator="delegar">
+          <div class="indicator-top">
+            <span class="indicator-name">Capacidad de delegar</span>
+            <span class="indicator-percent"><span class="percent-number" data-target="0">0</span>%</span>
+          </div>
+          <div class="indicator-bar-track">
+            <div class="indicator-bar-fill"></div>
+          </div>
+          <p class="indicator-interpretation"></p>
+        </div>
+
+        <div class="indicator-card" data-indicator="conversion">
+          <div class="indicator-top">
+            <span class="indicator-name">Conversión de leads</span>
+            <span class="indicator-percent"><span class="percent-number" data-target="0">0</span>%</span>
+          </div>
+          <div class="indicator-bar-track">
+            <div class="indicator-bar-fill"></div>
+          </div>
+          <p class="indicator-interpretation"></p>
+        </div>
+
+      </div>
+
+      <!-- Captura de WhatsApp -->
+      <div class="whatsapp-card reveal" style="--d:0.85s">
+        <h3 class="whatsapp-title">¿Quieres profundizar esto conmigo?</h3>
+        <p class="whatsapp-text">Quiero mostrarte el primer paso concreto para construir un proceso que funcione aunque tú no estés.</p>
+        <p class="whatsapp-cta-text">Déjame tu WhatsApp y te escribo personalmente.</p>
+
+        <form class="whatsapp-form" id="whatsappForm">
+          <div class="phone-input-row">
+            <div class="select-wrap">
+              <select id="countryCode" class="country-select" aria-label="Código de país">
+                <option value="+57" data-flag="🇨🇴" selected>🇨🇴 +57</option>
+                <option value="+52" data-flag="🇲🇽">🇲🇽 +52</option>
+                <option value="+54" data-flag="🇦🇷">🇦🇷 +54</option>
+                <option value="+56" data-flag="🇨🇱">🇨🇱 +56</option>
+                <option value="+51" data-flag="🇵🇪">🇵🇪 +51</option>
+                <option value="+593" data-flag="🇪🇨">🇪🇨 +593</option>
+                <option value="+58" data-flag="🇻🇪">🇻🇪 +58</option>
+                <option value="+507" data-flag="🇵🇦">🇵🇦 +507</option>
+                <option value="+506" data-flag="🇨🇷">🇨🇷 +506</option>
+                <option value="+502" data-flag="🇬🇹">🇬🇹 +502</option>
+                <option value="+503" data-flag="🇸🇻">🇸🇻 +503</option>
+                <option value="+504" data-flag="🇭🇳">🇭🇳 +504</option>
+                <option value="+505" data-flag="🇳🇮">🇳🇮 +505</option>
+                <option value="+598" data-flag="🇺🇾">🇺🇾 +598</option>
+                <option value="+591" data-flag="🇧🇴">🇧🇴 +591</option>
+                <option value="+595" data-flag="🇵🇾">🇵🇾 +595</option>
+                <option value="+1" data-flag="🇺🇸">🇺🇸 +1</option>
+                <option value="+1" data-flag="🇩🇴">🇩🇴 +1 (RD)</option>
+                <option value="+34" data-flag="🇪🇸">🇪🇸 +34</option>
+                <option value="+55" data-flag="🇧🇷">🇧🇷 +55</option>
+              </select>
+            </div>
+            <input
+              type="tel"
+              id="whatsappPhone"
+              class="phone-input"
+              placeholder="3001234567"
+              inputmode="numeric"
+              autocomplete="tel-national"
+            >
+          </div>
+          <span class="field-error" id="phoneError" role="alert"></span>
+
+          <button class="btn btn--gold btn--full" type="submit" id="btnSendWhatsapp">
+            <span>Recibir mi diagnóstico por WhatsApp</span>
+          </button>
+        </form>
+
+        <div class="whatsapp-confirmation" id="whatsappConfirmation" hidden>
+          <p>Listo. Abrimos WhatsApp para que quede en manos de Caro — te escribe personalmente muy pronto.</p>
+        </div>
+
+        <p class="whatsapp-footnote">Sin costo · Sin compromiso · Caro te responde personalmente.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============================================================
+   DIAGNÓSTICO COMERCIAL — CARO CHAPARRO
+   Lógica de la experiencia
+   ------------------------------------------------------------
+   Índice:
+   1. Configuración / datos (orden de pantallas, progreso, tabla de puntajes, copys)
+   2. Fondo animado de partículas
+   3. Estado de la aplicación
+   4. Navegación entre pantallas (siguiente con morph / anterior simple)
+   5. Selección de respuestas
+   6. Validaciones (email, teléfono)
+   7. Motor de puntuación
+   8. Render de la pantalla de resultado (conteo animado + barras)
+   9. Captura de WhatsApp
+   10. Inicialización
+   ============================================================ */
+
+(function () {
+  'use strict';
+
+  /* ============================================================
+     1. CONFIGURACIÓN / DATOS
+     ============================================================ */
+
+  // Orden real de navegación de la experiencia
+  var SCREENS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'result'];
+
+  // Porcentaje de la barra de progreso al ENTRAR a cada pantalla
+  var PROGRESS = {
+    intro: 0,
+    q1: 0,
+    q2: 16.66,
+    q3: 33.33,
+    q4: 50,
+    q5: 66.66,
+    q6: 83.33,
+    result: 100
+  };
+
+  // Fondo de cada pantalla, tomado también del atributo data-bg en el HTML
+  var SCREEN_BG = {
+    intro: 'light', q1: 'light', q2: 'dark', q3: 'light',
+    q4: 'dark', q5: 'light', q6: 'dark', result: 'light'
+  };
+
+  // Color sólido real detrás de cada tipo de fondo (debe calzar con style.css)
+  var BG_COLOR = { light: '#F2F2F2', dark: '#40358F' };
+
+  // Tabla de puntuación: cada respuesta aporta puntos (0-100) a 4 indicadores
+  // cons = Consistencia comercial | proc = Proceso documentado
+  // deleg = Capacidad de delegar  | conv = Conversión de leads
+  var SCORES = {
+    q1: {
+      A: { cons: 10, proc: 10, deleg: 5, conv: 10 },
+      B: { cons: 25, proc: 15, deleg: 10, conv: 20 },
+      C: { cons: 45, proc: 25, deleg: 15, conv: 35 },
+      D: { cons: 55, proc: 35, deleg: 25, conv: 30 }
+    },
+    q2: {
+      A: { cons: 10, proc: 10, deleg: 5, conv: 15 },
+      B: { cons: 25, proc: 15, deleg: 10, conv: 20 },
+      C: { cons: 40, proc: 35, deleg: 30, conv: 35 },
+      D: { cons: 35, proc: 30, deleg: 20, conv: 25 }
+    },
+    q3: {
+      A: { cons: 15, proc: 10, deleg: 5, conv: 10 },
+      B: { cons: 30, proc: 20, deleg: 10, conv: 25 },
+      C: { cons: 55, proc: 35, deleg: 20, conv: 55 },
+      D: { cons: 30, proc: 25, deleg: 15, conv: 20 }
+    },
+    q4: {
+      A: { cons: 10, proc: 5, deleg: 5, conv: 15 },
+      B: { cons: 25, proc: 20, deleg: 10, conv: 25 },
+      C: { cons: 45, proc: 45, deleg: 25, conv: 40 },
+      D: { cons: 35, proc: 35, deleg: 20, conv: 25 }
+    },
+    q5: {
+      A: { cons: 10, proc: 5, deleg: 5, conv: 10 },
+      B: { cons: 25, proc: 15, deleg: 10, conv: 20 },
+      C: { cons: 40, proc: 35, deleg: 30, conv: 35 },
+      D: { cons: 35, proc: 35, deleg: 20, conv: 25 }
+    },
+    q6: {
+      A: { cons: 25, proc: 20, deleg: 10, conv: 20 },
+      B: { cons: 35, proc: 25, deleg: 15, conv: 30 },
+      C: { cons: 40, proc: 40, deleg: 20, conv: 45 },
+      D: { cons: 25, proc: 20, deleg: 10, conv: 15 }
+    }
+  };
+
+  // Copys interpretativos por indicador, según nivel bajo / medio / alto
+  var INTERPRETATIONS = {
+    consistencia: {
+      low: 'Tus ventas todavía dependen mucho de tu energía diaria.',
+      mid: 'Ya existe movimiento comercial, pero falta previsibilidad.',
+      high: 'Tienes una base comercial sólida para escalar.'
+    },
+    proceso: {
+      low: 'El proceso todavía vive en tu cabeza o cambia demasiado.',
+      mid: 'Hay estructura, pero necesita orden y repetición.',
+      high: 'Tienes un sistema que puede optimizarse y escalar.'
+    },
+    delegar: {
+      low: 'Hoy el negocio depende demasiado de ti.',
+      mid: 'Puedes delegar partes, pero todavía no con total seguridad.',
+      high: 'Tienes buena base para que otras personas ejecuten contigo.'
+    },
+    conversion: {
+      low: 'Muchos interesados se enfrían antes de comprar.',
+      mid: 'Hay cierre, pero todavía se pierden oportunidades.',
+      high: 'Tu conversión tiene potencial fuerte para crecer con sistema.'
+    }
+  };
+
+  // Relación entre el nombre del indicador en pantalla y su clave en SCORES
+  var INDICATOR_KEY = {
+    consistencia: 'cons',
+    proceso: 'proc',
+    delegar: 'deleg',
+    conversion: 'conv'
+  };
+
+  // Diagnóstico textual principal, según el puntaje general (overall)
+  var DIAGNOSIS = {
+    building: {
+      eyebrow: 'SISTEMA EN CONSTRUCCIÓN',
+      title: 'Ya tienes oferta. Lo que falta es el proceso que la sostenga.',
+      text: 'Tus ventas existen, pero no son predecibles. Algunos meses cierras bien, otros depende de cuánta energía le metes. Eso no es un problema de oferta — es un problema de sistema. Y es exactamente lo que se puede resolver.'
+    },
+    scaling: {
+      eyebrow: 'SISTEMA LISTO PARA ESCALAR',
+      title: 'Tu sistema funciona. Ahora toca hacerlo delegable.',
+      text: 'Tus números muestran consistencia y un proceso que ya está dando resultados. El siguiente paso no es vender más — es construir la estructura que te permita escalar sin que todo dependa de ti.'
+    }
+  };
+
+  // Número de WhatsApp de Caro Chaparro donde llegan los leads del diagnóstico.
+  // Formato internacional, solo dígitos (sin '+', sin espacios).
+  var CARO_WHATSAPP_NUMBER = '573229172709';
+
+  // Mensaje precargado con el que se abre la conversación de WhatsApp.
+  var WHATSAPP_MESSAGE = 'Holaa, me gustaria obtener más información';
+
+  /* ============================================================
+     2. FONDO ANIMADO DE PARTÍCULAS
+     ============================================================
+     Dos comportamientos según el fondo activo:
+     - Fondo morado (dark):  partículas blancas, a la deriva, sesgadas
+       hacia bordes y parte inferior (comportamiento original).
+     - Fondo gris (light):   partículas moradas, ancladas a las 4
+       esquinas, deambulando suavemente alrededor de cada una.
+     ============================================================ */
+
+  var setParticlesTheme = function () {}; // se reasigna dentro de initParticles
+
+  function initParticles() {
+    var canvas = document.getElementById('particles-canvas');
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var particles = [];
+    var theme = 'light'; // coincide con la pantalla intro
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var rafId = null;
+
+    var PURPLE_RGB = '129,116,232'; // var(--purple-light) en formato rgb
+
+    function resize() {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // --- Modo "drift": partículas blancas sobre fondo morado ---
+    // Sesgadas hacia bordes y parte inferior, suben lentamente y
+    // reaparecen abajo al salir por arriba (deriva continua).
+    function spawnDrift() {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      var edgeBias = Math.random() < 0.55;
+      var x = edgeBias
+        ? (Math.random() < 0.5 ? Math.random() * w * 0.2 : w - Math.random() * w * 0.2)
+        : Math.random() * w;
+      var y = Math.random() < 0.6
+        ? h * 0.55 + Math.random() * h * 0.45
+        : Math.random() * h * 0.55;
+
+      var depth = Math.random(); // 0 = fondo lejano, 1 = primer plano cercano
+
+      return {
+        mode: 'drift',
+        x: x, y: y,
+        r: 0.5 + depth * 1.6,
+        o: 0.04 + depth * 0.22,
+        vx: (Math.random() - 0.5) * (0.04 + depth * 0.1),
+        vy: -(0.02 + depth * 0.18 + Math.random() * 0.05),
+        color: '255,255,255'
+      };
+    }
+
+    // --- Modo "corner": partículas moradas ancladas a una esquina ---
+    // Deambulan en un radio alrededor de su esquina; si se alejan
+    // demasiado, una suave fuerza de retorno las trae de vuelta.
+    function spawnCorner(cornerIndex) {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      var corners = [
+        { x: 0, y: 0 }, { x: w, y: 0 }, { x: 0, y: h }, { x: w, y: h }
+      ];
+      var anchor = corners[cornerIndex];
+      var radius = Math.min(w, h) * 0.24;
+      var depth = Math.random();
+
+      return {
+        mode: 'corner',
+        anchorX: anchor.x,
+        anchorY: anchor.y,
+        radius: radius,
+        x: anchor.x + (Math.random() - 0.5) * radius,
+        y: anchor.y + (Math.random() - 0.5) * radius,
+        r: 0.7 + depth * 1.8,
+        o: 0.12 + depth * 0.3,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: (Math.random() - 0.5) * 0.12,
+        color: PURPLE_RGB
+      };
+    }
+
+    function createParticles() {
+      particles = [];
+      if (theme === 'light') {
+        // 4 esquinas, ~9 partículas moradas alrededor de cada una
+        var perCorner = 9;
+        for (var c = 0; c < 4; c++) {
+          for (var i = 0; i < perCorner; i++) particles.push(spawnCorner(c));
+        }
+      } else {
+        var density = Math.floor((window.innerWidth * window.innerHeight) / 24000);
+        var count = Math.max(28, Math.min(70, density));
+        for (var j = 0; j < count; j++) particles.push(spawnDrift());
+      }
+    }
+
+    function updateDrift(p) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.y < -8) { p.y = window.innerHeight + 8; p.x = Math.random() * window.innerWidth; }
+      if (p.x < -8) p.x = window.innerWidth + 8;
+      if (p.x > window.innerWidth + 8) p.x = -8;
+    }
+
+    function updateCorner(p) {
+      // Recalcula el ancla por si la pantalla cambió de tamaño
+      p.x += p.vx;
+      p.y += p.vy;
+
+      var dx = p.x - p.anchorX;
+      var dy = p.y - p.anchorY;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > p.radius) {
+        // fuerza de retorno suave hacia la esquina
+        p.vx -= dx * 0.0035;
+        p.vy -= dy * 0.0035;
+      }
+
+      // pequeño deambular aleatorio constante
+      p.vx += (Math.random() - 0.5) * 0.006;
+      p.vy += (Math.random() - 0.5) * 0.006;
+
+      var speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+      var maxSpeed = 0.22;
+      if (speed > maxSpeed) {
+        p.vx = (p.vx / speed) * maxSpeed;
+        p.vy = (p.vy / speed) * maxSpeed;
+      }
+    }
+
+    function drawParticle(p) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + p.color + ',' + p.o + ')';
+      ctx.fill();
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        if (p.mode === 'corner') updateCorner(p); else updateDrift(p);
+        drawParticle(p);
+      }
+      if (!reduceMotion) rafId = requestAnimationFrame(tick);
+    }
+
+    resize();
+    createParticles();
+    tick();
+
+    window.addEventListener('resize', function () {
+      resize();
+      createParticles();
+    });
+
+    // Expuesto hacia afuera: cambia de modo cuando cambia el fondo de pantalla.
+    setParticlesTheme = function (nextTheme) {
+      if (nextTheme === theme) return;
+      theme = nextTheme;
+      createParticles();
+      if (reduceMotion) {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        particles.forEach(drawParticle);
+      }
+    };
+
+    // Si el usuario prefiere menos movimiento, dejamos un cuadro estático y suave.
+    if (reduceMotion && rafId === null) {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      particles.forEach(drawParticle);
+    }
+  }
+
+  /* ============================================================
+     2b. MANCHAS MORADAS CON REBOTE EN LOS BORDES (fondo gris)
+     ------------------------------------------------------------
+     Dos manchas difuminadas (una pequeña, una grande) que recorren
+     toda la pantalla sin detenerse nunca y rebotan, como una
+     pelota, al tocar cualquiera de los cuatro bordes del viewport.
+     ============================================================ */
+
+  function initBounceBlobs() {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var blobs = [
+      { el: document.querySelector('.blob-purple--lg'), speed: 0.16 },
+      { el: document.querySelector('.blob-purple--sm'), speed: 0.30 }
+    ].filter(function (b) { return !!b.el; });
+
+    if (!blobs.length) return;
+
+    function measure(el) {
+      var rect = el.getBoundingClientRect();
+      return { w: rect.width, h: rect.height };
+    }
+
+    // Posición y velocidad inicial: punto al azar dentro de la pantalla
+    // y un ángulo de salida al azar, para que las dos manchas nunca
+    // se vean sincronizadas entre sí.
+    blobs.forEach(function (b) {
+      var size = measure(b.el);
+      var maxX = Math.max(1, window.innerWidth - size.w);
+      var maxY = Math.max(1, window.innerHeight - size.h);
+      var angle = Math.random() * Math.PI * 2;
+
+      b.w = size.w;
+      b.h = size.h;
+      b.x = Math.random() * maxX;
+      b.y = Math.random() * maxY;
+      b.vx = Math.cos(angle) * b.speed;
+      b.vy = Math.sin(angle) * b.speed;
+
+      b.el.style.transform = 'translate3d(' + b.x + 'px,' + b.y + 'px,0)';
+    });
+
+    function step() {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+
+      blobs.forEach(function (b) {
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Rebote real: al tocar un borde, se invierte solo la
+        // componente de velocidad correspondiente (como una pelota).
+        if (b.x <= 0) { b.x = 0; b.vx = Math.abs(b.vx); }
+        else if (b.x + b.w >= w) { b.x = w - b.w; b.vx = -Math.abs(b.vx); }
+
+        if (b.y <= 0) { b.y = 0; b.vy = Math.abs(b.vy); }
+        else if (b.y + b.h >= h) { b.y = h - b.h; b.vy = -Math.abs(b.vy); }
+
+        b.el.style.transform = 'translate3d(' + b.x + 'px,' + b.y + 'px,0)';
+      });
+
+      if (!reduceMotion) requestAnimationFrame(step);
+    }
+
+    window.addEventListener('resize', function () {
+      blobs.forEach(function (b) {
+        var size = measure(b.el);
+        b.w = size.w;
+        b.h = size.h;
+        b.x = Math.min(b.x, Math.max(0, window.innerWidth - b.w));
+        b.y = Math.min(b.y, Math.max(0, window.innerHeight - b.h));
+      });
+    });
+
+    if (!reduceMotion) requestAnimationFrame(step);
+  }
+
+  /* ============================================================
+     3. ESTADO DE LA APLICACIÓN
+     ============================================================ */
+
+  var answers = {};            // { q1: 'A', q2: 'C', ... }
+  var currentScreenKey = 'intro';
+
+  /* ============================================================
+     4. NAVEGACIÓN ENTRE PANTALLAS
+     ============================================================ */
+
+  function $(selector, ctx) { return (ctx || document).querySelector(selector); }
+  function $all(selector, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(selector)); }
+
+  var progressFill = $('#progressFill');
+  var progressTrack = $('#progressTrack');
+  var morphOverlay = $('#morphOverlay');
+
+  function setBodyBg(bgKey) {
+    document.body.style.backgroundColor = BG_COLOR[bgKey];
+    document.body.classList.toggle('bg-dark', bgKey === 'dark');
+    setParticlesTheme(bgKey);
+  }
+
+  function updateProgress(screenKey) {
+    var pct = PROGRESS[screenKey] || 0;
+    progressFill.style.width = pct + '%';
+    progressTrack.setAttribute('aria-valuenow', String(Math.round(pct)));
+  }
+
+  function switchScreen(nextKey) {
+    $all('.screen').forEach(function (s) { s.classList.remove('screen--active'); });
+    var target = document.getElementById('screen-' + nextKey);
+    target.classList.add('screen--active');
+    currentScreenKey = nextKey;
+
+    if (nextKey === 'result') {
+      var scores = calculateScores();
+      renderResult(scores);
+    }
+
+    // Mueve el foco al encabezado de la nueva pantalla para accesibilidad
+    var heading = target.querySelector('h1, h2');
+    if (heading) {
+      heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+    }
+  }
+
+  // Transición "morph": el botón se expande, se convierte en el fondo
+  // de la siguiente pregunta, y luego se desvanece revelándola.
+  function morphTransitionTo(buttonEl, nextKey) {
+    var rect = buttonEl.getBoundingClientRect();
+    var nextBg = SCREEN_BG[nextKey];
+    var endColor = BG_COLOR[nextBg];
+
+    morphOverlay.classList.add('is-active');
+    morphOverlay.classList.remove('is-expanding');
+    morphOverlay.style.transition = 'none';
+    morphOverlay.style.opacity = '1';
+    morphOverlay.style.top = rect.top + 'px';
+    morphOverlay.style.left = rect.left + 'px';
+    morphOverlay.style.width = rect.width + 'px';
+    morphOverlay.style.height = rect.height + 'px';
+    morphOverlay.style.borderRadius = '999px';
+    morphOverlay.style.background = '#40358F';
+
+    // Forzar reflow antes de animar
+    // eslint-disable-next-line no-unused-expressions
+    morphOverlay.offsetHeight;
+
+    requestAnimationFrame(function () {
+      morphOverlay.style.transition =
+        'top 0.6s cubic-bezier(0.22,1,0.36,1), left 0.6s cubic-bezier(0.22,1,0.36,1), ' +
+        'width 0.6s cubic-bezier(0.22,1,0.36,1), height 0.6s cubic-bezier(0.22,1,0.36,1), ' +
+        'border-radius 0.6s cubic-bezier(0.22,1,0.36,1), background-color 0.6s cubic-bezier(0.22,1,0.36,1)';
+      morphOverlay.style.top = '0px';
+      morphOverlay.style.left = '0px';
+      morphOverlay.style.width = '100vw';
+      morphOverlay.style.height = '100vh';
+      morphOverlay.style.borderRadius = '0px';
+      morphOverlay.style.backgroundColor = endColor;
+      morphOverlay.classList.add('is-expanding'); // dispara el barrido de brillo
+    });
+
+    function onCovered() {
+      morphOverlay.removeEventListener('transitionend', onCovered);
+      // Pantalla totalmente cubierta: intercambiamos el contenido sin que se note.
+      switchScreen(nextKey);
+      setBodyBg(nextBg);
+      updateProgress(nextKey);
+
+      requestAnimationFrame(function () {
+        morphOverlay.style.transition = 'opacity 0.5s ease';
+        morphOverlay.style.opacity = '0';
+      });
+
+      morphOverlay.addEventListener('transitionend', function onRevealed() {
+        morphOverlay.removeEventListener('transitionend', onRevealed);
+        morphOverlay.classList.remove('is-active');
+        morphOverlay.classList.remove('is-expanding');
+      }, { once: true });
+    }
+
+    morphOverlay.addEventListener('transitionend', onCovered, { once: true });
+  }
+
+  function goBack() {
+    var idx = SCREENS.indexOf(currentScreenKey);
+    if (idx <= 0) return;
+    var prevKey = SCREENS[idx - 1];
+    switchScreen(prevKey);
+    setBodyBg(SCREEN_BG[prevKey]);
+    updateProgress(prevKey);
+  }
+
+  /* ============================================================
+     5. SELECCIÓN DE RESPUESTAS
+     ============================================================ */
+
+  function setupOptionGroups() {
+    $all('.options').forEach(function (group) {
+      var qKey = group.getAttribute('data-question');
+      $all('.option', group).forEach(function (optionBtn) {
+        optionBtn.addEventListener('click', function () {
+          $all('.option', group).forEach(function (b) { b.classList.remove('is-selected'); });
+          optionBtn.classList.add('is-selected');
+          answers[qKey] = optionBtn.getAttribute('data-value');
+
+          var screenEl = group.closest('.screen');
+          var nextBtn = screenEl.querySelector('[data-next]');
+          if (nextBtn) nextBtn.disabled = false;
+        });
+      });
+    });
+  }
+
+  function setupNextButtons() {
+    $all('[data-next]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        var screenEl = btn.closest('.screen');
+        var key = screenEl.getAttribute('data-screen');
+        var idx = SCREENS.indexOf(key);
+        var nextKey = SCREENS[idx + 1];
+        if (!nextKey) return;
+        morphTransitionTo(btn, nextKey);
+      });
+    });
+  }
+
+  function setupPrevButtons() {
+    $all('[data-prev]').forEach(function (btn) {
+      btn.addEventListener('click', goBack);
+    });
+  }
+
+  /* ============================================================
+     6. VALIDACIONES
+     ============================================================ */
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  }
+
+  function shake(el) {
+    el.classList.remove('is-shaking');
+    // eslint-disable-next-line no-unused-expressions
+    el.offsetWidth; // reinicia la animación si se dispara dos veces seguidas
+    el.classList.add('is-shaking');
+  }
+
+  function setupIntroValidation() {
+    var btnStart = $('#btnStart');
+    var emailInput = $('#userEmail');
+    var emailError = $('#emailError');
+    var inputWrap = $('#screen-intro .input-wrap');
+
+    btnStart.addEventListener('click', function () {
+      var value = emailInput.value || '';
+      if (!isValidEmail(value)) {
+        emailError.textContent = 'Ingresa un correo válido para continuar.';
+        shake(inputWrap);
+        emailInput.focus();
+        return;
+      }
+      emailError.textContent = '';
+      morphTransitionTo(btnStart, 'q1');
+    });
+
+    emailInput.addEventListener('input', function () {
+      if (emailError.textContent) emailError.textContent = '';
+    });
+  }
+
+  /* ============================================================
+     7. MOTOR DE PUNTUACIÓN
+     ============================================================ */
+
+  function calculateScores() {
+    var totals = { cons: 0, proc: 0, deleg: 0, conv: 0 };
+    var answered = 0;
+
+    Object.keys(SCORES).forEach(function (qKey) {
+      var chosen = answers[qKey];
+      if (!chosen) return;
+      var values = SCORES[qKey][chosen];
+      totals.cons += values.cons;
+      totals.proc += values.proc;
+      totals.deleg += values.deleg;
+      totals.conv += values.conv;
+      answered++;
+    });
+
+    var divisor = answered || 6;
+    var result = {
+      cons: Math.round(totals.cons / divisor),
+      proc: Math.round(totals.proc / divisor),
+      deleg: Math.round(totals.deleg / divisor),
+      conv: Math.round(totals.conv / divisor)
+    };
+    result.overall = Math.round((result.cons + result.proc + result.deleg + result.conv) / 4);
+    return result;
+  }
+
+  function tierFor(value) {
+    if (value < 40) return 'low';
+    if (value < 70) return 'mid';
+    return 'high';
+  }
+
+  /* ============================================================
+     8. RENDER DE LA PANTALLA DE RESULTADO
+     ============================================================ */
+
+  function animateCount(el, target, duration) {
+    var start = null;
+    function step(timestamp) {
+      if (start === null) start = timestamp;
+      var progress = Math.min((timestamp - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3); // ease-out cúbico
+      el.textContent = Math.round(eased * target);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function renderResult(scores) {
+    var diagnosis = scores.overall >= 70 ? DIAGNOSIS.scaling : DIAGNOSIS.building;
+    $('#diagEyebrow').textContent = diagnosis.eyebrow;
+    $('#diagTitle').textContent = diagnosis.title;
+    $('#diagText').textContent = diagnosis.text;
+
+    $all('.indicator-card').forEach(function (card, i) {
+      var indicatorName = card.getAttribute('data-indicator');
+      var scoreKey = INDICATOR_KEY[indicatorName];
+      var value = scores[scoreKey];
+      var tier = tierFor(value);
+
+      var percentEl = card.querySelector('.percent-number');
+      var barEl = card.querySelector('.indicator-bar-fill');
+      var interpEl = card.querySelector('.indicator-interpretation');
+
+      interpEl.textContent = INTERPRETATIONS[indicatorName][tier];
+      card.classList.toggle('is-strong', value >= 50);
+
+      // Pequeño retardo escalonado para que cada tarjeta cobre vida en orden
+      (function (percentEl, barEl, value, delay) {
+        setTimeout(function () {
+          barEl.style.width = value + '%';
+          animateCount(percentEl, value, 1100);
+        }, delay);
+      })(percentEl, barEl, value, 150 + i * 120);
+    });
+  }
+
+  /* ============================================================
+     9. CAPTURA DE WHATSAPP
+     ============================================================ */
+
+  function setupWhatsappForm() {
+    var form = $('#whatsappForm');
+    var countryCode = $('#countryCode');
+    var phoneInput = $('#whatsappPhone');
+    var phoneError = $('#phoneError');
+    var confirmation = $('#whatsappConfirmation');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var digits = (phoneInput.value || '').replace(/\D/g, '');
+      if (digits.length < 7) {
+        phoneError.textContent = 'Ingresa un número de WhatsApp válido.';
+        shake($('.phone-input-row'));
+        phoneInput.focus();
+        return;
+      }
+      phoneError.textContent = '';
+
+      // El número y código de país del lead quedan capturados arriba para
+      // seguimiento interno (CRM / analítica); el mensaje hacia Caro es fijo.
+      var waLink = 'https://wa.me/' + CARO_WHATSAPP_NUMBER + '?text=' + encodeURIComponent(WHATSAPP_MESSAGE);
+
+      window.open(waLink, '_blank', 'noopener');
+
+      form.hidden = true;
+      confirmation.hidden = false;
+    });
+
+    phoneInput.addEventListener('input', function () {
+      if (phoneError.textContent) phoneError.textContent = '';
+    });
+  }
+
+  /* ============================================================
+     10. INICIALIZACIÓN
+     ============================================================ */
+
+  function init() {
+    initParticles();
+    initBounceBlobs();
+    setupOptionGroups();
+    setupNextButtons();
+    setupPrevButtons();
+    setupIntroValidation();
+    setupWhatsappForm();
+
+    setBodyBg(SCREEN_BG.intro);
+    updateProgress('intro');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>

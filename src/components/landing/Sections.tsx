@@ -5,107 +5,141 @@ import {
   Instagram, Linkedin, MessageCircle, Star,
 } from "lucide-react";
 
-/* ========================= 2. PROBLEMA — embudo + palabras ========================= */
-const FALLING_WORDS = [
-  "LEADS", "CLIENTES", "OPORTUNIDADES", "MENSAJES", "CONSULTAS", "REUNIONES",
-  "WHATSAPP", "EMAILS", "CONTACTOS", "COTIZACIONES", "REFERIDOS",
-  "CLIENTE PERDIDO", "SIN SEGUIMIENTO", "VENTA PERDIDA", "OPORTUNIDAD FRÍA", "NUNCA LO LLAMARON",
+/* ========================= 2. PROBLEMA — embudo + palabras laterales ========================= */
+const SIDE_WORDS = [
+  "LEADS", "CLIENTES", "CONSULTAS", "WHATSAPP", "EMAILS", "CONTACTOS",
+  "COTIZACIONES", "REFERIDOS", "SIN SEGUIMIENTO", "CLIENTE PERDIDO",
+  "VENTA PERDIDA", "NUNCA LO LLAMARON", "OPORTUNIDAD FRÍA",
 ];
-const NEGATIVE = new Set(["CLIENTE PERDIDO", "SIN SEGUIMIENTO", "VENTA PERDIDA", "OPORTUNIDAD FRÍA", "NUNCA LO LLAMARON"]);
+const WORD_COLORS = [
+  { c: "#2B1142", o: 0.7 },
+  { c: "#1E0A33", o: 0.65 },
+  { c: "#6B2BBF", o: 0.6 },
+  { c: "#8B3FD6", o: 0.5 },
+  { c: "#4B1E7A", o: 0.65 },
+];
+
+// Funnel bars: built bottom→top (index 0 = smallest at bottom)
+const FUNNEL_BARS = [
+  { w: 120, h: 40, label: "bottom" },
+  { w: 180, h: 48 },
+  { w: 250, h: 56 },
+  { w: 340, h: 70, label: "top" },
+];
+
+type SideWord = {
+  id: number;
+  word: string;
+  side: "left" | "right";
+  topPct: number;
+  fontSize: number;
+  color: string;
+  opacity: number;
+  drift: number;
+  dur: number;
+  exploded: boolean;
+};
 
 export function Problema() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [drops, setDrops] = useState<{ id: number; word: string; x: number; delay: number; dur: number; size: number }[]>([]);
+  const [words, setWords] = useState<SideWord[]>([]);
+  const idRef = useRef(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    let id = 0;
-    const interval = setInterval(() => {
-      const word = FALLING_WORDS[Math.floor(Math.random() * FALLING_WORDS.length)];
-      const x = 10 + Math.random() * 80;
-      const dur = 7 + Math.random() * 5;
-      setDrops((d) => [...d.slice(-22), { id: id++, word, x, delay: 0, dur, size: 10 + Math.random() * 6 }]);
-    }, 350);
-    return () => clearInterval(interval);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
+  useEffect(() => {
+    const maxVisible = isMobile ? 6 : 11;
+    const interval = setInterval(() => {
+      setWords((prev) => {
+        if (prev.length >= maxVisible) return prev;
+        const palette = WORD_COLORS[Math.floor(Math.random() * WORD_COLORS.length)];
+        const next: SideWord = {
+          id: idRef.current++,
+          word: SIDE_WORDS[Math.floor(Math.random() * SIDE_WORDS.length)],
+          side: Math.random() > 0.5 ? "left" : "right",
+          topPct: 8 + Math.random() * 55,
+          fontSize: isMobile ? 11 + Math.random() * 3 : 12 + Math.random() * 6,
+          color: palette.c,
+          opacity: palette.o,
+          drift: 20 + Math.random() * 60,
+          dur: 6.5 + Math.random() * 3,
+          exploded: false,
+        };
+        return [...prev, next];
+      });
+    }, isMobile ? 900 : 600);
+    return () => clearInterval(interval);
+  }, [isMobile]);
+
+  const removeWord = (id: number) =>
+    setWords((prev) => prev.filter((w) => w.id !== id));
+
   return (
-    <section
-      ref={ref}
-      onMouseMove={(e) => {
-        const r = ref.current?.getBoundingClientRect();
-        if (!r) return;
-        setMouse({ x: (e.clientX - r.left) / r.width - 0.5, y: (e.clientY - r.top) / r.height - 0.5 });
-      }}
-      className="relative min-h-[110vh] overflow-hidden bg-white py-24"
-    >
-      {/* radial lights */}
+    <section className="relative min-h-[110vh] overflow-hidden bg-white py-24">
+      {/* soft radial lights */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/4 top-1/4 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet/10 blur-3xl" />
-        <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-violet-bright/10 blur-3xl" />
+        <div className="absolute left-1/4 top-1/3 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet/8 blur-3xl" />
+        <div className="absolute right-1/4 bottom-1/4 h-[400px] w-[400px] rounded-full bg-violet-bright/8 blur-3xl" />
       </div>
 
-      {/* falling words */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {drops.map((d) => {
-          const neg = NEGATIVE.has(d.word);
-          return (
-            <motion.span
-              key={d.id}
-              initial={{ y: -40, opacity: 0, filter: "blur(2px)" }}
-              animate={{ y: "110vh", opacity: [0, 0.7, 0.7, 0], filter: ["blur(2px)", "blur(0px)", "blur(0px)", "blur(6px)"] }}
-              transition={{ duration: d.dur, ease: "easeIn" }}
-              className="display absolute font-medium uppercase tracking-[0.18em]"
-              style={{
-                left: `${d.x}%`,
-                top: 0,
-                fontSize: `${d.size}px`,
-                color: neg ? "#9D4EDD" : "#2B1142",
-                opacity: neg ? 0.55 : 0.4,
+      {/* Side word zones — left & right only, center stays clear */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[26%] overflow-hidden md:w-[28%]">
+        {words.filter((w) => w.side === "left").map((w) => (
+          <SideWordEl key={w.id} word={w} sideClass="right-2 md:right-4" onDone={() => removeWord(w.id)} />
+        ))}
+      </div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-[26%] overflow-hidden md:w-[28%]">
+        {words.filter((w) => w.side === "right").map((w) => (
+          <SideWordEl key={w.id} word={w} sideClass="left-2 md:left-4" onDone={() => removeWord(w.id)} />
+        ))}
+      </div>
+
+      {/* Funnel — stacked floating bars, built bottom→top */}
+      <div className="relative mx-auto flex h-[60vh] items-end justify-center">
+        <div className="flex flex-col-reverse items-center gap-3">
+          {FUNNEL_BARS.map((bar, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 28, scale: 0.92, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{
+                duration: 0.75,
+                delay: i * 0.24,
+                ease: [0.22, 1, 0.36, 1],
               }}
+              style={{
+                width: `min(${bar.w}px, 78vw)`,
+                height: bar.h,
+                clipPath:
+                  i === FUNNEL_BARS.length - 1
+                    ? "polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%)"
+                    : i === 0
+                    ? "polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%)"
+                    : "polygon(6% 0%, 94% 0%, 88% 100%, 12% 100%)",
+                background:
+                  "linear-gradient(180deg, rgba(139,63,214,0.10) 0%, rgba(139,63,214,0.04) 100%)",
+                border: "1.5px solid rgba(139,63,214,0.55)",
+                boxShadow:
+                  "0 0 0 1px rgba(139,63,214,0.08), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -10px 30px rgba(139,63,214,0.18), 0 20px 50px -20px rgba(139,63,214,0.45), 0 0 40px rgba(157,78,221,0.25)",
+                backdropFilter: "blur(8px)",
+              }}
+              className="relative"
             >
-              {d.word}
-            </motion.span>
-          );
-        })}
+              {/* subtle top reflection */}
+              <div
+                className="pointer-events-none absolute inset-x-3 top-0 h-px"
+                style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)" }}
+              />
+            </motion.div>
+          ))}
+        </div>
       </div>
-
-      {/* Funnel */}
-      <motion.div
-        className="relative mx-auto flex h-[55vh] items-center justify-center"
-        animate={{ x: mouse.x * 18, y: mouse.y * 12 }}
-        transition={{ type: "spring", stiffness: 40, damping: 18 }}
-      >
-        <motion.div
-          className="relative"
-          animate={{ y: [0, -12, 0], rotate: [0, 0.6, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <svg width="380" height="420" viewBox="0 0 380 420" className="drop-shadow-[0_30px_60px_rgba(139,63,214,0.25)]">
-            <defs>
-              <linearGradient id="funnelBorder" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0" stopColor="#8B3FD6" />
-                <stop offset="1" stopColor="#9D4EDD" />
-              </linearGradient>
-              <linearGradient id="funnelFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stopColor="#9D4EDD" stopOpacity="0.12" />
-                <stop offset="1" stopColor="#8B3FD6" stopOpacity="0.05" />
-              </linearGradient>
-              <linearGradient id="funnelShine" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0" stopColor="white" stopOpacity="0" />
-                <stop offset="0.5" stopColor="white" stopOpacity="0.25" />
-                <stop offset="1" stopColor="white" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            {/* outer glass funnel */}
-            <path d="M30 30 L350 30 L240 250 L240 400 L140 400 L140 250 Z" fill="url(#funnelFill)" stroke="url(#funnelBorder)" strokeWidth="1.5" />
-            <path d="M30 30 L350 30 L240 250 L240 400 L140 400 L140 250 Z" fill="url(#funnelShine)" opacity="0.6" />
-            {/* inner divisions */}
-            <line x1="80" y1="110" x2="300" y2="110" stroke="#8B3FD6" strokeOpacity="0.25" strokeWidth="0.5" />
-            <line x1="120" y1="190" x2="260" y2="190" stroke="#8B3FD6" strokeOpacity="0.25" strokeWidth="0.5" />
-          </svg>
-        </motion.div>
-      </motion.div>
 
       {/* Title bottom */}
       <div className="relative mx-auto mt-12 max-w-4xl px-6 text-center">
@@ -121,6 +155,122 @@ export function Problema() {
         </motion.h2>
       </div>
     </section>
+  );
+}
+
+function SideWordEl({
+  word,
+  sideClass,
+  onDone,
+}: {
+  word: SideWord;
+  sideClass: string;
+  onDone: () => void;
+}) {
+  const [phase, setPhase] = useState<"drift" | "explode">("drift");
+  // direction: left-side words drift right toward funnel; right-side drift left
+  const towardCenter = word.side === "left" ? word.drift : -word.drift;
+  // bounce back away from funnel
+  const bounceBack = word.side === "left" ? -word.drift * 0.4 : word.drift * 0.4;
+
+  return (
+    <>
+      {phase === "drift" && (
+        <motion.div
+          initial={{ opacity: 0, x: word.side === "left" ? -30 : 30, y: 0, filter: "blur(4px)" }}
+          animate={{
+            opacity: [0, word.opacity, word.opacity, word.opacity * 0.9],
+            x: [
+              word.side === "left" ? -30 : 30,
+              towardCenter * 0.6,
+              towardCenter,
+              bounceBack,
+            ],
+            y: [0, 60, 140, 220],
+            filter: ["blur(4px)", "blur(0px)", "blur(0px)", "blur(0px)"],
+          }}
+          transition={{ duration: word.dur, times: [0, 0.25, 0.65, 1], ease: "easeInOut" }}
+          onAnimationComplete={() => setPhase("explode")}
+          className={`display absolute font-semibold uppercase tracking-[0.18em] whitespace-nowrap ${sideClass}`}
+          style={{
+            top: `${word.topPct}%`,
+            fontSize: word.fontSize,
+            color: word.color,
+          }}
+        >
+          {word.word}
+        </motion.div>
+      )}
+      {phase === "explode" && (
+        <ExplodeBurst
+          word={word}
+          sideClass={sideClass}
+          onDone={onDone}
+        />
+      )}
+    </>
+  );
+}
+
+function ExplodeBurst({
+  word,
+  sideClass,
+  onDone,
+}: {
+  word: SideWord;
+  sideClass: string;
+  onDone: () => void;
+}) {
+  const towardCenter = word.side === "left" ? word.drift * 0.4 : -word.drift * 0.4;
+  const letters = word.word.split("");
+  return (
+    <motion.div
+      className={`absolute ${sideClass}`}
+      style={{ top: `calc(${word.topPct}% + 220px)`, fontSize: word.fontSize }}
+      initial={{ x: towardCenter }}
+      animate={{ x: towardCenter }}
+      onAnimationComplete={() => setTimeout(onDone, 700)}
+    >
+      <div className="relative flex">
+        {letters.map((ch, i) => (
+          <motion.span
+            key={i}
+            className="display font-semibold uppercase tracking-[0.18em]"
+            style={{ color: word.color }}
+            initial={{ opacity: word.opacity, y: 0, x: 0, scale: 1, filter: "blur(0px)" }}
+            animate={{
+              opacity: [word.opacity, word.opacity, 0],
+              y: [0, -6, 14],
+              x: [0, (i - letters.length / 2) * 4, (i - letters.length / 2) * 10],
+              scale: [1, 1.05, 0.85],
+              filter: ["blur(0px)", "blur(0.5px)", "blur(4px)"],
+            }}
+            transition={{ duration: 0.7, times: [0, 0.25, 1], ease: "easeOut", delay: i * 0.012 }}
+          >
+            {ch === " " ? "\u00A0" : ch}
+          </motion.span>
+        ))}
+        {/* particle burst */}
+        {[...Array(6)].map((_, i) => {
+          const angle = (i / 6) * Math.PI * 2;
+          return (
+            <motion.span
+              key={`p${i}`}
+              className="absolute left-1/2 top-1/2 h-1 w-1 rounded-full"
+              style={{ background: "#8B3FD6" }}
+              initial={{ opacity: 0.7, x: 0, y: 0, scale: 1 }}
+              animate={{
+                opacity: [0.7, 0],
+                x: Math.cos(angle) * 22,
+                y: Math.sin(angle) * 22,
+                scale: [1, 0.2],
+              }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
+          );
+        })}
+      </div>
+    </motion.div>
   );
 }
 

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, TrendingUp, Target, DollarSign } from "lucide-react";
-import caroPortrait from "@/assets/caro-portrait.jpg";
+import caroPortrait from "@/assets/caro-portrait.png";
 
 export function Hero() {
   return (

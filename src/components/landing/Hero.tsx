@@ -116,30 +116,20 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* Right: portrait + floating dashboard cards + funnel */}
+        {/* Right: portrait + floating dashboard cards */}
         <div className="relative mx-auto h-[520px] w-full max-w-md lg:h-[600px]">
-          {/* Soft glow */}
-          <div className="absolute inset-0 -z-0 rounded-[40px] bg-[radial-gradient(closest-side,rgba(157,78,221,0.45),transparent_70%)] blur-2xl" />
+          {/* Soft glow halo behind portrait */}
+          <div className="absolute left-1/2 top-10 -z-0 h-[480px] w-[420px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(157,78,221,0.55),transparent_70%)] blur-2xl" />
 
-          {/* Portrait card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="absolute left-1/2 top-6 h-[460px] w-[300px] -translate-x-1/2 overflow-hidden rounded-[32px] border border-white/15 shadow-[0_40px_120px_-30px_rgba(139,63,214,0.6)] sm:w-[330px] lg:h-[540px]"
-            style={{ background: "radial-gradient(120% 80% at 50% 0%, #5B2A8C 0%, #2B1142 55%, #1E0A33 100%)" }}
-          >
-            <img src={caroPortrait} alt="Caro Chaparro, mentora y estratega de ventas" className="absolute inset-x-0 bottom-0 mx-auto h-[94%] w-auto object-contain object-bottom" />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep via-ink-deep/70 to-transparent p-5 pt-24">
-              <div className="display text-[11px] uppercase tracking-[0.3em] text-gold/80">Mentora · Estratega</div>
-              <div
-                className="serif mt-1 text-2xl text-white sm:text-3xl"
-                style={{ WebkitTextStroke: "1px #8B3FD6" }}
-              >
-                CARO CHAPARRO
-              </div>
-            </div>
-          </motion.div>
+          {/* Portrait — no frame, blends with aurora */}
+          <motion.img
+            src={caroPortrait}
+            alt="Caro Chaparro, mentora y estratega de ventas"
+            initial={{ opacity: 0, scale: 0.96, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1.1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute left-1/2 bottom-0 h-[560px] w-auto max-w-none -translate-x-1/2 object-contain drop-shadow-[0_40px_60px_rgba(30,10,51,0.55)] lg:h-[640px]"
+          />
 
           {/* Floating metric cards */}
           <motion.div

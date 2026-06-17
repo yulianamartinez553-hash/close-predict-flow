@@ -47,7 +47,7 @@ export function Hero() {
           <a href="#testimonios" className="hover:text-white">Testimonios</a>
           <a href="#contacto" className="hover:text-white">Contacto</a>
         </div>
-        <a href="#cta" className="hidden rounded-full border border-white/20 px-4 py-2 text-sm hover:bg-white/10 md:inline-block">Agendar</a>
+        <a href="/diagnostico.html" className="hidden rounded-full border border-white/20 px-4 py-2 text-sm hover:bg-white/10 md:inline-block">Agendar</a>
       </nav>
 
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 pb-24 pt-12 lg:grid-cols-[1.15fr_1fr] lg:pt-20">
@@ -104,7 +104,7 @@ export function Hero() {
             className="mt-10 flex flex-wrap items-center gap-4"
           >
             <a
-              href="#cta"
+              href="/diagnostico.html"
               className="btn-gold pulse-glow group inline-flex items-center gap-2 rounded-full px-7 py-4 text-sm font-semibold uppercase tracking-wider hover:scale-[1.02]"
             >
               Agendar diagnóstico estratégico

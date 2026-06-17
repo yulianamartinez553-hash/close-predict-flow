@@ -663,7 +663,7 @@ export function CtaFinal({ portrait }: { portrait: string }) {
           </p>
 
           <a
-            href="https://wa.me/573229172709"
+            href="/diagnostico.html"
             target="_blank"
             rel="noreferrer"
             className="btn-gold pulse-glow group mt-10 inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-semibold uppercase tracking-wider hover:scale-[1.03]"
@@ -692,7 +692,7 @@ export function Footer() {
             Caro Chaparro · Mentora & Estratega de ventas. Sistemas comerciales predecibles para infoproductores LATAM.
           </p>
           <a
-            href="#cta"
+            href="/diagnostico.html"
             className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/40 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold transition hover:bg-gold hover:text-ink-deep"
           >
             Agendar diagnóstico

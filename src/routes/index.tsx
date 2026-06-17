@@ -1,29 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Hero } from "@/components/landing/Hero";
+import {
+  Problema, Narrative, Sistema, Entregables, Resultado, Garantia,
+  Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
+} from "@/components/landing/Sections";
+import caroPortrait from "@/assets/caro-portrait.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Caro Chaparro · CLOSE-PREDICT™ — Sistema comercial predecible en 12 semanas" },
+      { name: "description", content: "Transformo ventas que dependen del dueño en un sistema comercial predecible y escalable. Agendá tu Diagnóstico Comercial Estratégico." },
+      { property: "og:title", content: "Caro Chaparro · CLOSE-PREDICT™" },
+      { property: "og:description", content: "Sistema comercial delegable y predecible para infoproductores LATAM." },
     ],
   }),
-  component: Index,
+  component: Landing,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Landing() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="overflow-x-hidden bg-background text-foreground">
+      <Hero />
+      <Problema />
+      <Narrative />
+      <Sistema />
+      <Entregables />
+      <Resultado />
+      <Garantia />
+      <Testimonios />
+      <LeadCapture />
+      <CtaFinal portrait={caroPortrait} />
+      <Footer />
+      <WhatsAppFloat />
+    </main>
   );
 }

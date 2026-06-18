@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
+import { CaosToSistema } from "@/components/landing/CaosToSistema";
 import {
   Problema, Narrative, Sistema, Entregables, Resultado, Garantia,
   Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
@@ -22,6 +23,7 @@ function Landing() {
   return (
     <main className="overflow-x-hidden bg-background text-foreground">
       <Hero />
+      <CaosToSistema />
       <Problema />
       <Narrative />
       <Sistema />

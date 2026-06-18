@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caro Chaparro · CLOSE-PREDICT™</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   TOKENS & RESET
+═══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --v:       #7C3AED;   /* violet brand */
+  --v-mid:   #6D28D9;
+  --v-lt:    #A78BFA;
+  --v-pale:  #EDE9FE;
+  --ink:     #1E0A33;
+  --muted:   #64748B;
+  --bg:      #FFFFFF;
+  --bg-s:    #F9F8FF;   /* section tint */
+  --serif:   'Cormorant Garamond', Georgia, serif;
+  --sans:    'Montserrat', system-ui, sans-serif;
+  --ease:    cubic-bezier(.22,1,.36,1);
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--ink);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+.nav{
+  position:absolute;
+  top:0;left:0;right:0;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 72px;
+}
+.nav-brand{
+  font-family:var(--serif);
+  font-size:22px;
+  font-weight:700;
+  color:var(--ink);
+  letter-spacing:-.01em;
+  text-decoration:none;
+}
+.nav-brand em{font-style:italic;color:var(--v)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{
+  font-size:13px;font-weight:500;color:var(--muted);
+  text-decoration:none;transition:color .2s
+}
+.nav-links a:hover{color:var(--ink)}
+.nav-cta{
+  padding:8px 22px;
+  border:1.5px solid rgba(124,58,237,.35);
+  border-radius:100px;
+  font-size:13px;font-weight:600;
+  color:var(--v);text-decoration:none;
+  transition:background .2s,color .2s
+}
+.nav-cta:hover{background:var(--v);color:#fff}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO SECTION
+═══════════════════════════════════════════════════════════════ */
+#hero{
+  position:relative;
+  min-height:100vh;
+  background:var(--bg);
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+}
+
+.hero-inner{
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+  padding:110px 72px 80px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:56px;
+  align-items:center;
+}
+
+/* ── Left: copy ─────────────────────────────────────────────── */
+.hero-copy{display:flex;flex-direction:column;gap:28px}
+
+.hero-eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:10.5px;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--v);
+  padding:5px 16px;
+  border:1px solid rgba(124,58,237,.22);
+  border-radius:100px;
+  background:rgba(124,58,237,.05);
+  width:fit-content;
+}
+.hero-eyebrow::before{
+  content:'';width:6px;height:6px;
+  border-radius:50%;background:var(--v);flex-shrink:0
+}
+
+.hero-h1{
+  font-family:var(--serif);
+  font-size:clamp(34px,3.8vw,58px);
+  font-weight:700;
+  line-height:1.07;
+  color:var(--ink);
+  text-wrap:balance;
+}
+/* "sistema." en degradado violeta */
+.hero-h1 em{
+  font-style:normal;
+  background:linear-gradient(130deg,var(--v),var(--v-lt));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-sub{
+  font-size:15.5px;line-height:1.85;
+  color:var(--muted);max-width:460px
+}
+.hero-sub strong{color:var(--ink);font-weight:600}
+
+.hero-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 32px;
+  background:var(--v);color:#fff;
+  border-radius:100px;
+  font-size:13.5px;font-weight:700;letter-spacing:.04em;
+  text-decoration:none;
+  width:fit-content;
+  box-shadow:0 8px 32px rgba(124,58,237,.38);
+  transition:transform .2s var(--ease),box-shadow .2s;
+}
+.hero-cta:hover{
+  transform:translateY(-2px) scale(1.02);
+  box-shadow:0 14px 40px rgba(124,58,237,.48)
+}
+.hero-cta::after{content:'→';font-size:16px}
+
+/* ── Right: canvas wrapper ──────────────────────────────────── */
+.hero-canvas-col{display:flex;align-items:center;justify-content:center}
+
+/* aspect-ratio fijo; el canvas se estira para llenarlo */
+#funnelWrap{
+  position:relative;
+  width:100%;max-width:500px;
+  aspect-ratio:5/6.5;
+}
+/* El canvas tiene CSS filter para el glow global de las partículas */
+#funnelCanvas{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  display:block;
+  cursor:crosshair;
+  filter:drop-shadow(0 0 5px rgba(124,58,237,.42));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SOBRE MÍ
+═══════════════════════════════════════════════════════════════ */
+#about{
+  background:var(--bg-s);
+  padding:120px 72px;
+  overflow:hidden;
+}
+
+.about-inner{
+  max-width:1160px;margin:0 auto;
+  display:grid;
+  grid-template-columns:1fr 1.1fr;
+  gap:80px;
+  align-items:center;
+}
+
+/* ── Foto ──────────────────────────────────────────────────── */
+.about-photo-col{display:flex;justify-content:center;position:relative}
+
+.photo-frame{
+  position:relative;
+  width:min(420px,100%);
+}
+
+/* Aura degradada detrás de la silueta */
+.photo-aura{
+  position:absolute;
+  inset:-24px -16px;
+  background:radial-gradient(ellipse 68% 55% at 50% 90%,
+    rgba(124,58,237,.22) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+/* Drop-shadow sigue la silueta del PNG transparente */
+.about-img{
+  position:relative;z-index:1;
+  width:100%;height:auto;display:block;
+  filter:
+    drop-shadow(0 24px 48px rgba(124,58,237,.16))
+    drop-shadow(0 4px 12px rgba(0,0,0,.06));
+}
+
+/* Animación flotante continua (aplicada al <img> para no conflictuar con reveal) */
+@keyframes photoFloat{
+  0%,100%{transform:translateY(0)}
+  50%    {transform:translateY(-14px)}
+}
+.float-anim{animation:photoFloat 5.5s ease-in-out infinite}
+
+/* ── Texto ─────────────────────────────────────────────────── */
+.about-copy{display:flex;flex-direction:column;gap:30px}
+
+.about-eyebrow{
+  font-size:10.5px;font-weight:700;
+  letter-spacing:.26em;text-transform:uppercase;
+  color:var(--v);
+}
+
+/* Dos líneas con tratamiento tipográfico distinto */
+.about-title{font-family:var(--serif);line-height:1.1}
+.t1{
+  display:block;
+  font-size:clamp(28px,3vw,44px);
+  font-weight:700;color:var(--ink)
+}
+.t2{
+  display:block;
+  font-size:clamp(28px,3vw,44px);
+  font-style:italic;font-weight:600;
+  color:var(--v)
+}
+
+.about-body{
+  font-size:15.5px;line-height:1.92;
+  color:#4B5563;max-width:520px
+}
+.about-body strong{color:var(--ink);font-weight:700}
+
+/* Tarjetas estadísticas */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.stat-card{
+  background:#fff;
+  border:1px solid rgba(124,58,237,.14);
+  border-radius:18px;
+  padding:20px 10px;
+  text-align:center;
+  box-shadow:0 4px 24px rgba(124,58,237,.07);
+}
+.stat-num{
+  font-family:var(--serif);
+  font-size:36px;font-weight:700;
+  color:var(--v);line-height:1;
+  letter-spacing:-.02em;
+}
+.stat-lbl{
+  font-size:11px;font-weight:500;
+  color:var(--muted);margin-top:8px;line-height:1.45
+}
+
+/* Badges */
+.badges{display:flex;flex-wrap:wrap;gap:10px}
+.badge{
+  padding:8px 18px;
+  border-radius:100px;
+  border:1px solid rgba(124,58,237,.28);
+  background:rgba(124,58,237,.05);
+  font-size:12px;font-weight:600;
+  color:var(--v-mid);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+   Estado inicial invisible; .visible lo anima hacia su posición final.
+═══════════════════════════════════════════════════════════════ */
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:
+    opacity  .72s var(--ease),
+    transform .72s var(--ease);
+}
+/* Variante foto: entra desde la izquierda con leve escala */
+.reveal.from-left{transform:translateX(-44px) scale(.96)}
+
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0) translateX(0) scale(1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════ */
+@media(max-width:900px){
+  .nav{padding:16px 24px}
+  .nav-links,.nav-cta{display:none}
+
+  .hero-inner{
+    grid-template-columns:1fr;
+    padding:80px 24px 60px;
+    gap:40px;
+    text-align:center;
+  }
+  .hero-eyebrow,.hero-cta{margin:0 auto}
+  .hero-sub{max-width:100%;margin:0 auto}
+
+  /* Funnel encima del copy en mobile */
+  .hero-canvas-col{order:-1}
+  #funnelWrap{max-width:280px;margin:0 auto}
+
+  #about{padding:80px 24px}
+  .about-inner{
+    grid-template-columns:1fr;
+    gap:40px;
+  }
+  .about-photo-col{order:-1}
+  .photo-frame{max-width:320px}
+  .stats-grid{gap:10px}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PREFERS-REDUCED-MOTION
+   Muestra todo ya revelado, sin animaciones.
+═══════════════════════════════════════════════════════════════ */
+@media(prefers-reduced-motion:reduce){
+  .reveal{
+    opacity:1!important;
+    transform:none!important;
+    transition:none!important;
+  }
+  .float-anim{animation:none!important}
+  #funnelCanvas{filter:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVIGATION
+═══════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <a href="#" class="nav-brand">Caro <em>Chaparro</em></a>
+  <ul class="nav-links">
+    <li><a href="#about">Sobre mí</a></li>
+    <li><a href="#sistema">Sistema</a></li>
+    <li><a href="#testimonios">Testimonios</a></li>
+  </ul>
+  <a href="#agendar" class="nav-cta">Agendar</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO — Embudo de partículas
+═══════════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-inner">
+
+    <!-- Columna izquierda: copy -->
+    <div class="hero-copy">
+      <span class="hero-eyebrow">CLOSE-PREDICT™ &middot; Mentoría high-ticket</span>
+
+      <h1 class="hero-h1">
+        Tu negocio no tiene<br>
+        un problema de ventas.<br>
+        Tiene un problema de <em>sistema.</em>
+      </h1>
+
+      <p class="hero-sub">
+        Transformo ventas que dependen del dueño en un
+        <strong>sistema comercial predecible</strong> y escalable en 12 semanas.
+      </p>
+
+      <a href="#agendar" class="hero-cta">Agendar diagnóstico estratégico</a>
+    </div>
+
+    <!-- Columna derecha: canvas interactivo -->
+    <div class="hero-canvas-col">
+      <div id="funnelWrap">
+        <canvas
+          id="funnelCanvas"
+          aria-label="Embudo de ventas CLOSE-PREDICT™ animado con partículas interactivas"
+        ></canvas>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SOBRE MÍ
+═══════════════════════════════════════════════════════════════ -->
+<section id="about">
+  <div class="about-inner">
+
+    <!-- Foto principal — entra desde la izquierda -->
+    <div class="about-photo-col">
+      <div class="photo-frame reveal from-left" id="aboutPhotoFrame">
+        <div class="photo-aura"></div>
+        <!--
+          Foto principal de Caro. Cambiar "fase-1.png" por la foto deseada.
+          Las opciones disponibles: fase-1.png … fase-5.png
+        -->
+        <img
+          id="aboutImg"
+          src="images/fase-1.png"
+          alt="Caro Chaparro — mentora y estratega comercial"
+          class="about-img"
+          loading="lazy"
+        >
+      </div>
+    </div>
+
+    <!-- Bloque de texto -->
+    <div class="about-copy">
+
+      <!-- Eyebrow -->
+      <p class="about-eyebrow reveal" data-delay=".12">SOBRE MÍ</p>
+
+      <!-- Título en dos líneas con tratamiento tipográfico distinto -->
+      <h2 class="about-title reveal" data-delay=".22">
+        <span class="t1">No te habla la teoría.</span>
+        <span class="t2">Te habla la experiencia.</span>
+      </h2>
+
+      <!-- Párrafo — copy exacto del brief -->
+      <p class="about-body reveal" data-delay=".36">
+        Durante más de 10 años fui dueña de negocio. Sentí en carne propia el dolor de sacar
+        plata de donde no había, de contratar un closer que aprendía y se iba, de tener todo
+        en la cabeza y nada documentado. Por eso construí <strong>CLOSE-PREDICT™</strong>:
+        el sistema que ordena lo que a la mayoría de los dueños los tiene apagando incendios.
+      </p>
+
+      <!-- 3 tarjetas de estadísticas con conteo animado -->
+      <div class="stats-grid">
+        <!-- data-count = valor final; data-suffix = sufijo ("+") -->
+        <div class="stat-card reveal" data-delay=".52">
+          <div class="stat-num" data-count="10" data-suffix="+">0+</div>
+          <div class="stat-lbl">Años como dueña de negocio</div>
+        </div>
+        <div class="stat-card reveal" data-delay=".64">
+          <div class="stat-num" data-count="20" data-suffix="+">0+</div>
+          <div class="stat-lbl">Proyectos como closer</div>
+        </div>
+        <div class="stat-card reveal" data-delay=".76">
+          <div class="stat-num" data-count="5" data-suffix="+">0+</div>
+          <div class="stat-lbl">Empresas asesoradas</div>
+        </div>
+      </div>
+
+      <!-- 4 badges en cascada -->
+      <div class="badges">
+        <span class="badge reveal" data-delay=".90">Profesional en Comercio Internacional</span>
+        <span class="badge reveal" data-delay=".98">Certificada como Closer Digital</span>
+        <span class="badge reveal" data-delay="1.06">Customer Service</span>
+        <span class="badge reveal" data-delay="1.14">Neuroventas</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────────────────
+   GLOBAL FLAGS
+───────────────────────────────────────────────────────────── */
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOBILE  = () => window.innerWidth < 768;
+
+/* ─────────────────────────────────────────────────────────────
+   PARTICLE — círculo morado con centro transparente (dona/anillo)
+   ox/oy = posición de reposo; x/y = posición actual
+───────────────────────────────────────────────────────────── */
+class Particle {
+  constructor(ox, oy, pieceIdx) {
+    this.ox = ox;
+    this.oy = oy;
+    this.x  = ox + (Math.random() - .5) * 3;  /* leve jitter de spawn */
+    this.y  = oy + (Math.random() - .5) * 3;
+    this.vx = 0;
+    this.vy = 0;
+    /* radio del anillo: varía entre 1.4 y 2.8px (canvas coords internos) */
+    this.r     = 1.4 + Math.random() * 1.4;
+    /* opacidad: 0.5–1.0 para dar textura/profundidad */
+    this.alpha = 0.5 + Math.random() * 0.5;
+    this.piece = pieceIdx;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   PARTICLE FUNNEL ENGINE
+   Resolución interna fija (500×650); CSS escala el canvas.
+   La posición del mouse se convierte al espacio interno mediante
+   getBoundingClientRect() + ratio canvas/CSS.
+───────────────────────────────────────────────────────────── */
+class ParticleFunnel {
+  constructor(canvas) {
+    this.canvas    = canvas;
+    this.ctx       = canvas.getContext('2d');
+    this.particles = [];
+    this.pieces    = [];
+    this.mouse     = { x: -9999, y: -9999 };
+
+    /* ── Física ──────────────────────────────────────────────
+       Ajustar aquí para cambiar comportamiento de repulsión/retorno:
+       REPEL_R   → radio de influencia del cursor (px canvas internos)
+       REPEL_STR → fuerza de empuje
+       SPRING    → velocidad de retorno al origen (0.04 = suave, 0.12 = rápido)
+       DAMP      → fricción (0.9 = poco, 0.75 = mucho)
+    ─────────────────────────────────────────────────────────── */
+    this.REPEL_R   = 72;
+    this.REPEL_STR = 5.8;
+    this.SPRING    = 0.07;
+    this.DAMP      = 0.83;
+
+    /* Resolución interna del canvas (independiente del CSS) */
+    canvas.width  = 500;
+    canvas.height = 650;
+
+    this._buildParticles();
+    this._bindEvents();
+    this._loop();
+  }
+
+  /* ── Generar partículas para cada pieza trapezoidal ─────────
+     Cada pieza: yT/yB = y top/bottom, wT/wB = ancho top/bottom
+     n = cantidad de partículas (reducida en mobile)
+  ─────────────────────────────────────────────────────────── */
+  _buildParticles() {
+    this.particles = [];
+    const W  = this.canvas.width;
+    const H  = this.canvas.height;
+    const cx = W / 2;
+    const m  = MOBILE();
+
+    /*
+     * 4 piezas en forma de tronco de cono (trapezoides), decrecientes.
+     * Separación entre piezas: ~4% de H.
+     * Ajustar proporciones aquí para cambiar forma del embudo.
+     */
+    this.pieces = [
+      { yT:H*.04, yB:H*.23, wT:W*.86, wB:W*.68, n: m ? 480 : 1150 }, /* 0 — tope */
+      { yT:H*.27, yB:H*.46, wT:W*.64, wB:W*.50, n: m ? 360 : 870  }, /* 1           */
+      { yT:H*.50, yB:H*.66, wT:W*.46, wB:W*.35, n: m ? 240 : 590  }, /* 2           */
+      { yT:H*.70, yB:H*.84, wT:W*.32, wB:W*.21, n: m ? 140 : 370  }, /* 3 — fondo  */
+    ];
+
+    this.pieces.forEach((p, idx) => {
+      for (let i = 0; i < p.n; i++) {
+        const t  = Math.random();                  /* posición relativa dentro de la pieza */
+        const y  = p.yT + t * (p.yB - p.yT);     /* y en canvas coords                   */
+        const wx = p.wT + t * (p.wB - p.wT);      /* ancho interpolado en esa fila        */
+        const x  = cx - wx / 2 + Math.random() * wx;
+        this.particles.push(new Particle(x, y, idx));
+      }
+    });
+  }
+
+  /* ── Eventos de mouse y touch ───────────────────────────── */
+  _bindEvents() {
+    const c = this.canvas;
+
+    const track = (e) => {
+      const r  = c.getBoundingClientRect();
+      const sx = c.width  / r.width;
+      const sy = c.height / r.height;
+      const s  = e.touches ? e.touches[0] : e;
+      this.mouse.x = (s.clientX - r.left) * sx;
+      this.mouse.y = (s.clientY - r.top)  * sy;
+    };
+    const clear = () => { this.mouse.x = -9999; this.mouse.y = -9999; };
+
+    c.addEventListener('mousemove',  track, { passive: true });
+    c.addEventListener('touchmove',  track, { passive: true });
+    c.addEventListener('mouseleave', clear);
+    c.addEventListener('touchend',   clear);
+
+    /* Reconstruir posiciones originales si cambia el tamaño de ventana */
+    let timer;
+    window.addEventListener('resize', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => this._buildParticles(), 200);
+    });
+  }
+
+  /* ── Física por frame ───────────────────────────────────── */
+  _update() {
+    const { x: mx, y: my } = this.mouse;
+    const RR = this.REPEL_R * this.REPEL_R;  /* comparar d² evita sqrt costoso */
+
+    for (let i = 0, n = this.particles.length; i < n; i++) {
+      const p  = this.particles[i];
+      const dx = p.x - mx;
+      const dy = p.y - my;
+      const d2 = dx * dx + dy * dy;
+
+      /* Repulsión: solo si el cursor está dentro del radio */
+      if (d2 < RR && d2 > .01) {
+        const d = Math.sqrt(d2);
+        const f = ((this.REPEL_R - d) / this.REPEL_R) * this.REPEL_STR;
+        p.vx += (dx / d) * f;
+        p.vy += (dy / d) * f;
+      }
+
+      /* Fuerza de retorno spring hacia posición original */
+      p.vx += (p.ox - p.x) * this.SPRING;
+      p.vy += (p.oy - p.y) * this.SPRING;
+
+      /* Amortiguación */
+      p.vx *= this.DAMP;
+      p.vy *= this.DAMP;
+
+      /* Integración */
+      p.x += p.vx;
+      p.y += p.vy;
+    }
+  }
+
+  /* ── Renderizado de un frame ────────────────────────────── */
+  _draw() {
+    const ctx = this.ctx;
+    const W   = this.canvas.width;
+    const H   = this.canvas.height;
+    const cx  = W / 2;
+
+    ctx.clearRect(0, 0, W, H);
+
+    /* ── Paso 1: relleno cristal + bordes de cada pieza ─────
+       Orden de dibujo: fill → glow outline → top neon border
+    ─────────────────────────────────────────────────────────── */
+    this.pieces.forEach(p => {
+      /* Vértices del trapezoide */
+      const x1 = cx - p.wT / 2, y1 = p.yT;  /* top-left  */
+      const x2 = cx + p.wT / 2, y2 = p.yT;  /* top-right */
+      const x3 = cx + p.wB / 2, y3 = p.yB;  /* bot-right */
+      const x4 = cx - p.wB / 2, y4 = p.yB;  /* bot-left  */
+
+      ctx.save();
+
+      /* Relleno vidrio: degradado blanco → lavanda translúcido */
+      const g = ctx.createLinearGradient(0, y1, 0, y3);
+      g.addColorStop(0, 'rgba(255,255,255,.58)');
+      g.addColorStop(1, 'rgba(237,233,254,.22)');
+      ctx.fillStyle  = g;
+      ctx.shadowOffsetY = 10;
+      ctx.shadowBlur    = 26;
+      ctx.shadowColor   = 'rgba(0,0,0,.07)';  /* sombra suave = "flota" */
+      ctx.beginPath();
+      ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      ctx.lineTo(x3,y3); ctx.lineTo(x4,y4);
+      ctx.closePath();
+      ctx.fill();
+
+      /* Halo violeta difuminado alrededor del contorno completo */
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur    = 24;
+      ctx.shadowColor   = 'rgba(124,58,237,.28)';
+      ctx.strokeStyle   = 'rgba(124,58,237,.11)';
+      ctx.lineWidth     = 1;
+      ctx.beginPath();
+      ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+      ctx.lineTo(x3,y3); ctx.lineTo(x4,y4);
+      ctx.closePath();
+      ctx.stroke();
+
+      /* Línea superior neón violeta brillante (marca cada pieza) */
+      ctx.shadowBlur  = 14;
+      ctx.shadowColor = '#7C3AED';
+      ctx.strokeStyle = '#7C3AED';
+      ctx.lineWidth   = 2.8;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      ctx.restore();
+    });
+
+    /* ── Paso 2: dibujar todas las partículas (anillos morados) ─
+       strokeStyle fijo, solo cambia globalAlpha por partícula.
+       El glow viene del CSS filter: drop-shadow en el canvas.
+    ─────────────────────────────────────────────────────────── */
+    ctx.save();
+    ctx.strokeStyle = '#7C3AED';
+    ctx.lineWidth   = 1.1;
+
+    for (let i = 0, n = this.particles.length; i < n; i++) {
+      const p = this.particles[i];
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  /* ── Loop principal ─────────────────────────────────────── */
+  _loop() {
+    /* En reduced-motion: dibuja una vez estático y para */
+    if (REDUCED) { this._draw(); return; }
+
+    this._update();
+    this._draw();
+    requestAnimationFrame(() => this._loop());
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CONTEO ANIMADO DE ESTADÍSTICAS
+   Anima de 0 hasta data-count con ease-out cúbico.
+   Ajustar `duration` (ms) para cambiar velocidad del contador.
+───────────────────────────────────────────────────────────── */
+function animateCounter(el, duration = 1300) {
+  const target = parseInt(el.dataset.count, 10);
+  const suffix = el.dataset.suffix || '';
+  const t0     = performance.now();
+
+  (function tick(now) {
+    const p    = Math.min((now - t0) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);           /* ease-out cúbico */
+    el.textContent = Math.round(ease * target) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SCROLL REVEAL — IntersectionObserver
+   Cada elemento .reveal entra en viewport → añade .visible.
+   data-delay (segundos) crea el stagger entre elementos.
+───────────────────────────────────────────────────────────── */
+function initReveal() {
+  /* En reduced-motion: mostrar todo ya revelado con valores finales */
+  if (REDUCED) {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    document.querySelectorAll('.stat-num[data-count]').forEach(el => {
+      el.textContent = el.dataset.count + (el.dataset.suffix || '');
+    });
+    document.getElementById('aboutImg')?.classList.add('float-anim');
+    return;
+  }
+
+  const seen = new Set();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting || seen.has(entry.target)) return;
+      seen.add(entry.target);
+
+      const el  = entry.target;
+      const del = parseFloat(el.dataset.delay || 0) * 1000;
+
+      setTimeout(() => {
+        el.classList.add('visible');
+
+        /* Contador en tarjetas de estadísticas */
+        el.querySelectorAll('.stat-num[data-count]').forEach(animateCounter);
+
+        /* Foto: después de que termine la transición de reveal, agregar float */
+        if (el.id === 'aboutPhotoFrame') {
+          setTimeout(() => {
+            document.getElementById('aboutImg')?.classList.add('float-anim');
+          }, 780);
+        }
+      }, del);
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}
+
+/* ─────────────────────────────────────────────────────────────
+   BOOT
+───────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  /* Inicializar sistema de partículas */
+  new ParticleFunnel(document.getElementById('funnelCanvas'));
+
+  /* Inicializar animaciones de scroll */
+  initReveal();
+});
+</script>
+</body>
+</html>

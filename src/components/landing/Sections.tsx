@@ -415,10 +415,21 @@ const DELIVERABLES = [
 export function Entregables() {
   return (
     <section id="entregables" className="relative overflow-hidden bg-ink-deep py-28 text-white">
+      {/* Video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_105406_16f4600d-7a92-4292-b96e-b19156c7830a.mp4"
+      />
+      <div className="pointer-events-none absolute inset-0 z-0 bg-ink-deep/70" />
+
       {/* radial glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet/20 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet/20 blur-3xl" />
       {/* particles */}
-      <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0 z-10">
         {[...Array(30)].map((_, i) => (
           <motion.span
             key={i}
@@ -430,7 +441,7 @@ export function Entregables() {
         ))}
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 text-center">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 text-center">
         <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-gold">Entregables · Bonos</div>
         <h2 className="serif text-4xl text-balance sm:text-5xl lg:text-6xl">
           14 entregables + 2 bonos incluidos
@@ -441,17 +452,18 @@ export function Entregables() {
       </div>
 
       {/* Marquee carousel */}
-      <div className="relative mt-20 overflow-hidden" style={{ maskImage: "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)" }}>
+      <div className="relative z-10 mt-20 overflow-hidden" style={{ maskImage: "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)" }}>
         <motion.div
           className="flex gap-6 px-6"
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
         >
           {[...DELIVERABLES, ...DELIVERABLES].map((d, i) => (
             <DeliverableCard key={i} {...d} />
           ))}
         </motion.div>
       </div>
+
     </section>
   );
 }

@@ -6,804 +6,926 @@
 <title>Caro Chaparro · CLOSE-PREDICT™</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   TOKENS & RESET
-═══════════════════════════════════════════════════════════════ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
+/* ── TOKENS ────────────────────────────────────────────────── */
 :root{
-  --v:       #7C3AED;   /* violet brand */
-  --v-mid:   #6D28D9;
-  --v-lt:    #A78BFA;
-  --v-pale:  #EDE9FE;
-  --ink:     #1E0A33;
-  --muted:   #64748B;
-  --bg:      #FFFFFF;
-  --bg-s:    #F9F8FF;   /* section tint */
-  --serif:   'Cormorant Garamond', Georgia, serif;
-  --sans:    'Montserrat', system-ui, sans-serif;
-  --ease:    cubic-bezier(.22,1,.36,1);
+  --v:#7C3AED; --v2:#6D28D9; --vl:#A78BFA; --vp:#EDE9FE;
+  --ink:#1E0A33; --ink2:#2B1142; --gold:#F4C430; --gold2:#E8C547;
+  --muted:#64748B; --bg:#fff; --bgs:#F9F8FF;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Montserrat',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
 }
-
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{
-  font-family:var(--sans);
-  background:var(--bg);
-  color:var(--ink);
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
-/* ═══════════════════════════════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════════════════════════════ */
-.nav{
-  position:absolute;
-  top:0;left:0;right:0;
-  z-index:20;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:20px 72px;
-}
-.nav-brand{
-  font-family:var(--serif);
-  font-size:22px;
-  font-weight:700;
-  color:var(--ink);
-  letter-spacing:-.01em;
-  text-decoration:none;
-}
+/* ── NAV ───────────────────────────────────────────────────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 72px;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(124,58,237,.08)}
+.nav-brand{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);text-decoration:none}
 .nav-brand em{font-style:italic;color:var(--v)}
-.nav-links{display:flex;gap:32px;list-style:none}
-.nav-links a{
-  font-size:13px;font-weight:500;color:var(--muted);
-  text-decoration:none;transition:color .2s
-}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s}
 .nav-links a:hover{color:var(--ink)}
-.nav-cta{
-  padding:8px 22px;
-  border:1.5px solid rgba(124,58,237,.35);
-  border-radius:100px;
-  font-size:13px;font-weight:600;
-  color:var(--v);text-decoration:none;
-  transition:background .2s,color .2s
-}
+.nav-cta{padding:8px 22px;border:1.5px solid rgba(124,58,237,.35);border-radius:100px;font-size:13px;font-weight:600;color:var(--v);text-decoration:none;transition:background .2s,color .2s}
 .nav-cta:hover{background:var(--v);color:#fff}
 
-/* ═══════════════════════════════════════════════════════════════
-   HERO SECTION
-═══════════════════════════════════════════════════════════════ */
-#hero{
-  position:relative;
-  min-height:100vh;
-  background:var(--bg);
-  display:flex;
-  align-items:center;
-  overflow:hidden;
-}
-
-.hero-inner{
-  width:100%;
-  max-width:1280px;
-  margin:0 auto;
-  padding:110px 72px 80px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:56px;
-  align-items:center;
-}
-
-/* ── Left: copy ─────────────────────────────────────────────── */
+/* ── HERO ──────────────────────────────────────────────────── */
+#hero{position:relative;min-height:100vh;background:var(--bg);display:flex;align-items:center;overflow:hidden;padding-top:72px}
+.hero-inner{width:100%;max-width:1280px;margin:0 auto;padding:80px 72px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
 .hero-copy{display:flex;flex-direction:column;gap:28px}
-
-.hero-eyebrow{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  font-size:10.5px;
-  font-weight:700;
-  letter-spacing:.22em;
-  text-transform:uppercase;
-  color:var(--v);
-  padding:5px 16px;
-  border:1px solid rgba(124,58,237,.22);
-  border-radius:100px;
-  background:rgba(124,58,237,.05);
-  width:fit-content;
-}
-.hero-eyebrow::before{
-  content:'';width:6px;height:6px;
-  border-radius:50%;background:var(--v);flex-shrink:0
-}
-
-.hero-h1{
-  font-family:var(--serif);
-  font-size:clamp(34px,3.8vw,58px);
-  font-weight:700;
-  line-height:1.07;
-  color:var(--ink);
-  text-wrap:balance;
-}
-/* "sistema." en degradado violeta */
-.hero-h1 em{
-  font-style:normal;
-  background:linear-gradient(130deg,var(--v),var(--v-lt));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-
-.hero-sub{
-  font-size:15.5px;line-height:1.85;
-  color:var(--muted);max-width:460px
-}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--v);padding:5px 16px;border:1px solid rgba(124,58,237,.22);border-radius:100px;background:rgba(124,58,237,.05);width:fit-content}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--v);flex-shrink:0}
+.hero-h1{font-family:var(--serif);font-size:clamp(32px,3.8vw,58px);font-weight:700;line-height:1.07;color:var(--ink);text-wrap:balance}
+.hero-h1 em{font-style:normal;background:linear-gradient(130deg,var(--v),var(--vl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:15.5px;line-height:1.85;color:var(--muted);max-width:460px}
 .hero-sub strong{color:var(--ink);font-weight:600}
-
-.hero-cta{
-  display:inline-flex;align-items:center;gap:10px;
-  padding:14px 32px;
-  background:var(--v);color:#fff;
-  border-radius:100px;
-  font-size:13.5px;font-weight:700;letter-spacing:.04em;
-  text-decoration:none;
-  width:fit-content;
-  box-shadow:0 8px 32px rgba(124,58,237,.38);
-  transition:transform .2s var(--ease),box-shadow .2s;
-}
-.hero-cta:hover{
-  transform:translateY(-2px) scale(1.02);
-  box-shadow:0 14px 40px rgba(124,58,237,.48)
-}
-.hero-cta::after{content:'→';font-size:16px}
-
-/* ── Right: canvas wrapper ──────────────────────────────────── */
+.btn-primary{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:var(--v);color:#fff;border-radius:100px;font-size:13.5px;font-weight:700;letter-spacing:.04em;text-decoration:none;width:fit-content;box-shadow:0 8px 32px rgba(124,58,237,.38);transition:transform .2s var(--ease),box-shadow .2s}
+.btn-primary:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(124,58,237,.48)}
 .hero-canvas-col{display:flex;align-items:center;justify-content:center}
+#funnelWrap{position:relative;width:100%;max-width:480px;aspect-ratio:5/6.5}
+#funnelCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;filter:drop-shadow(0 0 5px rgba(124,58,237,.42))}
 
-/* aspect-ratio fijo; el canvas se estira para llenarlo */
-#funnelWrap{
-  position:relative;
-  width:100%;max-width:500px;
-  aspect-ratio:5/6.5;
-}
-/* El canvas tiene CSS filter para el glow global de las partículas */
-#funnelCanvas{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  display:block;
-  cursor:crosshair;
-  filter:drop-shadow(0 0 5px rgba(124,58,237,.42));
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SOBRE MÍ
-═══════════════════════════════════════════════════════════════ */
-#about{
-  background:var(--bg-s);
-  padding:120px 72px;
-  overflow:hidden;
-}
-
-.about-inner{
-  max-width:1160px;margin:0 auto;
-  display:grid;
-  grid-template-columns:1fr 1.1fr;
-  gap:80px;
-  align-items:center;
-}
-
-/* ── Foto ──────────────────────────────────────────────────── */
-.about-photo-col{display:flex;justify-content:center;position:relative}
-
-.photo-frame{
-  position:relative;
-  width:min(420px,100%);
-}
-
-/* Aura degradada detrás de la silueta */
-.photo-aura{
-  position:absolute;
-  inset:-24px -16px;
-  background:radial-gradient(ellipse 68% 55% at 50% 90%,
-    rgba(124,58,237,.22) 0%,transparent 70%);
-  pointer-events:none;z-index:0;
-}
-
-/* Drop-shadow sigue la silueta del PNG transparente */
-.about-img{
-  position:relative;z-index:1;
-  width:100%;height:auto;display:block;
-  filter:
-    drop-shadow(0 24px 48px rgba(124,58,237,.16))
-    drop-shadow(0 4px 12px rgba(0,0,0,.06));
-}
-
-/* Animación flotante continua (aplicada al <img> para no conflictuar con reveal) */
-@keyframes photoFloat{
-  0%,100%{transform:translateY(0)}
-  50%    {transform:translateY(-14px)}
-}
+/* ── SOBRE MÍ ──────────────────────────────────────────────── */
+#about{background:var(--bgs);padding:120px 72px;overflow:hidden}
+.about-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1fr 1.1fr;gap:80px;align-items:center}
+.photo-frame{position:relative;width:min(420px,100%)}
+.photo-aura{position:absolute;inset:-24px -16px;background:radial-gradient(ellipse 68% 55% at 50% 90%,rgba(124,58,237,.22) 0%,transparent 70%);pointer-events:none;z-index:0}
+.about-img{position:relative;z-index:1;width:100%;height:auto;display:block;filter:drop-shadow(0 24px 48px rgba(124,58,237,.16)) drop-shadow(0 4px 12px rgba(0,0,0,.06))}
+@keyframes photoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 .float-anim{animation:photoFloat 5.5s ease-in-out infinite}
-
-/* ── Texto ─────────────────────────────────────────────────── */
 .about-copy{display:flex;flex-direction:column;gap:30px}
-
-.about-eyebrow{
-  font-size:10.5px;font-weight:700;
-  letter-spacing:.26em;text-transform:uppercase;
-  color:var(--v);
-}
-
-/* Dos líneas con tratamiento tipográfico distinto */
+.about-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--v)}
 .about-title{font-family:var(--serif);line-height:1.1}
-.t1{
-  display:block;
-  font-size:clamp(28px,3vw,44px);
-  font-weight:700;color:var(--ink)
-}
-.t2{
-  display:block;
-  font-size:clamp(28px,3vw,44px);
-  font-style:italic;font-weight:600;
-  color:var(--v)
-}
-
-.about-body{
-  font-size:15.5px;line-height:1.92;
-  color:#4B5563;max-width:520px
-}
+.t1{display:block;font-size:clamp(28px,3vw,44px);font-weight:700;color:var(--ink)}
+.t2{display:block;font-size:clamp(28px,3vw,44px);font-style:italic;font-weight:600;color:var(--v)}
+.about-body{font-size:15.5px;line-height:1.92;color:#4B5563;max-width:520px}
 .about-body strong{color:var(--ink);font-weight:700}
-
-/* Tarjetas estadísticas */
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px;
-}
-.stat-card{
-  background:#fff;
-  border:1px solid rgba(124,58,237,.14);
-  border-radius:18px;
-  padding:20px 10px;
-  text-align:center;
-  box-shadow:0 4px 24px rgba(124,58,237,.07);
-}
-.stat-num{
-  font-family:var(--serif);
-  font-size:36px;font-weight:700;
-  color:var(--v);line-height:1;
-  letter-spacing:-.02em;
-}
-.stat-lbl{
-  font-size:11px;font-weight:500;
-  color:var(--muted);margin-top:8px;line-height:1.45
-}
-
-/* Badges */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat-card{background:#fff;border:1px solid rgba(124,58,237,.14);border-radius:18px;padding:20px 10px;text-align:center;box-shadow:0 4px 24px rgba(124,58,237,.07)}
+.stat-num{font-family:var(--serif);font-size:36px;font-weight:700;color:var(--v);line-height:1;letter-spacing:-.02em}
+.stat-lbl{font-size:11px;font-weight:500;color:var(--muted);margin-top:8px;line-height:1.45}
 .badges{display:flex;flex-wrap:wrap;gap:10px}
-.badge{
-  padding:8px 18px;
-  border-radius:100px;
-  border:1px solid rgba(124,58,237,.28);
-  background:rgba(124,58,237,.05);
-  font-size:12px;font-weight:600;
-  color:var(--v-mid);
-}
+.badge{padding:8px 18px;border-radius:100px;border:1px solid rgba(124,58,237,.28);background:rgba(124,58,237,.05);font-size:12px;font-weight:600;color:var(--v2)}
 
-/* ═══════════════════════════════════════════════════════════════
-   SCROLL REVEAL
-   Estado inicial invisible; .visible lo anima hacia su posición final.
-═══════════════════════════════════════════════════════════════ */
-.reveal{
-  opacity:0;
-  transform:translateY(28px);
-  transition:
-    opacity  .72s var(--ease),
-    transform .72s var(--ease);
-}
-/* Variante foto: entra desde la izquierda con leve escala */
+/* ── SECTION SHARED ────────────────────────────────────────── */
+.section-hd{max-width:720px;margin:0 auto;text-align:center;padding:0 24px}
+.section-hd .eyebrow{margin:0 auto 20px;justify-content:center}
+.section-h2{font-family:var(--serif);font-size:clamp(28px,3.2vw,46px);font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:16px}
+.section-h2 em{font-style:italic;color:var(--v)}
+.section-lead{font-size:16px;line-height:1.75;color:var(--muted)}
+
+/* ── FASES 3D ──────────────────────────────────────────────── */
+#fases{background:var(--bgs);padding:100px 0 80px;overflow:hidden}
+.fases-stage-outer{margin:48px auto 0;max-width:1024px;height:520px;display:flex;align-items:center;justify-content:center;perspective:1350px;cursor:none}
+.fases-ring{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .08s linear}
+.fases-slot{position:absolute;left:50%;top:50%;width:260px;height:400px;margin-left:-130px;margin-top:-200px;transform-style:preserve-3d;will-change:transform,opacity;transition:opacity .3s ease}
+.fases-glow{position:absolute;inset:-2px;border-radius:18px;background:rgba(124,58,237,.35);filter:blur(26px);transform:translateZ(-30px)}
+.fases-card{position:relative;width:100%;height:100%;border-radius:16px;border:1px solid rgba(255,255,255,.15);box-shadow:0 20px 60px -20px rgba(0,0,0,.5);padding:28px 22px;color:#fff;display:flex;flex-direction:column;overflow:hidden}
+.fases-card-title{font-size:26px;font-weight:800;line-height:1.05;letter-spacing:.01em;text-transform:uppercase;white-space:pre-line;margin:0}
+.fases-card-sub{margin-top:12px;font-size:12px;line-height:1.5;color:rgba(255,255,255,.85)}
+.fases-icon{margin-top:auto;display:flex;justify-content:center;align-items:center;padding-top:20px}
+/* Mobile fases: horizontal scroll */
+.fases-mobile{display:none;overflow-x:auto;gap:16px;padding:16px 24px 32px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fases-mobile::-webkit-scrollbar{display:none}
+.fases-mobile .fases-slot{position:static;width:240px;height:360px;flex-shrink:0;left:auto;top:auto;margin:0;opacity:1!important;transform:none!important}
+
+/* ── ENTREGABLES MARQUEE ───────────────────────────────────── */
+#entregables{padding:100px 0;background:var(--bg);overflow:hidden}
+.marquee-wrap{overflow:hidden;position:relative}
+.marquee-wrap::before,.marquee-wrap::after{content:'';position:absolute;top:0;bottom:0;width:120px;z-index:2;pointer-events:none}
+.marquee-wrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.marquee-wrap::after{right:0;background:linear-gradient(270deg,var(--bg),transparent)}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.marquee-track{display:flex;width:max-content;gap:0}
+.marquee-primary .marquee-track{animation:marquee 30s linear infinite}
+.marquee-bonos .marquee-track{animation:marquee 22s linear infinite reverse}
+.marquee-primary{margin-bottom:24px}
+.m-item{display:inline-flex;align-items:center;gap:10px;padding:0 32px;white-space:nowrap;font-size:15px;font-weight:600;color:var(--ink)}
+.m-item::before{content:'✓';color:var(--v);font-size:16px;flex-shrink:0}
+.m-item-bono{display:inline-flex;align-items:center;gap:10px;padding:0 28px;white-space:nowrap;font-size:13px;font-weight:600;color:var(--gold2)}
+.m-item-bono::before{content:'★';font-size:13px;flex-shrink:0}
+.m-sep{color:rgba(124,58,237,.25);padding:0 4px;font-size:20px;line-height:1;flex-shrink:0}
+
+/* ── RESULTADO ─────────────────────────────────────────────── */
+#resultado{padding:100px 72px;background:var(--bgs)}
+.resultado-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.resultado-copy{display:flex;flex-direction:column;gap:36px}
+.resultado-h2{font-family:var(--serif);font-size:clamp(26px,3vw,42px);font-weight:700;color:var(--ink);line-height:1.12}
+.resultado-list{list-style:none;display:flex;flex-direction:column;gap:16px}
+.resultado-list li{display:flex;align-items:center;gap:12px;font-size:15px;font-weight:500;color:var(--ink);opacity:0;transform:translateX(-20px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.resultado-list li::before{content:'✓';width:24px;height:24px;background:var(--v);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.resultado-list.active li{opacity:1;transform:translateX(0)}
+/* Stagger for resultado items */
+.resultado-list.active li:nth-child(1){transition-delay:.0s}
+.resultado-list.active li:nth-child(2){transition-delay:.12s}
+.resultado-list.active li:nth-child(3){transition-delay:.24s}
+.resultado-list.active li:nth-child(4){transition-delay:.36s}
+.resultado-list.active li:nth-child(5){transition-delay:.48s}
+.resultado-list.active li:nth-child(6){transition-delay:.60s}
+/* Pipeline dashboard card */
+.pipeline-card{background:#fff;border:1px solid rgba(124,58,237,.12);border-radius:20px;padding:28px;box-shadow:0 8px 48px rgba(124,58,237,.1)}
+.pipeline-hdr{display:flex;align-items:center;gap:10px;margin-bottom:20px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pipeline-dot{width:8px;height:8px;border-radius:50%;background:var(--v)}
+.pipeline-rows{display:flex;flex-direction:column;gap:12px}
+.pipeline-row{display:flex;align-items:center;gap:12px}
+.pipeline-bar-wrap{flex:1;height:6px;background:rgba(124,58,237,.1);border-radius:100px;overflow:hidden}
+.pipeline-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--v),var(--vl))}
+.pipeline-lbl{font-size:12px;font-weight:500;color:var(--muted);min-width:100px}
+.pipeline-val{font-size:13px;font-weight:700;color:var(--ink);min-width:56px;text-align:right}
+.pipeline-footer{margin-top:20px;padding-top:16px;border-top:1px solid rgba(124,58,237,.1);display:flex;justify-content:space-between;align-items:center}
+.conv-lbl{font-size:12px;font-weight:600;color:var(--muted)}
+.conv-val{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--v)}
+
+/* ── GARANTÍA ──────────────────────────────────────────────── */
+#garantia{padding:80px 72px;background:var(--bg);text-align:center}
+.garantia-inner{max-width:680px;margin:0 auto}
+.garantia-icon{width:64px;height:64px;margin:0 auto 24px;background:rgba(124,58,237,.1);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.garantia-h{font-family:var(--serif);font-size:clamp(26px,3vw,40px);font-weight:700;color:var(--ink);margin-bottom:18px}
+.garantia-p{font-size:16px;line-height:1.85;color:var(--muted)}
+
+/* ── TESTIMONIOS ───────────────────────────────────────────── */
+#testimonios{padding:100px 72px;background:var(--bgs)}
+.testi-video{max-width:700px;margin:48px auto 0;background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:20px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer}
+.testi-video-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff}
+.play-btn{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:28px;transition:background .2s}
+.testi-video:hover .play-btn{background:rgba(255,255,255,.25)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px;max-width:1100px;margin-left:auto;margin-right:auto}
+.testi-card{background:#fff;border:1px solid rgba(124,58,237,.12);border-radius:20px;padding:28px;box-shadow:0 4px 24px rgba(124,58,237,.07)}
+.testi-stars{color:var(--gold);font-size:16px;letter-spacing:2px;margin-bottom:16px}
+.testi-quote{font-size:14.5px;line-height:1.85;color:#4B5563;margin-bottom:20px;font-style:italic}
+.testi-name{font-size:13px;font-weight:700;color:var(--ink)}
+.testi-role{font-size:12px;color:var(--muted);margin-top:2px}
+.press-stripe{margin-top:56px;text-align:center}
+.press-lbl{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+.press-logos{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+.press-logo{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:.05em;opacity:.55}
+
+/* ── NO ES TU MOMENTO ──────────────────────────────────────── */
+#no-momento{padding:80px 72px;background:var(--bg)}
+.no-momento-inner{max-width:1100px;margin:0 auto}
+.no-momento-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.nomo-card{background:var(--bgs);border:1px solid rgba(124,58,237,.14);border-radius:20px;padding:28px 24px}
+.nomo-icon{font-size:28px;margin-bottom:16px}
+.nomo-h{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:10px}
+.nomo-p{font-size:14px;line-height:1.75;color:var(--muted)}
+.nomo-link{display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:13px;font-weight:600;color:var(--v);text-decoration:none}
+.nomo-link:hover{text-decoration:underline}
+
+/* ── CTA FINAL ─────────────────────────────────────────────── */
+#cta-final{background:linear-gradient(135deg,var(--ink),var(--ink2) 60%,#3B1568);padding:100px 72px;overflow:hidden;position:relative}
+.cta-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.cta-photo-col{position:relative;display:flex;align-items:flex-end}
+.cta-img{width:100%;max-width:440px;height:auto;display:block;filter:drop-shadow(0 20px 60px rgba(124,58,237,.45));position:relative;z-index:1}
+.cta-glow{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(ellipse,rgba(124,58,237,.5),transparent 70%);filter:blur(40px);z-index:0}
+.cta-copy{display:flex;flex-direction:column;gap:28px;color:#fff}
+.cta-h{font-family:var(--serif);font-size:clamp(30px,3.5vw,52px);font-weight:700;line-height:1.08;color:#fff}
+.cta-p{font-size:16px;line-height:1.8;color:rgba(255,255,255,.75)}
+.btn-gold{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);border-radius:100px;font-size:15px;font-weight:800;text-decoration:none;position:relative;overflow:hidden;box-shadow:0 8px 40px rgba(244,196,48,.4);width:fit-content;transition:transform .2s var(--ease),box-shadow .2s}
+.btn-gold:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 14px 50px rgba(244,196,48,.55)}
+/* Shimmer on gold button */
+.btn-gold::after{content:'';position:absolute;top:-20px;bottom:-20px;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-150%) skewX(-15deg);animation:shimmer 2.5s ease-in-out infinite}
+@keyframes shimmer{0%{transform:translateX(-150%) skewX(-15deg)}60%,100%{transform:translateX(300%) skewX(-15deg)}}
+.cta-slogan{font-size:14px;font-style:italic;color:var(--gold);line-height:1.5;max-width:400px}
+
+/* ── FOOTER ────────────────────────────────────────────────── */
+footer{background:var(--ink);color:rgba(255,255,255,.7);padding:60px 72px 40px}
+.footer-inner{max-width:1100px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:48px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1)}
+.footer-brand{font-family:var(--serif);font-size:22px;font-weight:700;color:#fff}
+.footer-brand em{font-style:italic;color:var(--vl)}
+.footer-desc{font-size:13px;line-height:1.7;margin-top:10px;max-width:280px}
+.footer-col-title{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:16px}
+.footer-links{display:flex;flex-direction:column;gap:10px}
+.footer-links a{font-size:14px;color:rgba(255,255,255,.65);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:#fff}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:28px;flex-wrap:wrap;gap:16px}
+.footer-legal{font-size:12px;color:rgba(255,255,255,.35)}
+.footer-payment{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.payment-badge{font-size:11px;font-weight:600;color:rgba(255,255,255,.4);padding:4px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px}
+.footer-cta-row{margin-top:24px;text-align:center}
+.footer-cta{font-size:13px;font-weight:600;color:var(--vl);text-decoration:none}
+.footer-cta:hover{color:#fff}
+
+/* ── WHATSAPP FLOAT ────────────────────────────────────────── */
+.wa-float{position:fixed;bottom:28px;right:28px;z-index:9999;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:transform .2s var(--ease),box-shadow .2s;text-decoration:none}
+.wa-float:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(37,211,102,.65)}
+.wa-float svg{width:30px;height:30px;fill:#fff}
+
+/* ── SCROLL REVEAL ─────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .72s var(--ease),transform .72s var(--ease)}
 .reveal.from-left{transform:translateX(-44px) scale(.96)}
+.reveal.visible{opacity:1;transform:translate(0,0) scale(1)}
 
-.reveal.visible{
-  opacity:1;
-  transform:translateY(0) translateX(0) scale(1);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════════════════════════ */
+/* ── RESPONSIVE ────────────────────────────────────────────── */
 @media(max-width:900px){
-  .nav{padding:16px 24px}
-  .nav-links,.nav-cta{display:none}
-
-  .hero-inner{
-    grid-template-columns:1fr;
-    padding:80px 24px 60px;
-    gap:40px;
-    text-align:center;
-  }
-  .hero-eyebrow,.hero-cta{margin:0 auto}
+  .nav{padding:14px 20px}.nav-links,.nav-cta{display:none}
+  .hero-inner{grid-template-columns:1fr;padding:70px 24px 60px;gap:40px;text-align:center}
+  .hero-copy .eyebrow,.hero-copy .btn-primary{margin:0 auto}
   .hero-sub{max-width:100%;margin:0 auto}
-
-  /* Funnel encima del copy en mobile */
   .hero-canvas-col{order:-1}
   #funnelWrap{max-width:280px;margin:0 auto}
-
   #about{padding:80px 24px}
-  .about-inner{
-    grid-template-columns:1fr;
-    gap:40px;
-  }
+  .about-inner{grid-template-columns:1fr;gap:40px}
   .about-photo-col{order:-1}
-  .photo-frame{max-width:320px}
-  .stats-grid{gap:10px}
+  .photo-frame{max-width:320px;margin:0 auto}
+  #fases{padding:80px 0 60px}
+  .fases-stage-outer{display:none}
+  .fases-mobile{display:flex}
+  #entregables{padding:80px 0}
+  #resultado{padding:80px 24px}
+  .resultado-inner{grid-template-columns:1fr;gap:48px}
+  #garantia,#testimonios,#no-momento,#cta-final{padding:80px 24px}
+  .testi-grid,.no-momento-grid{grid-template-columns:1fr}
+  .cta-inner{grid-template-columns:1fr}
+  .cta-photo-col{display:none}
+  footer{padding:60px 24px 40px}
+  .footer-top{grid-template-columns:1fr;gap:32px}
+  .footer-bottom{flex-direction:column;align-items:flex-start}
+  .section-hd{padding:0 24px}
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   PREFERS-REDUCED-MOTION
-   Muestra todo ya revelado, sin animaciones.
-═══════════════════════════════════════════════════════════════ */
+/* ── REDUCED MOTION ────────────────────────────────────────── */
 @media(prefers-reduced-motion:reduce){
-  .reveal{
-    opacity:1!important;
-    transform:none!important;
-    transition:none!important;
-  }
-  .float-anim{animation:none!important}
+  .reveal{opacity:1!important;transform:none!important;transition:none!important}
+  .float-anim,.btn-gold::after{animation:none!important}
   #funnelCanvas{filter:none!important}
+  .marquee-track{animation:none!important;flex-wrap:wrap}
+  .resultado-list li{opacity:1!important;transform:none!important;transition:none!important}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     NAVIGATION
-═══════════════════════════════════════════════════════════════ -->
+<!-- ══════════ NAV ══════════ -->
 <nav class="nav">
   <a href="#" class="nav-brand">Caro <em>Chaparro</em></a>
   <ul class="nav-links">
     <li><a href="#about">Sobre mí</a></li>
-    <li><a href="#sistema">Sistema</a></li>
+    <li><a href="#fases">Sistema</a></li>
     <li><a href="#testimonios">Testimonios</a></li>
+    <li><a href="#no-momento">Recursos</a></li>
   </ul>
-  <a href="#agendar" class="nav-cta">Agendar</a>
+  <a href="diagnostico.html" class="nav-cta">Agendar</a>
 </nav>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     HERO — Embudo de partículas
-═══════════════════════════════════════════════════════════════ -->
+<!-- ══════════ HERO ══════════ -->
 <section id="hero">
   <div class="hero-inner">
-
-    <!-- Columna izquierda: copy -->
     <div class="hero-copy">
-      <span class="hero-eyebrow">CLOSE-PREDICT™ &middot; Mentoría high-ticket</span>
-
-      <h1 class="hero-h1">
-        Tu negocio no tiene<br>
-        un problema de ventas.<br>
-        Tiene un problema de <em>sistema.</em>
-      </h1>
-
-      <p class="hero-sub">
-        Transformo ventas que dependen del dueño en un
-        <strong>sistema comercial predecible</strong> y escalable en 12 semanas.
-      </p>
-
-      <a href="#agendar" class="hero-cta">Agendar diagnóstico estratégico</a>
+      <span class="eyebrow">CLOSE-PREDICT™ &middot; Mentoría high-ticket</span>
+      <h1 class="hero-h1">Tu negocio no tiene<br>un problema de ventas.<br>Tiene un problema de <em>sistema.</em></h1>
+      <p class="hero-sub">Transformo ventas que dependen del dueño en un <strong>sistema comercial predecible</strong> y escalable en 12 semanas.</p>
+      <a href="diagnostico.html" class="btn-primary">Agendar diagnóstico estratégico →</a>
     </div>
-
-    <!-- Columna derecha: canvas interactivo -->
     <div class="hero-canvas-col">
       <div id="funnelWrap">
-        <canvas
-          id="funnelCanvas"
-          aria-label="Embudo de ventas CLOSE-PREDICT™ animado con partículas interactivas"
-        ></canvas>
+        <canvas id="funnelCanvas" aria-label="Embudo de ventas interactivo CLOSE-PREDICT™"></canvas>
       </div>
     </div>
-
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     SOBRE MÍ
-═══════════════════════════════════════════════════════════════ -->
+<!-- ══════════ SOBRE MÍ ══════════ -->
 <section id="about">
   <div class="about-inner">
-
-    <!-- Foto principal — entra desde la izquierda -->
     <div class="about-photo-col">
-      <div class="photo-frame reveal from-left" id="aboutPhotoFrame">
+      <div class="photo-frame reveal from-left" id="aboutFrame">
         <div class="photo-aura"></div>
-        <!--
-          Foto principal de Caro. Cambiar "fase-1.png" por la foto deseada.
-          Las opciones disponibles: fase-1.png … fase-5.png
-        -->
-        <img
-          id="aboutImg"
-          src="images/fase-1.png"
-          alt="Caro Chaparro — mentora y estratega comercial"
-          class="about-img"
-          loading="lazy"
-        >
+        <!-- Cambiar fase-1.png por la foto principal deseada -->
+        <img id="aboutImg" src="images/fase-1.png" alt="Caro Chaparro — mentora y estratega comercial" class="about-img" loading="lazy">
       </div>
     </div>
-
-    <!-- Bloque de texto -->
     <div class="about-copy">
-
-      <!-- Eyebrow -->
       <p class="about-eyebrow reveal" data-delay=".12">SOBRE MÍ</p>
-
-      <!-- Título en dos líneas con tratamiento tipográfico distinto -->
       <h2 class="about-title reveal" data-delay=".22">
         <span class="t1">No te habla la teoría.</span>
         <span class="t2">Te habla la experiencia.</span>
       </h2>
-
-      <!-- Párrafo — copy exacto del brief -->
       <p class="about-body reveal" data-delay=".36">
         Durante más de 10 años fui dueña de negocio. Sentí en carne propia el dolor de sacar
         plata de donde no había, de contratar un closer que aprendía y se iba, de tener todo
         en la cabeza y nada documentado. Por eso construí <strong>CLOSE-PREDICT™</strong>:
         el sistema que ordena lo que a la mayoría de los dueños los tiene apagando incendios.
       </p>
-
-      <!-- 3 tarjetas de estadísticas con conteo animado -->
       <div class="stats-grid">
-        <!-- data-count = valor final; data-suffix = sufijo ("+") -->
-        <div class="stat-card reveal" data-delay=".52">
-          <div class="stat-num" data-count="10" data-suffix="+">0+</div>
-          <div class="stat-lbl">Años como dueña de negocio</div>
-        </div>
-        <div class="stat-card reveal" data-delay=".64">
-          <div class="stat-num" data-count="20" data-suffix="+">0+</div>
-          <div class="stat-lbl">Proyectos como closer</div>
-        </div>
-        <div class="stat-card reveal" data-delay=".76">
-          <div class="stat-num" data-count="5" data-suffix="+">0+</div>
-          <div class="stat-lbl">Empresas asesoradas</div>
-        </div>
+        <div class="stat-card reveal" data-delay=".50"><div class="stat-num" data-count="10" data-suffix="+">0+</div><div class="stat-lbl">Años como dueña de negocio</div></div>
+        <div class="stat-card reveal" data-delay=".62"><div class="stat-num" data-count="20" data-suffix="+">0+</div><div class="stat-lbl">Proyectos como closer</div></div>
+        <div class="stat-card reveal" data-delay=".74"><div class="stat-num" data-count="5"  data-suffix="+">0+</div><div class="stat-lbl">Empresas asesoradas</div></div>
       </div>
-
-      <!-- 4 badges en cascada -->
       <div class="badges">
-        <span class="badge reveal" data-delay=".90">Profesional en Comercio Internacional</span>
-        <span class="badge reveal" data-delay=".98">Certificada como Closer Digital</span>
-        <span class="badge reveal" data-delay="1.06">Customer Service</span>
-        <span class="badge reveal" data-delay="1.14">Neuroventas</span>
+        <span class="badge reveal" data-delay=".88">Profesional en Comercio Internacional</span>
+        <span class="badge reveal" data-delay=".96">Certificada como Closer Digital</span>
+        <span class="badge reveal" data-delay="1.04">Customer Service</span>
+        <span class="badge reveal" data-delay="1.12">Neuroventas</span>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════
+<!-- ══════════ FASES 3D ══════════ -->
+<section id="fases">
+  <div class="section-hd">
+    <div class="eyebrow">CLOSE-PREDICT™ · 5 FASES · 12 SEMANAS</div>
+    <h2 class="section-h2">Un sistema comercial delegable y <em>predecible</em>, en 12 semanas.</h2>
+    <p class="section-lead">Cada fase tiene criterios claros, guiones documentados y métricas de control —<br>para que tu equipo ejecute sin depender de ti.</p>
+  </div>
+
+  <!-- Desktop: 3D carousel -->
+  <div class="fases-stage-outer" id="fasesOuter">
+    <div class="fases-ring" id="fasesRing">
+
+      <div class="fases-slot" data-i="0">
+        <div class="fases-glow"></div>
+        <div class="fases-card" style="background:linear-gradient(160deg,#5b21b6,#7c3aed)">
+          <h3 class="fases-card-title">Radiografía&#10;Comercial</h3>
+          <p class="fases-card-sub">Sem 1–2 · Diagnóstico del estado real</p>
+          <div class="fases-icon">
+            <svg width="110" height="110" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="14" y="12" width="36" height="44" rx="4"/><rect x="24" y="7" width="16" height="9" rx="3"/>
+              <path d="M22 28h8M22 36h8M22 44h8"/><path d="M36 27l4 4M40 27l-4 4M36 35l4 4M40 35l-4 4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="fases-slot" data-i="1">
+        <div class="fases-glow"></div>
+        <div class="fases-card" style="background:linear-gradient(160deg,#7c3aed,#9d5cff)">
+          <h3 class="fases-card-title">Arquitectura&#10;Comercial</h3>
+          <p class="fases-card-sub">Sem 3–4 · Diseño del sistema</p>
+          <div class="fases-icon">
+            <svg width="110" height="110" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 8h22l10 10v38H16z"/><path d="M38 8v10h10"/>
+              <path d="M23 46v-8M31 46v-14M39 46v-20"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="fases-slot" data-i="2">
+        <div class="fases-glow"></div>
+        <div class="fases-card" style="background:linear-gradient(160deg,#1e0a33,#3b1568)">
+          <h3 class="fases-card-title">Guiones y&#10;Calificación</h3>
+          <p class="fases-card-sub">Sem 5–7 · Ruta de comunicación</p>
+          <div class="fases-icon">
+            <svg width="110" height="110" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 14h32v22H24l-10 8V36h-4z"/><path d="M48 24h6v18h-4v8l-8-8h-6"/>
+              <path d="M19 22l4 4 7-8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="fases-slot" data-i="3">
+        <div class="fases-glow"></div>
+        <div class="fases-card" style="background:linear-gradient(160deg,#6d28d9,#8b5cf6)">
+          <h3 class="fases-card-title">KPIs y&#10;Dashboard</h3>
+          <p class="fases-card-sub">Sem 8–9 · Métricas del embudo</p>
+          <div class="fases-icon">
+            <svg width="110" height="110" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="8" y="12" width="48" height="40" rx="4"/><path d="M8 22h48"/>
+              <path d="M18 42v-8M28 42v-14M38 42v-10M48 42v-16"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="fases-slot" data-i="4">
+        <div class="fases-glow"></div>
+        <div class="fases-card" style="background:linear-gradient(160deg,#6b21a8,#7c3aed)">
+          <h3 class="fases-card-title">Delegación&#10;y Escala</h3>
+          <p class="fases-card-sub">Sem 10–12 · Sistema delegable</p>
+          <div class="fases-icon">
+            <svg width="110" height="110" viewBox="0 0 64 64" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="32" cy="16" r="7"/><circle cx="14" cy="40" r="6"/><circle cx="50" cy="40" r="6"/>
+              <path d="M32 23v10M32 33l-12 4M32 33l12 4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- fases-ring -->
+  </div><!-- fases-stage-outer -->
+
+  <!-- Mobile: horizontal scroll -->
+  <div class="fases-mobile" id="fasesMobile">
+    <!-- cloned by JS on mobile -->
+  </div>
+</section>
+
+<!-- ══════════ ENTREGABLES ══════════ -->
+<section id="entregables">
+  <div class="section-hd" style="margin-bottom:48px">
+    <h2 class="section-h2">14 entregables + 2 bonos incluidos.</h2>
+  </div>
+
+  <!-- Fila principal entregables -->
+  <div class="marquee-wrap marquee-primary">
+    <div class="marquee-track" id="entregablesTrack">
+      <span class="m-item">Calculadora comercial</span><span class="m-sep">·</span>
+      <span class="m-item">Mapa de fuga personalizado</span><span class="m-sep">·</span>
+      <span class="m-item">Arquitectura comercial</span><span class="m-sep">·</span>
+      <span class="m-item">Playbook de ventas completo</span><span class="m-sep">·</span>
+      <span class="m-item">Guión de calificación BANT</span><span class="m-sep">·</span>
+      <span class="m-item">Guión de cierres en 5 pasos</span><span class="m-sep">·</span>
+      <span class="m-item">Secuencia de seguimiento</span><span class="m-sep">·</span>
+      <span class="m-item">Dashboards de KPIs</span><span class="m-sep">·</span>
+      <span class="m-item">SOPs y Manual de ventas</span><span class="m-sep">·</span>
+      <span class="m-item">Roadmap de 90 días</span><span class="m-sep">·</span>
+      <!-- Duplicado para loop infinito -->
+      <span class="m-item">Calculadora comercial</span><span class="m-sep">·</span>
+      <span class="m-item">Mapa de fuga personalizado</span><span class="m-sep">·</span>
+      <span class="m-item">Arquitectura comercial</span><span class="m-sep">·</span>
+      <span class="m-item">Playbook de ventas completo</span><span class="m-sep">·</span>
+      <span class="m-item">Guión de calificación BANT</span><span class="m-sep">·</span>
+      <span class="m-item">Guión de cierres en 5 pasos</span><span class="m-sep">·</span>
+      <span class="m-item">Secuencia de seguimiento</span><span class="m-sep">·</span>
+      <span class="m-item">Dashboards de KPIs</span><span class="m-sep">·</span>
+      <span class="m-item">SOPs y Manual de ventas</span><span class="m-sep">·</span>
+      <span class="m-item">Roadmap de 90 días</span><span class="m-sep">·</span>
+    </div>
+  </div>
+
+  <!-- Fila bonos -->
+  <div class="marquee-wrap marquee-bonos" style="margin-top:16px">
+    <div class="marquee-track" id="bonosTrack">
+      <span class="m-item-bono">Roleplay en vivo</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+      <span class="m-item-bono">Auditoría de 2 llamadas</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+      <span class="m-item-bono">Sesión de Pauta Digital</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+      <span class="m-item-bono">Agente de Objeciones IA</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+      <span class="m-item-bono">Roleplay en vivo</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+      <span class="m-item-bono">Auditoría de 2 llamadas</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+      <span class="m-item-bono">Sesión de Pauta Digital</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+      <span class="m-item-bono">Agente de Objeciones IA</span><span class="m-sep" style="color:rgba(244,196,48,.3)">·</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ RESULTADO ══════════ -->
+<section id="resultado">
+  <div class="resultado-inner">
+    <div class="resultado-copy">
+      <h2 class="resultado-h2 reveal">Al finalizar, tenés un sistema comercial funcionando y escalando.</h2>
+      <ul class="resultado-list" id="resultadoList">
+        <li>Pipeline implementado y visible</li>
+        <li>Métricas clave para tomar decisiones</li>
+        <li>Seguimiento estructurado y automático</li>
+        <li>Playbook de ventas documentado</li>
+        <li>Equipo alineado y autónomo</li>
+        <li>Crecimiento predecible y escalable</li>
+      </ul>
+    </div>
+    <!-- Mini pipeline dashboard -->
+    <div class="pipeline-card reveal" data-delay=".2">
+      <div class="pipeline-hdr"><div class="pipeline-dot"></div>Pipeline · CLOSE-PREDICT™</div>
+      <div class="pipeline-rows">
+        <div class="pipeline-row">
+          <span class="pipeline-lbl">Nuevos</span>
+          <div class="pipeline-bar-wrap"><div class="pipeline-bar" style="width:100%"></div></div>
+          <span class="pipeline-val">245</span>
+        </div>
+        <div class="pipeline-row">
+          <span class="pipeline-lbl">Oportunidades</span>
+          <div class="pipeline-bar-wrap"><div class="pipeline-bar" style="width:64%"></div></div>
+          <span class="pipeline-val">78</span>
+        </div>
+        <div class="pipeline-row">
+          <span class="pipeline-lbl">Cotizaciones</span>
+          <div class="pipeline-bar-wrap"><div class="pipeline-bar" style="width:38%"></div></div>
+          <span class="pipeline-val">32</span>
+        </div>
+        <div class="pipeline-row">
+          <span class="pipeline-lbl">Ventas</span>
+          <div class="pipeline-bar-wrap"><div class="pipeline-bar" style="width:82%"></div></div>
+          <span class="pipeline-val">$158K</span>
+        </div>
+      </div>
+      <div class="pipeline-footer">
+        <span class="conv-lbl">Conversión</span>
+        <span class="conv-val">13.1%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ GARANTÍA ══════════ -->
+<section id="garantia">
+  <div class="garantia-inner reveal">
+    <div class="garantia-icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    </div>
+    <h2 class="garantia-h">Nuestra garantía</h2>
+    <p class="garantia-p">Si al terminar el programa aún no tenés tu sistema comercial implementado correctamente, seguimos contigo hasta dejarlo 100% listo. Tu éxito es nuestro compromiso.</p>
+  </div>
+</section>
+
+<!-- ══════════ TESTIMONIOS ══════════ -->
+<section id="testimonios">
+  <div class="section-hd">
+    <h2 class="section-h2">Lo que dicen quienes ya ordenaron sus ventas.</h2>
+  </div>
+
+  <!-- Video placeholder — reemplazar src con URL real -->
+  <div class="testi-video reveal" data-delay=".1">
+    <div class="testi-video-overlay">
+      <div class="play-btn">▶</div>
+      <p style="font-size:14px;opacity:.7">Testimonio en video</p>
+    </div>
+  </div>
+
+  <!-- 3 tarjetas escritas (placeholders para reemplazar) -->
+  <div class="testi-grid">
+    <div class="testi-card reveal" data-delay=".15">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"En 8 semanas armamos nuestro playbook completo y cerramos el mejor mes de la historia de la empresa. Por primera vez mi equipo vende sin que yo esté encima."</p>
+      <div class="testi-name">Martín R.</div>
+      <div class="testi-role">CEO — Agencia de Marketing Digital</div>
+    </div>
+    <div class="testi-card reveal" data-delay=".25">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"Tenía todo en la cabeza. Hoy tengo guiones, dashboards y un equipo que funciona solo. Caro no solo enseña, acompaña hasta que el sistema funciona."</p>
+      <div class="testi-name">Valentina L.</div>
+      <div class="testi-role">Fundadora — Consultora de Bienestar</div>
+    </div>
+    <div class="testi-card reveal" data-delay=".35">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-quote">"Mi conversión pasó del 8% al 19% en 10 semanas. El sistema es real, documentado y delegable. No es teoría, es una metodología que funciona."</p>
+      <div class="testi-name">Diego M.</div>
+      <div class="testi-role">Director Comercial — SaaS B2B</div>
+    </div>
+  </div>
+
+  <!-- Franja de prensa -->
+  <div class="press-stripe reveal" data-delay=".4">
+    <p class="press-lbl">Como lo escuchaste en</p>
+    <div class="press-logos">
+      <span class="press-logo">EMISORA 1</span>
+      <span class="press-logo">EMISORA 2</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ NO ES TU MOMENTO ══════════ -->
+<section id="no-momento">
+  <div class="no-momento-inner">
+    <div class="section-hd" style="text-align:left;padding:0;max-width:100%">
+      <h2 class="section-h2">¿Todavía no es tu momento para el sistema completo?</h2>
+    </div>
+    <div class="no-momento-grid">
+      <div class="nomo-card reveal" data-delay=".1">
+        <div class="nomo-icon">🎯</div>
+        <h3 class="nomo-h">Diagnóstico gratuito</h3>
+        <p class="nomo-p">Respondé unas preguntas y obtené una primera luz de dónde está fallando tu proceso de ventas.</p>
+        <a href="diagnostico.html" class="nomo-link">Empezar diagnóstico →</a>
+      </div>
+      <div class="nomo-card reveal" data-delay=".2">
+        <div class="nomo-icon">💬</div>
+        <h3 class="nomo-h">Comunidad Sala Flows</h3>
+        <p class="nomo-p">Conectate cada 15 días y recibí contenido de valor en ventas y marketing. Gratis.</p>
+        <a href="https://wa.me/573229172709" class="nomo-link" target="_blank" rel="noopener">Unirme →</a>
+      </div>
+      <div class="nomo-card reveal" data-delay=".3">
+        <div class="nomo-icon">📥</div>
+        <h3 class="nomo-h">Recursos gratuitos</h3>
+        <p class="nomo-p">Guías prácticas para empezar a ordenar tus ventas hoy, sin esperar.</p>
+        <a href="https://wa.me/573229172709" class="nomo-link" target="_blank" rel="noopener">Descargar →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA FINAL ══════════ -->
+<section id="cta-final">
+  <div class="cta-inner">
+    <div class="cta-photo-col">
+      <div class="cta-glow"></div>
+      <!-- Cambiar fase-5.png por la foto de cierre deseada -->
+      <img src="images/fase-5.png" alt="Caro Chaparro" class="cta-img reveal from-left">
+    </div>
+    <div class="cta-copy">
+      <h2 class="cta-h reveal">¿Listo para construir tu sistema comercial?</h2>
+      <p class="cta-p reveal" data-delay=".12">Agendá tu Diagnóstico Comercial Estratégico y descubrí exactamente dónde se están perdiendo tus ventas y cómo convertirlas en crecimiento.</p>
+      <a href="diagnostico.html" class="btn-gold reveal" data-delay=".22">Agenda tu llamada →</a>
+      <p class="cta-slogan reveal" data-delay=".34">"A la cima de ventas no se llega con conocimiento, sino con estrategia."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">Caro <em>Chaparro</em></div>
+        <p class="footer-desc">Mentora &amp; Estratega de ventas. Transformo equipos comerciales en máquinas predecibles y escalables.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Contacto</div>
+        <div class="footer-links">
+          <a href="https://wa.me/573229172709" target="_blank" rel="noopener">WhatsApp +57 322 9172709</a>
+          <a href="mailto:Caroventascoach@gmail.com">Caroventascoach@gmail.com</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Redes</div>
+        <div class="footer-links">
+          <a href="https://instagram.com/carochaparroventas" target="_blank" rel="noopener">Instagram @carochaparroventas</a>
+          <a href="https://www.tiktok.com/@carochaparrov" target="_blank" rel="noopener">TikTok @carochaparrov</a>
+          <a href="https://www.linkedin.com/in/carolina-chaparro-74602b18b/" target="_blank" rel="noopener">LinkedIn — Caro Chaparro</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-legal">© 2026 Caro Chaparro · CLOSE-PREDICT™. Todos los derechos reservados.</span>
+      <div class="footer-payment">
+        <span class="payment-badge">PayPal</span>
+        <span class="payment-badge">Transferencia internacional</span>
+        <span class="payment-badge">Transferencias locales</span>
+        <span class="payment-badge">Cripto · Binance</span>
+      </div>
+    </div>
+    <div class="footer-cta-row">
+      <a href="diagnostico.html" class="footer-cta">→ Agendar diagnóstico gratuito</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ WHATSAPP FLOAT ══════════ -->
+<a href="https://wa.me/573229172709" class="wa-float" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 0C5.376 0 0 5.376 0 11.99c0 2.114.553 4.099 1.52 5.83L0 24l6.335-1.493A11.934 11.934 0 0011.99 24C18.604 24 24 18.624 24 12.01 24 5.376 18.604 0 11.99 0zm0 21.818a9.818 9.818 0 01-5.008-1.37l-.36-.214-3.724.876.936-3.62-.234-.372A9.783 9.783 0 012.18 12.01c0-5.416 4.394-9.81 9.81-9.81s9.81 4.394 9.81 9.81-4.394 9.808-9.81 9.808z"/></svg>
+</a>
+
+<!-- ══════════════════════════════════════════════════════════
      JAVASCRIPT
-═══════════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════════════ -->
 <script>
 'use strict';
 
-/* ─────────────────────────────────────────────────────────────
-   GLOBAL FLAGS
-───────────────────────────────────────────────────────────── */
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const MOBILE  = () => window.innerWidth < 768;
+const isMob   = () => window.innerWidth < 900;
 
 /* ─────────────────────────────────────────────────────────────
-   PARTICLE — círculo morado con centro transparente (dona/anillo)
-   ox/oy = posición de reposo; x/y = posición actual
+   1. PARTICLE FUNNEL
+   Cada partícula: anillo morado (arc stroke, sin fill).
+   Física: repulsión del cursor + spring de retorno al origen.
 ───────────────────────────────────────────────────────────── */
 class Particle {
-  constructor(ox, oy, pieceIdx) {
-    this.ox = ox;
-    this.oy = oy;
-    this.x  = ox + (Math.random() - .5) * 3;  /* leve jitter de spawn */
-    this.y  = oy + (Math.random() - .5) * 3;
-    this.vx = 0;
-    this.vy = 0;
-    /* radio del anillo: varía entre 1.4 y 2.8px (canvas coords internos) */
-    this.r     = 1.4 + Math.random() * 1.4;
-    /* opacidad: 0.5–1.0 para dar textura/profundidad */
-    this.alpha = 0.5 + Math.random() * 0.5;
-    this.piece = pieceIdx;
+  constructor(ox, oy) {
+    this.ox = ox; this.oy = oy;
+    this.x  = ox + (Math.random()-.5)*3;
+    this.y  = oy + (Math.random()-.5)*3;
+    this.vx = 0; this.vy = 0;
+    this.r     = 1.4 + Math.random()*1.4;   /* radio del anillo: 1.4–2.8px */
+    this.alpha = 0.5 + Math.random()*0.5;   /* opacidad: 0.5–1.0 */
   }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   PARTICLE FUNNEL ENGINE
-   Resolución interna fija (500×650); CSS escala el canvas.
-   La posición del mouse se convierte al espacio interno mediante
-   getBoundingClientRect() + ratio canvas/CSS.
-───────────────────────────────────────────────────────────── */
 class ParticleFunnel {
   constructor(canvas) {
-    this.canvas    = canvas;
-    this.ctx       = canvas.getContext('2d');
-    this.particles = [];
-    this.pieces    = [];
-    this.mouse     = { x: -9999, y: -9999 };
-
-    /* ── Física ──────────────────────────────────────────────
-       Ajustar aquí para cambiar comportamiento de repulsión/retorno:
-       REPEL_R   → radio de influencia del cursor (px canvas internos)
-       REPEL_STR → fuerza de empuje
-       SPRING    → velocidad de retorno al origen (0.04 = suave, 0.12 = rápido)
-       DAMP      → fricción (0.9 = poco, 0.75 = mucho)
-    ─────────────────────────────────────────────────────────── */
-    this.REPEL_R   = 72;
-    this.REPEL_STR = 5.8;
-    this.SPRING    = 0.07;
-    this.DAMP      = 0.83;
-
-    /* Resolución interna del canvas (independiente del CSS) */
-    canvas.width  = 500;
-    canvas.height = 650;
-
-    this._buildParticles();
-    this._bindEvents();
-    this._loop();
+    this.c   = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.pts = [];
+    this.pcs = [];
+    this.mx  = -9999; this.my = -9999;
+    /* ── Ajustar aquí para cambiar física ──
+       REPEL_R   = radio de influencia del cursor
+       REPEL_STR = fuerza de empuje
+       SPRING    = velocidad de retorno al origen
+       DAMP      = amortiguación (más bajo = más fricción)  */
+    this.R  = 72; this.STR = 5.8;
+    this.SP = 0.07; this.DM = 0.83;
+    this.c.width = 500; this.c.height = 650;
+    this._build(); this._events(); this._loop();
   }
 
-  /* ── Generar partículas para cada pieza trapezoidal ─────────
-     Cada pieza: yT/yB = y top/bottom, wT/wB = ancho top/bottom
-     n = cantidad de partículas (reducida en mobile)
-  ─────────────────────────────────────────────────────────── */
-  _buildParticles() {
-    this.particles = [];
-    const W  = this.canvas.width;
-    const H  = this.canvas.height;
-    const cx = W / 2;
-    const m  = MOBILE();
-
-    /*
-     * 4 piezas en forma de tronco de cono (trapezoides), decrecientes.
-     * Separación entre piezas: ~4% de H.
-     * Ajustar proporciones aquí para cambiar forma del embudo.
-     */
-    this.pieces = [
-      { yT:H*.04, yB:H*.23, wT:W*.86, wB:W*.68, n: m ? 480 : 1150 }, /* 0 — tope */
-      { yT:H*.27, yB:H*.46, wT:W*.64, wB:W*.50, n: m ? 360 : 870  }, /* 1           */
-      { yT:H*.50, yB:H*.66, wT:W*.46, wB:W*.35, n: m ? 240 : 590  }, /* 2           */
-      { yT:H*.70, yB:H*.84, wT:W*.32, wB:W*.21, n: m ? 140 : 370  }, /* 3 — fondo  */
+  /* Generar partículas dentro de las 4 piezas trapezoidales */
+  _build() {
+    this.pts = [];
+    const W = 500, H = 650, cx = 250, m = isMob();
+    /* Cada pieza: [yTop, yBot, anchoTop, anchoBot, cantidad] */
+    this.pcs = [
+      [H*.04, H*.23, W*.86, W*.68, m?480:1150],
+      [H*.27, H*.46, W*.64, W*.50, m?360:870 ],
+      [H*.50, H*.66, W*.46, W*.35, m?240:590 ],
+      [H*.70, H*.84, W*.32, W*.21, m?140:370 ],
     ];
-
-    this.pieces.forEach((p, idx) => {
-      for (let i = 0; i < p.n; i++) {
-        const t  = Math.random();                  /* posición relativa dentro de la pieza */
-        const y  = p.yT + t * (p.yB - p.yT);     /* y en canvas coords                   */
-        const wx = p.wT + t * (p.wB - p.wT);      /* ancho interpolado en esa fila        */
-        const x  = cx - wx / 2 + Math.random() * wx;
-        this.particles.push(new Particle(x, y, idx));
+    this.pcs.forEach(([yT,yB,wT,wB,n]) => {
+      for (let i=0; i<n; i++) {
+        const t = Math.random();
+        const y = yT + t*(yB-yT);
+        const w = wT + t*(wB-wT);
+        const x = cx - w/2 + Math.random()*w;
+        this.pts.push(new Particle(x, y));
       }
     });
   }
 
-  /* ── Eventos de mouse y touch ───────────────────────────── */
-  _bindEvents() {
-    const c = this.canvas;
-
-    const track = (e) => {
-      const r  = c.getBoundingClientRect();
-      const sx = c.width  / r.width;
-      const sy = c.height / r.height;
-      const s  = e.touches ? e.touches[0] : e;
-      this.mouse.x = (s.clientX - r.left) * sx;
-      this.mouse.y = (s.clientY - r.top)  * sy;
+  _events() {
+    const c = this.c;
+    const mv = e => {
+      const r = c.getBoundingClientRect();
+      const s = e.touches ? e.touches[0] : e;
+      this.mx = (s.clientX-r.left)*(500/r.width);
+      this.my = (s.clientY-r.top)*(650/r.height);
     };
-    const clear = () => { this.mouse.x = -9999; this.mouse.y = -9999; };
+    const lv = () => { this.mx=-9999; this.my=-9999; };
+    c.addEventListener('mousemove', mv, {passive:true});
+    c.addEventListener('touchmove', mv, {passive:true});
+    c.addEventListener('mouseleave', lv);
+    c.addEventListener('touchend', lv);
+    let t; window.addEventListener('resize', () => { clearTimeout(t); t=setTimeout(()=>this._build(),200); });
+  }
 
-    c.addEventListener('mousemove',  track, { passive: true });
-    c.addEventListener('touchmove',  track, { passive: true });
-    c.addEventListener('mouseleave', clear);
-    c.addEventListener('touchend',   clear);
-
-    /* Reconstruir posiciones originales si cambia el tamaño de ventana */
-    let timer;
-    window.addEventListener('resize', () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => this._buildParticles(), 200);
+  _update() {
+    const {mx,my,R,STR,SP,DM} = this; const RR=R*R;
+    this.pts.forEach(p => {
+      const dx=p.x-mx, dy=p.y-my, d2=dx*dx+dy*dy;
+      if (d2<RR && d2>.01) {
+        const d=Math.sqrt(d2), f=((R-d)/R)*STR;
+        p.vx+=(dx/d)*f; p.vy+=(dy/d)*f;
+      }
+      p.vx+=(p.ox-p.x)*SP; p.vy+=(p.oy-p.y)*SP;
+      p.vx*=DM; p.vy*=DM;
+      p.x+=p.vx; p.y+=p.vy;
     });
   }
 
-  /* ── Física por frame ───────────────────────────────────── */
-  _update() {
-    const { x: mx, y: my } = this.mouse;
-    const RR = this.REPEL_R * this.REPEL_R;  /* comparar d² evita sqrt costoso */
-
-    for (let i = 0, n = this.particles.length; i < n; i++) {
-      const p  = this.particles[i];
-      const dx = p.x - mx;
-      const dy = p.y - my;
-      const d2 = dx * dx + dy * dy;
-
-      /* Repulsión: solo si el cursor está dentro del radio */
-      if (d2 < RR && d2 > .01) {
-        const d = Math.sqrt(d2);
-        const f = ((this.REPEL_R - d) / this.REPEL_R) * this.REPEL_STR;
-        p.vx += (dx / d) * f;
-        p.vy += (dy / d) * f;
-      }
-
-      /* Fuerza de retorno spring hacia posición original */
-      p.vx += (p.ox - p.x) * this.SPRING;
-      p.vy += (p.oy - p.y) * this.SPRING;
-
-      /* Amortiguación */
-      p.vx *= this.DAMP;
-      p.vy *= this.DAMP;
-
-      /* Integración */
-      p.x += p.vx;
-      p.y += p.vy;
-    }
-  }
-
-  /* ── Renderizado de un frame ────────────────────────────── */
   _draw() {
-    const ctx = this.ctx;
-    const W   = this.canvas.width;
-    const H   = this.canvas.height;
-    const cx  = W / 2;
+    const {ctx,pcs,pts} = this; const cx=250;
+    ctx.clearRect(0,0,500,650);
 
-    ctx.clearRect(0, 0, W, H);
-
-    /* ── Paso 1: relleno cristal + bordes de cada pieza ─────
-       Orden de dibujo: fill → glow outline → top neon border
-    ─────────────────────────────────────────────────────────── */
-    this.pieces.forEach(p => {
-      /* Vértices del trapezoide */
-      const x1 = cx - p.wT / 2, y1 = p.yT;  /* top-left  */
-      const x2 = cx + p.wT / 2, y2 = p.yT;  /* top-right */
-      const x3 = cx + p.wB / 2, y3 = p.yB;  /* bot-right */
-      const x4 = cx - p.wB / 2, y4 = p.yB;  /* bot-left  */
-
+    /* ── Relleno vidrio + bordes de cada pieza ── */
+    pcs.forEach(([yT,yB,wT,wB]) => {
+      const x1=cx-wT/2, x2=cx+wT/2, x3=cx+wB/2, x4=cx-wB/2;
       ctx.save();
-
-      /* Relleno vidrio: degradado blanco → lavanda translúcido */
-      const g = ctx.createLinearGradient(0, y1, 0, y3);
-      g.addColorStop(0, 'rgba(255,255,255,.58)');
-      g.addColorStop(1, 'rgba(237,233,254,.22)');
-      ctx.fillStyle  = g;
-      ctx.shadowOffsetY = 10;
-      ctx.shadowBlur    = 26;
-      ctx.shadowColor   = 'rgba(0,0,0,.07)';  /* sombra suave = "flota" */
-      ctx.beginPath();
-      ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
-      ctx.lineTo(x3,y3); ctx.lineTo(x4,y4);
-      ctx.closePath();
-      ctx.fill();
-
-      /* Halo violeta difuminado alrededor del contorno completo */
-      ctx.shadowOffsetY = 0;
-      ctx.shadowBlur    = 24;
-      ctx.shadowColor   = 'rgba(124,58,237,.28)';
-      ctx.strokeStyle   = 'rgba(124,58,237,.11)';
-      ctx.lineWidth     = 1;
-      ctx.beginPath();
-      ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
-      ctx.lineTo(x3,y3); ctx.lineTo(x4,y4);
-      ctx.closePath();
-      ctx.stroke();
-
-      /* Línea superior neón violeta brillante (marca cada pieza) */
-      ctx.shadowBlur  = 14;
-      ctx.shadowColor = '#7C3AED';
-      ctx.strokeStyle = '#7C3AED';
-      ctx.lineWidth   = 2.8;
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-
+      const g=ctx.createLinearGradient(0,yT,0,yB);
+      g.addColorStop(0,'rgba(255,255,255,.58)');
+      g.addColorStop(1,'rgba(237,233,254,.22)');
+      ctx.fillStyle=g; ctx.shadowOffsetY=10; ctx.shadowBlur=26; ctx.shadowColor='rgba(0,0,0,.07)';
+      ctx.beginPath(); ctx.moveTo(x1,yT); ctx.lineTo(x2,yT); ctx.lineTo(x3,yB); ctx.lineTo(x4,yB); ctx.closePath(); ctx.fill();
+      ctx.shadowOffsetY=0; ctx.shadowBlur=22; ctx.shadowColor='rgba(124,58,237,.28)';
+      ctx.strokeStyle='rgba(124,58,237,.11)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x1,yT); ctx.lineTo(x2,yT); ctx.lineTo(x3,yB); ctx.lineTo(x4,yB); ctx.closePath(); ctx.stroke();
+      ctx.shadowBlur=14; ctx.shadowColor='#7C3AED'; ctx.strokeStyle='#7C3AED'; ctx.lineWidth=2.8;
+      ctx.beginPath(); ctx.moveTo(x1,yT); ctx.lineTo(x2,yT); ctx.stroke();
       ctx.restore();
     });
 
-    /* ── Paso 2: dibujar todas las partículas (anillos morados) ─
-       strokeStyle fijo, solo cambia globalAlpha por partícula.
-       El glow viene del CSS filter: drop-shadow en el canvas.
-    ─────────────────────────────────────────────────────────── */
-    ctx.save();
-    ctx.strokeStyle = '#7C3AED';
-    ctx.lineWidth   = 1.1;
-
-    for (let i = 0, n = this.particles.length; i < n; i++) {
-      const p = this.particles[i];
-      ctx.globalAlpha = p.alpha;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
+    /* ── Partículas (anillos morados) ── */
+    ctx.save(); ctx.strokeStyle='#7C3AED'; ctx.lineWidth=1.1;
+    pts.forEach(p => { ctx.globalAlpha=p.alpha; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.stroke(); });
     ctx.restore();
   }
 
-  /* ── Loop principal ─────────────────────────────────────── */
   _loop() {
-    /* En reduced-motion: dibuja una vez estático y para */
     if (REDUCED) { this._draw(); return; }
-
-    this._update();
-    this._draw();
-    requestAnimationFrame(() => this._loop());
+    this._update(); this._draw();
+    requestAnimationFrame(()=>this._loop());
   }
 }
 
 /* ─────────────────────────────────────────────────────────────
-   CONTEO ANIMADO DE ESTADÍSTICAS
-   Anima de 0 hasta data-count con ease-out cúbico.
-   Ajustar `duration` (ms) para cambiar velocidad del contador.
+   2. FASES 3D CAROUSEL
+   Pausa automática con IntersectionObserver + visibilitychange.
+   Ajustar SPEED para cambiar velocidad de rotación.
 ───────────────────────────────────────────────────────────── */
-function animateCounter(el, duration = 1300) {
-  const target = parseInt(el.dataset.count, 10);
-  const suffix = el.dataset.suffix || '';
-  const t0     = performance.now();
+class FasesCarousel {
+  constructor(outer, ring) {
+    this.outer  = outer;
+    this.ring   = ring;
+    this.slots  = [...ring.querySelectorAll('.fases-slot')];
+    this.N      = this.slots.length;
+    this.offset = 0;
+    this.tgt    = {x:0,y:0}; this.smo = {x:0,y:0};
+    this.last   = 0; this.raf = 0; this.on = false;
+    /* ── Geometría — ajustar aquí ──
+       SPACE = separación horizontal entre tarjetas
+       DEPTH = cuánto retroceden las laterales
+       TILT  = rotación Y de las laterales (grados)
+       SPEED = tarjetas por segundo                */
+    this.SPACE=300; this.DEPTH=240; this.TILT=42; this.SPEED=0.4;
+    this.FPS=1000/30;
+    this._bind();
+  }
 
-  (function tick(now) {
-    const p    = Math.min((now - t0) / duration, 1);
-    const ease = 1 - Math.pow(1 - p, 3);           /* ease-out cúbico */
-    el.textContent = Math.round(ease * target) + suffix;
-    if (p < 1) requestAnimationFrame(tick);
-  })(t0);
+  _bind() {
+    const mv = e => {
+      const r=this.outer.getBoundingClientRect();
+      this.tgt.x=((e.clientX-r.left)/r.width-.5)*2;
+      this.tgt.y=((e.clientY-r.top)/r.height-.5)*2;
+    };
+    this.outer.addEventListener('mousemove', mv);
+    this.outer.addEventListener('mouseleave', ()=>{this.tgt.x=0;this.tgt.y=0;});
+    const io = new IntersectionObserver(([e])=>{
+      this.on=e.isIntersecting; this.on?this._start():this._stop();
+    },{threshold:.05});
+    io.observe(this.outer);
+    document.addEventListener('visibilitychange', ()=>{ document.hidden?this._stop():(this.on&&this._start()); });
+  }
+
+  _start() {
+    if (this.raf) return;
+    this.last=performance.now();
+    const loop=ts=>{
+      this.raf=requestAnimationFrame(loop);
+      const e=ts-this.last; if(e<this.FPS)return;
+      this.last=ts-(e%this.FPS);
+      if(!document.hidden) this.offset+=Math.min(e,100)/1000*this.SPEED;
+      this.smo.x+=(this.tgt.x-this.smo.x)*.12;
+      this.smo.y+=(this.tgt.y-this.smo.y)*.12;
+      this._render();
+    };
+    this.raf=requestAnimationFrame(loop);
+  }
+
+  _stop() { cancelAnimationFrame(this.raf); this.raf=0; }
+
+  _render() {
+    const {N,offset,smo,slots,SPACE,DEPTH,TILT}=this;
+    this.ring.style.transform=`rotateX(${-smo.y*8}deg) rotateY(${smo.x*14}deg)`;
+    slots.forEach((s,i)=>{
+      let p=(((i-offset)%N)+N)%N; if(p>N/2)p-=N;
+      const a=Math.abs(p);
+      s.style.transform=`translateX(${p*SPACE}px) translateZ(${-a*DEPTH}px) rotateY(${-p*TILT}deg) scale(${1-a*.05})`;
+      s.style.opacity=a>2.2?0:1-Math.min(a/2.4,1)*.9;
+      s.style.zIndex=200-Math.round(a*20);
+    });
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
-   SCROLL REVEAL — IntersectionObserver
-   Cada elemento .reveal entra en viewport → añade .visible.
-   data-delay (segundos) crea el stagger entre elementos.
+   3. SCROLL REVEAL + COUNTER
 ───────────────────────────────────────────────────────────── */
+function animateCounter(el, dur=1300) {
+  const n=parseInt(el.dataset.count), suf=el.dataset.suffix||'', t0=performance.now();
+  (function tick(now){ const p=Math.min((now-t0)/dur,1), e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(e*n)+suf; if(p<1)requestAnimationFrame(tick); })(t0);
+}
+
 function initReveal() {
-  /* En reduced-motion: mostrar todo ya revelado con valores finales */
   if (REDUCED) {
-    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
-    document.querySelectorAll('.stat-num[data-count]').forEach(el => {
-      el.textContent = el.dataset.count + (el.dataset.suffix || '');
-    });
+    document.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+    document.querySelectorAll('.stat-num[data-count]').forEach(el=>{ el.textContent=el.dataset.count+(el.dataset.suffix||''); });
     document.getElementById('aboutImg')?.classList.add('float-anim');
+    document.getElementById('resultadoList')?.classList.add('active');
     return;
   }
-
-  const seen = new Set();
-
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting || seen.has(entry.target)) return;
-      seen.add(entry.target);
-
-      const el  = entry.target;
-      const del = parseFloat(el.dataset.delay || 0) * 1000;
-
-      setTimeout(() => {
+  const seen=new Set();
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting||seen.has(e.target))return;
+      seen.add(e.target);
+      const el=e.target, del=parseFloat(el.dataset.delay||0)*1000;
+      setTimeout(()=>{
         el.classList.add('visible');
-
-        /* Contador en tarjetas de estadísticas */
         el.querySelectorAll('.stat-num[data-count]').forEach(animateCounter);
-
-        /* Foto: después de que termine la transición de reveal, agregar float */
-        if (el.id === 'aboutPhotoFrame') {
-          setTimeout(() => {
-            document.getElementById('aboutImg')?.classList.add('float-anim');
-          }, 780);
-        }
-      }, del);
+        if(el.id==='aboutFrame') setTimeout(()=>document.getElementById('aboutImg')?.classList.add('float-anim'),780);
+      },del);
     });
-  }, { threshold: 0.15 });
+  },{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  /* Resultado list: watch section, trigger when in view */
+  const rList=document.getElementById('resultadoList');
+  if(rList) {
+    const rio=new IntersectionObserver(([e])=>{
+      if(e.isIntersecting){ rList.classList.add('active'); rio.disconnect(); }
+    },{threshold:.2});
+    rio.observe(rList);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
-   BOOT
+   4. MOBILE FASES — clone cards into horizontal scroller
+───────────────────────────────────────────────────────────── */
+function initMobileFases() {
+  if (!isMob()) return;
+  const mobile = document.getElementById('fasesMobile');
+  const slots  = document.querySelectorAll('#fasesRing .fases-slot');
+  slots.forEach(s => mobile.appendChild(s.cloneNode(true)));
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. BOOT
 ───────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  /* Inicializar sistema de partículas */
+  /* Particle funnel */
   new ParticleFunnel(document.getElementById('funnelCanvas'));
 
-  /* Inicializar animaciones de scroll */
+  /* Fases 3D carousel (desktop only) */
+  const outer = document.getElementById('fasesOuter');
+  const ring  = document.getElementById('fasesRing');
+  if (outer && ring && !REDUCED) new FasesCarousel(outer, ring);
+
+  /* Mobile fases */
+  initMobileFases();
+
+  /* Scroll reveals */
   initReveal();
 });
 </script>

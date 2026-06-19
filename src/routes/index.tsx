@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
 import { SequenceIntro } from "@/components/landing/SequenceIntro";
 import { AboutMe } from "@/components/landing/AboutMe";
+import { Phases } from "@/components/landing/Phases";
 import {
   Sistema, Entregables, Resultado, Garantia,
   Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
@@ -33,6 +34,7 @@ function Landing() {
       )}
       <Hero />
       <AboutMe />
+      <Phases />
       <Sistema />
       <Entregables />
       <Resultado />

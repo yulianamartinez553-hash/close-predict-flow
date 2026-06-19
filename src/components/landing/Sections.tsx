@@ -331,69 +331,164 @@ function NarrativeBlock({ title, body, index }: { title: string; body: string; i
   );
 }
 
-/* ========================= 4. SISTEMA CLOSE-PREDICT ========================= */
-const CARD_IMAGES = [
-  "/images/fase-1.png",
-  "/images/fase-2.png",
-  "/images/fase-3.png",
-  "/images/fase-4.png",
-  "/images/fase-5.png",
+/* ========================= 4. ENTREGABLES CAROUSEL ========================= */
+interface Deliverable { num: string; title: string; premium?: boolean }
+const ENTREGABLES_DATA: Deliverable[] = [
+  { num: "01", title: "Calculadora comercial" },
+  { num: "02", title: "Mapa de fuga personalizado" },
+  { num: "03", title: "Arquitectura comercial" },
+  { num: "04", title: "Playbook de ventas completo" },
+  { num: "05", title: "Guión de calificación BANT" },
+  { num: "06", title: "Guión de cierres en 5 pasos" },
+  { num: "07", title: "Secuencia de seguimiento" },
+  { num: "08", title: "Dashboards de KPIs" },
+  { num: "09", title: "SOPs y Manual de ventas" },
+  { num: "10", title: "Roadmap de 90 días" },
+  { num: "11", title: "Roleplay en vivo",            premium: true },
+  { num: "12", title: "Auditoría de 2 llamadas",     premium: true },
+  { num: "13", title: "Sesión de Pauta Digital",     premium: true },
+  { num: "14", title: "Agente de Objeciones IA",     premium: true },
 ];
 
-/* --- 3D infinite premium carousel of the phase cards --- */
-const CARD_W = 280;
-const CARD_H = 420;
-const THICK = 30; // real volumetric thickness (px)
-const LAYERS = 12; // stacked layers that fake the extruded body
-const SPACING = 300; // horizontal gap between consecutive cards
-const DEPTH = 240; // how far side cards recede
-const TILT = 42; // rotateY of side cards (deg)
-const SPEED = 0.42; // cards per second — a bit faster
+/* Carousel geometry — igual al original */
+const CARD_W   = 260;
+const CARD_H   = 380;
+const SPACING  = 300;
+const DEPTH    = 240;
+const TILT     = 42;
+const SPEED    = 0.42;
+const FPS_CAR  = 30;          /* frame-limit del carrusel */
 
-function PhaseCarousel3D() {
-  const N = CARD_IMAGES.length;
-  const stageRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef(0);
+/* Tarjeta de entregable — sin imágenes, solo número + título + línea de color */
+function EntregableCard({ card }: { card: Deliverable }) {
+  const bg = card.premium
+    ? "linear-gradient(145deg, #2B1142 0%, #1E0A33 100%)"
+    : "linear-gradient(145deg, #8B3FD6 0%, #9D4EDD 100%)";
+  const line = card.premium
+    ? "linear-gradient(90deg, #F4C430, #E8C547, #F4C430)"
+    : "linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.18), rgba(255,255,255,0.55))";
+  const lineShadow = card.premium
+    ? "0 0 14px rgba(244,196,48,0.55)"
+    : "0 0 8px rgba(255,255,255,0.28)";
+
+  return (
+    <div
+      style={{
+        position: "absolute", inset: 0,
+        borderRadius: 20, overflow: "hidden",
+        background: bg,
+        border: card.premium ? "1px solid rgba(244,196,48,0.3)" : "1px solid rgba(255,255,255,0.14)",
+        boxShadow: card.premium
+          ? "0 20px 60px -16px rgba(43,17,66,0.65)"
+          : "0 20px 60px -16px rgba(139,63,214,0.45)",
+        display: "flex", flexDirection: "column",
+        padding: "28px 24px",
+      }}
+    >
+      {/* Línea de color con brillo (gloss) */}
+      <div style={{
+        height: 3, borderRadius: 2, marginBottom: 28,
+        background: line, boxShadow: lineShadow,
+      }} />
+
+      {/* Número pequeño */}
+      <span style={{
+        fontFamily: "'Montserrat', system-ui, sans-serif",
+        fontWeight: 700, fontSize: 12,
+        color: "rgba(255,255,255,0.45)", letterSpacing: "0.12em",
+        marginBottom: 16,
+      }}>
+        {card.num}
+      </span>
+
+      {/* Título grande */}
+      <p style={{
+        fontFamily: "'Cormorant Garamond', Georgia, serif",
+        fontWeight: 700, fontSize: "clamp(1.25rem, 2.2vw, 1.75rem)",
+        color: "#fff", lineHeight: 1.2, flex: 1,
+      }}>
+        {card.title}
+      </p>
+
+      {/* Badge PREMIUM */}
+      {card.premium && (
+        <span style={{
+          fontFamily: "'Montserrat', system-ui, sans-serif",
+          fontWeight: 700, fontSize: 10,
+          textTransform: "uppercase", letterSpacing: "0.18em",
+          color: "#F4C430", border: "1px solid rgba(244,196,48,0.6)",
+          borderRadius: 4, padding: "3px 9px",
+          alignSelf: "flex-start", marginTop: 16,
+        }}>
+          PREMIUM
+        </span>
+      )}
+
+      {/* Gloss diagonal */}
+      <div style={{
+        position: "absolute", inset: 0, borderRadius: 20, pointerEvents: "none",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 55%)",
+      }} />
+    </div>
+  );
+}
+
+function EntregablesCarousel3D() {
+  const N = ENTREGABLES_DATA.length;
+  const stageRef    = useRef<HTMLDivElement>(null);
+  const offsetRef   = useRef(0);
   const targetMouse = useRef({ x: 0, y: 0 });
   const smoothMouse = useRef({ x: 0, y: 0 });
-  const lastRef = useRef(performance.now());
-  const [offset, setOffset] = useState(0);
+  const lastFrameRef = useRef(0);
+  const visibleRef  = useRef(true);
+  const [offset, setOffset]     = useState(0);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     let raf = 0;
+    const INTERVAL = 1000 / FPS_CAR;
+
+    /* Loop con 30 fps + pausa por IntersectionObserver + visibilitychange */
     const loop = (now: number) => {
-      const dt = Math.min((now - lastRef.current) / 1000, 0.05);
-      lastRef.current = now;
+      raf = requestAnimationFrame(loop);
+      if (!visibleRef.current || document.hidden) return;
+      const delta = now - lastFrameRef.current;
+      if (delta < INTERVAL) return;
+      lastFrameRef.current = now - (delta % INTERVAL);
+
+      const dt = Math.min(delta / 1000, 0.05);
       offsetRef.current += dt * SPEED;
-      // inertia / smoothing toward the cursor target
       smoothMouse.current.x += (targetMouse.current.x - smoothMouse.current.x) * 0.07;
       smoothMouse.current.y += (targetMouse.current.y - smoothMouse.current.y) * 0.07;
       setOffset(offsetRef.current);
       setParallax({ x: smoothMouse.current.x, y: smoothMouse.current.y });
-      raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+
+    /* Pausar cuando el carrusel no está en viewport */
+    const io = new IntersectionObserver(
+      ([e]) => { visibleRef.current = e.isIntersecting; },
+      { threshold: 0 }
+    );
+    if (stageRef.current) io.observe(stageRef.current);
+
+    return () => { cancelAnimationFrame(raf); io.disconnect(); };
   }, []);
 
   const handleMove = (e: React.MouseEvent) => {
     const r = stageRef.current?.getBoundingClientRect();
     if (!r) return;
-    targetMouse.current.x = ((e.clientX - r.left) / r.width - 0.5) * 2; // -1..1
-    targetMouse.current.y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    targetMouse.current.x = ((e.clientX - r.left) / r.width  - 0.5) * 2;
+    targetMouse.current.y = ((e.clientY - r.top)  / r.height - 0.5) * 2;
   };
-  const handleLeave = () => {
-    targetMouse.current.x = 0;
-    targetMouse.current.y = 0;
-  };
+  const handleLeave = () => { targetMouse.current.x = 0; targetMouse.current.y = 0; };
 
   return (
     <div
       ref={stageRef}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className="relative mx-auto flex h-[560px] w-full max-w-5xl items-center justify-center"
+      className="relative mx-auto flex h-[520px] w-full max-w-5xl items-center justify-center"
       style={{ perspective: "1350px" }}
     >
       <div
@@ -404,91 +499,31 @@ function PhaseCarousel3D() {
           transition: "transform 0.05s linear",
         }}
       >
-        {CARD_IMAGES.map((src, i) => {
-          // circular position in range (-N/2 .. N/2) so the carousel is infinite
+        {ENTREGABLES_DATA.map((card, i) => {
+          /* Posición circular — mismas fórmulas del carrusel original */
           let p = (((i - offset) % N) + N) % N;
           if (p > N / 2) p -= N;
-          const abs = Math.abs(p);
-          const tx = p * SPACING;
-          const tz = -abs * DEPTH;
-          const ry = -p * TILT;
-          const scale = 1 - abs * 0.05;
-          // progressive appear / disappear at the edges (offscreen wrap is invisible)
+          const abs     = Math.abs(p);
+          const tx      = p * SPACING;
+          const tz      = -abs * DEPTH;
+          const ry      = -p * TILT;
+          const scale   = 1 - abs * 0.05;
           const opacity = abs > 2.2 ? 0 : 1 - Math.min(abs / 2.4, 1) * 0.9;
-          const z = 200 - Math.round(abs * 20);
+          const z       = 200 - Math.round(abs * 20);
 
           return (
             <div
               key={i}
               className="absolute left-1/2 top-1/2"
               style={{
-                width: CARD_W,
-                height: CARD_H,
-                marginLeft: -CARD_W / 2,
-                marginTop: -CARD_H / 2,
-                transformStyle: "preserve-3d",
+                width: CARD_W, height: CARD_H,
+                marginLeft: -CARD_W / 2, marginTop: -CARD_H / 2,
                 transform: `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`,
-                opacity,
-                zIndex: z,
+                opacity, zIndex: z,
                 transition: "opacity 0.3s ease",
               }}
             >
-              {/* soft glow behind the image */}
-              <div
-                className="absolute inset-0 rounded-[16px]"
-                style={{
-                  transform: "translateZ(-4px)",
-                  boxShadow: "0 30px 80px -20px rgba(124,58,237,0.55)",
-                  background: "rgba(124,58,237,0.35)",
-                  filter: "blur(26px)",
-                }}
-              />
-
-              {/* stacked layers — real volumetric thickness (the extruded body) */}
-              {Array.from({ length: LAYERS }).map((_, k) => (
-                <img
-                  key={k}
-                  src={src}
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 h-full w-full rounded-[16px] object-cover"
-                  style={{
-                    transform: `translateZ(${THICK - (k + 1) * (THICK / LAYERS)}px)`,
-                    filter: "blur(2px) brightness(.45)",
-                  }}
-                />
-              ))}
-
-              {/* back face — same image, blurred + darkened with overlay */}
-              <div
-                className="absolute inset-0 rounded-[16px] overflow-hidden"
-                style={{ transform: "translateZ(0px)" }}
-              >
-                <img
-                  src={src}
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 h-full w-full object-cover rounded-[16px]"
-                  style={{ filter: "blur(18px) brightness(.5)", transform: "scale(1.15)" }}
-                />
-                <div className="absolute inset-0 rounded-[16px]" style={{ background: "rgba(0,0,0,.35)" }} />
-              </div>
-
-              {/* front face — the phase image covering the whole card */}
-              <div
-                className="absolute inset-0 rounded-[16px] overflow-hidden"
-                style={{
-                  transform: `translateZ(${THICK}px)`,
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  boxShadow: "0 20px 60px -20px rgba(0,0,0,0.5)",
-                }}
-              >
-                <img
-                  src={src}
-                  className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
-                  alt=""
-                />
-              </div>
+              <EntregableCard card={card} />
             </div>
           );
         })}
@@ -499,23 +534,30 @@ function PhaseCarousel3D() {
 
 export function Sistema() {
   return (
-    <section id="sistema" className="relative overflow-hidden bg-cloud py-28">
-      <div className="grid-noise absolute inset-0 opacity-50" />
+    <section id="sistema" className="relative overflow-hidden py-28" style={{ background: "#F5F3F7" }}>
       <div className="relative mx-auto max-w-7xl px-6">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-violet">CLOSE-PREDICT™ · 5 fases · 12 semanas</div>
-          <h2 className="serif text-4xl text-ink text-balance sm:text-5xl lg:text-6xl">
-            Un sistema comercial delegable y <em className="text-violet">predecible</em>, en 12 semanas.
+        {/* Nuevo encabezado — eyebrow + h2 + subtítulo */}
+        <div className="mx-auto mb-16 max-w-3xl text-center">
+          <div
+            className="display mb-4 text-xs uppercase tracking-[0.3em]"
+            style={{ color: "#8B3FD6" }}
+          >
+            CLOSE-PREDICT™
+          </div>
+          <h2
+            className="serif text-4xl text-balance sm:text-5xl lg:text-6xl"
+            style={{ color: "#2B1142" }}
+          >
+            Entregables
           </h2>
           <p className="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Cada fase tiene criterios claros, guiones documentados y métricas de control — para que tu equipo ejecute sin depender de ti.
+            Cada fase tiene criterios claros, guiones documentados y métricas de control
+            para que tu equipo ejecute sin depender de ti.
           </p>
         </div>
 
-        {/* 3D infinite carousel of the phase cards */}
-        <div className="relative mt-12">
-          <PhaseCarousel3D />
-        </div>
+        {/* Carrusel 3D de entregables */}
+        <EntregablesCarousel3D />
       </div>
     </section>
   );

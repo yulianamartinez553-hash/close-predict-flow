@@ -4,8 +4,9 @@ import { Hero } from "@/components/landing/Hero";
 import { SequenceIntro } from "@/components/landing/SequenceIntro";
 import { AboutMe } from "@/components/landing/AboutMe";
 import { Phases } from "@/components/landing/Phases";
+import { InterludeParticles } from "@/components/landing/InterludeParticles";
 import {
-  Sistema, Entregables, Resultado, Garantia,
+  Sistema, Resultado, Garantia,
   Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
 } from "@/components/landing/Sections";
 import { CursorFollower } from "@/components/animations/CursorFollower";
@@ -34,9 +35,9 @@ function Landing() {
       )}
       <Hero />
       <AboutMe />
+      <InterludeParticles />
       <Phases />
       <Sistema />
-      <Entregables />
       <Resultado />
       <Garantia />
       <Testimonios />

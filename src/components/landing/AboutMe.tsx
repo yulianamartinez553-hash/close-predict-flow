@@ -1,112 +1,253 @@
-import { motion } from "framer-motion";
-import caroPortrait from "@/assets/caro-portrait.png";
+import { useState, useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import { MetricCounter } from "@/components/animations/MetricCounter";
 import { TickerHorizontal } from "@/components/animations/TickerHorizontal";
-import { ShiningButton } from "@/components/animations/ShiningButton";
+
+/* ── DATOS ──────────────────────────────────────────────────── */
+const STATS = [
+  { value: 10, label: "Años como dueña de negocio", suffix: "+" },
+  { value: 20, label: "Proyectos como closer",       suffix: "+" },
+  { value: 5,  label: "Empresas asesoradas",         suffix: "+" },
+];
+
+const BADGES = [
+  "Profesional en Comercio Internacional",
+  "Certificada como Closer Digital",
+  "Customer Service",
+  "Neuroventas",
+];
 
 const CREDENTIALS = [
   "Profesional en Comercio Internacional",
   "Closer Digital Certificada",
   "Customer Service",
   "Neuroventas",
-  "Certificación Premium",
   "Estratega Comercial",
   "Mentora High-Ticket",
-  "Infoproductora LATAM",
 ];
 
-const STATS = [
-  { value: 100, label: "Clientes acompañados", suffix: "+" },
-  { value: 12,  label: "Semanas del programa",  suffix: "" },
-  { value: 3,   label: "Años de experiencia",   suffix: "+" },
-];
+/* ── VARIANTES FRAMER MOTION ───────────────────────────────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0,  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+};
 
+/* Stagger para badges — ajustar staggerChildren para cambiar velocidad */
+const badgeContainer = {
+  hidden: {},
+  show:   { transition: { staggerChildren: 0.11, delayChildren: 0 } },
+};
+const badgeItem = {
+  hidden: { opacity: 0, y: 12, scale: 0.97 },
+  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/* ── COMPONENTE ─────────────────────────────────────────────── */
 export function AboutMe() {
+  /* Ref para saber cuándo entra la foto en viewport */
+  const photoRef = useRef<HTMLDivElement>(null);
+  const photoInView = useInView(photoRef, { once: true, amount: 0.2 });
+
+  /* El float empieza cuando termina la animación de revelado */
+  const [floating, setFloating] = useState(false);
+
   return (
-    <section id="sobre-mi" className="relative overflow-hidden bg-white py-28">
-      {/* soft ambient glows */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 top-1/3 h-[500px] w-[500px] rounded-full bg-violet/5 blur-3xl" />
-        <div className="absolute -right-40 bottom-1/3 h-[400px] w-[400px] rounded-full bg-gold/5 blur-3xl" />
-      </div>
+    <>
+      {/* Keyframe del float — inyectado una vez */}
+      <style>{`
+        @keyframes photoFloat {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-12px); }
+        }
+        /* Amplitud 12 px, período 5.5 s — ajustable aquí */
+        .about-float { animation: photoFloat 5.5s ease-in-out infinite; }
+      `}</style>
 
-      <div className="relative mx-auto max-w-7xl px-6">
-        <div className="grid items-center gap-16 lg:grid-cols-[1fr_1.15fr]">
-
-          {/* Portrait */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="relative mx-auto w-full max-w-sm"
-          >
-            {/* glow halo */}
-            <div className="absolute inset-0 rounded-[40px] bg-gradient-to-br from-violet/20 to-gold/10 blur-2xl" />
-            <div
-              className="relative overflow-hidden rounded-[40px] border border-violet/15"
-              style={{ boxShadow: "0 40px 100px -30px rgba(43,17,66,0.35)" }}
-            >
-              <img
-                src={caroPortrait}
-                alt="Caro Chaparro, mentora y estratega de ventas"
-                className="w-full object-cover"
-              />
-              {/* bottom fade */}
-              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white/20 to-transparent" />
-            </div>
-
-            {/* floating tag */}
-            <div className="absolute -bottom-4 -right-4 rounded-2xl border border-violet/15 bg-white/90 px-4 py-2 shadow-lg backdrop-blur-xl">
-              <div className="display text-[10px] uppercase tracking-[0.25em] text-violet">Caro Chaparro</div>
-              <div className="text-xs text-muted-foreground">Mentora · Estratega Comercial</div>
-            </div>
-          </motion.div>
-
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-violet">
-              Sobre mí
-            </div>
-
-            <h2 className="serif text-4xl text-ink text-balance sm:text-5xl">
-              Del caos comercial al{" "}
-              <em className="text-violet">sistema predecible</em>.
-            </h2>
-
-            <p className="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Soy Caro Chaparro — estratega comercial y mentora high-ticket. Ayudo a infoproductores y dueños de negocios LATAM a convertir ventas impredecibles en un sistema escalable. En 12 semanas transformamos el caos en un proceso que funciona sin vos.
-            </p>
-
-            {/* Stats row */}
-            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-violet/10 pt-8">
-              {STATS.map((s) => (
-                <MetricCounter key={s.label} {...s} />
-              ))}
-            </div>
-
-            {/* Credentials ticker */}
-            <div className="mt-8 rounded-2xl border border-violet/10 bg-cloud/60">
-              <TickerHorizontal items={CREDENTIALS} />
-            </div>
-
-            {/* CTA */}
-            <div className="mt-10">
-              <ShiningButton
-                href="/diagnostico.html"
-                text="Agendar diagnóstico estratégico"
-                size="lg"
-              />
-            </div>
-          </motion.div>
-
+      <section id="sobre-mi" className="relative overflow-hidden bg-white py-28">
+        {/* Halos de ambiente */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div className="absolute -left-32 top-1/4 h-[460px] w-[460px] rounded-full"
+            style={{ background: "rgba(139,63,214,.06)", filter: "blur(80px)" }} />
+          <div className="absolute -right-24 bottom-1/4 h-[360px] w-[360px] rounded-full"
+            style={{ background: "rgba(157,78,221,.05)", filter: "blur(80px)" }} />
         </div>
-      </div>
-    </section>
+
+        <div className="relative mx-auto max-w-[1160px] px-6 lg:px-[64px]">
+          <div className="grid items-center gap-20 lg:grid-cols-[1fr_1.15fr]">
+
+            {/* ── COLUMNA FOTO ── */}
+            <div className="mx-auto w-full max-w-[420px]" ref={photoRef}>
+
+              {/* Revelado: clip-path de abajo hacia arriba + escala 0.96 → 1
+                  Ajustar duration y ease de la transición aquí               */}
+              <motion.div
+                className="relative"
+                initial={{ clipPath: "inset(0 0 100% 0)", opacity: 0, scale: 0.96 }}
+                animate={photoInView
+                  ? { clipPath: "inset(0 0 0% 0)", opacity: 1, scale: 1 }
+                  : {}}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                onAnimationComplete={() => setFloating(true)}
+              >
+                {/* Halo debajo de la foto */}
+                <div
+                  className="pointer-events-none absolute"
+                  style={{
+                    inset: "-20px -14px",
+                    background: "radial-gradient(ellipse 68% 55% at 50% 90%, rgba(139,63,214,.20) 0%, transparent 70%)",
+                  }}
+                  aria-hidden
+                />
+
+                {/* Foto principal — usa /images/caro-01.webp del directorio public */}
+                <img
+                  src="/images/caro-01.webp"
+                  alt="Caro Chaparro — mentora y estratega comercial"
+                  width={420}
+                  height={560}
+                  className={`relative z-10 block w-full h-auto rounded-sm${floating ? " about-float" : ""}`}
+                  style={{
+                    filter:
+                      "drop-shadow(0 28px 56px rgba(139,63,214,.14)) drop-shadow(0 4px 12px rgba(0,0,0,.07))",
+                  }}
+                  loading="lazy"
+                />
+              </motion.div>
+            </div>
+
+            {/* ── COLUMNA COPY ── */}
+            <div className="flex flex-col gap-7">
+
+              {/* Eyebrow */}
+              <motion.p
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+                style={{
+                  fontSize: "10.5px", fontWeight: 700, letterSpacing: ".28em",
+                  textTransform: "uppercase", color: "#8B3FD6",
+                }}
+              >
+                SOBRE MÍ
+              </motion.p>
+
+              {/* Título — 2 líneas con tratamiento tipográfico distinto */}
+              <motion.h2
+                style={{ fontFamily: "var(--font-serif)", lineHeight: 1.1 }}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ staggerChildren: 0.15 }}
+              >
+                {/* Línea 1: serif bold oscuro */}
+                <motion.span
+                  variants={fadeUp}
+                  className="block"
+                  style={{
+                    fontSize: "clamp(28px,3.2vw,44px)",
+                    fontWeight: 700,
+                    color: "#1E0A33",
+                  }}
+                >
+                  No te habla la teoría.
+                </motion.span>
+                {/* Línea 2: cursiva elegante violeta */}
+                <motion.span
+                  variants={fadeUp}
+                  className="block"
+                  style={{
+                    fontSize: "clamp(28px,3.2vw,44px)",
+                    fontStyle: "italic",
+                    fontWeight: 600,
+                    color: "#8B3FD6",
+                    letterSpacing: ".01em",
+                  }}
+                >
+                  Te habla la experiencia.
+                </motion.span>
+              </motion.h2>
+
+              {/* Párrafo — copy exacto, no modificar */}
+              <motion.p
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: 0.15 }}
+                style={{
+                  fontSize: "15.5px", lineHeight: 1.92,
+                  color: "#4B5563", maxWidth: "520px",
+                }}
+              >
+                Durante más de 10 años fui dueña de negocio. Sentí en carne propia el dolor de sacar
+                plata de donde no había, de contratar un closer que aprendía y se iba, de tener todo
+                en la cabeza y nada documentado. Por eso construí{" "}
+                <strong style={{ color: "#1E0A33", fontWeight: 700 }}>CLOSE-PREDICT™</strong>:{" "}
+                el sistema que ordena lo que a la mayoría de los dueños los tiene apagando incendios.
+              </motion.p>
+
+              {/* Estadísticas — MetricCounter anima de 0 al valor al entrar en viewport */}
+              <motion.div
+                className="grid grid-cols-3 gap-[14px]"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ staggerChildren: 0.18 }}
+              >
+                {STATS.map(s => (
+                  <motion.div
+                    key={s.label}
+                    variants={fadeUp}
+                    className="rounded-[18px] border py-[22px] px-3 text-center"
+                    style={{
+                      borderColor: "rgba(139,63,214,.13)",
+                      background: "#fff",
+                      boxShadow: "0 4px 24px rgba(139,63,214,.07)",
+                    }}
+                  >
+                    <MetricCounter value={s.value} label={s.label} suffix={s.suffix} />
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Badges en cascada (stagger via variantes) */}
+              <motion.div
+                className="flex flex-wrap gap-[10px]"
+                variants={badgeContainer}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+              >
+                {BADGES.map(b => (
+                  <motion.span
+                    key={b}
+                    variants={badgeItem}
+                    className="rounded-full text-xs font-semibold"
+                    style={{
+                      padding: "8px 18px",
+                      border: "1px solid rgba(139,63,214,.28)",
+                      background: "rgba(139,63,214,.05)",
+                      color: "#9D4EDD",
+                    }}
+                  >
+                    {b}
+                  </motion.span>
+                ))}
+              </motion.div>
+
+              {/* Ticker horizontal de credenciales — loop infinito */}
+              <div
+                className="rounded-[14px] border"
+                style={{ borderColor: "rgba(139,63,214,.12)", background: "rgba(249,248,255,.7)" }}
+              >
+                <TickerHorizontal items={CREDENTIALS} speed={30} />
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

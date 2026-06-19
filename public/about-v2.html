@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caro Chaparro · Sobre mí</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ──────────────────────────────────────────────── */
+:root {
+  --v:     #8B3FD6;
+  --v2:    #9D4EDD;
+  --ink:   #1E0A33;
+  --ink2:  #2B1142;
+  --muted: #64748B;
+  --bgs:   #F9F8FF;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans:  'Montserrat', system-ui, sans-serif;
+  --ease:  cubic-bezier(.22,1,.36,1);
+  --dur-photo: 900ms;     /* velocidad entrada foto   — ajustar aquí */
+  --dur-text:  700ms;     /* velocidad bloques de texto               */
+  --dur-count: 1800ms;    /* duración conteo de estadísticas          */
+  --dur-badge: 400ms;     /* duración cada badge                      */
+  --stg-badge: 110ms;     /* desfasaje entre badges (stagger)         */
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:#fff;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── SECCIÓN ─────────────────────────────────────────────── */
+#about{
+  background:#fff;
+  padding:120px 64px;
+  overflow:hidden;
+  position:relative;
+}
+/* Halos de ambiente */
+#about::before,#about::after{
+  content:'';pointer-events:none;
+  position:absolute;border-radius:50%;filter:blur(80px);
+}
+#about::before{
+  width:460px;height:460px;top:10%;left:-120px;
+  background:rgba(139,63,214,.06);
+}
+#about::after{
+  width:360px;height:360px;bottom:10%;right:-100px;
+  background:rgba(157,78,221,.05);
+}
+
+.about-inner{
+  max-width:1160px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1.15fr;
+  gap:80px;align-items:center;
+  position:relative;z-index:1;
+}
+
+/* ── FOTO ────────────────────────────────────────────────── */
+.photo-col{position:relative;width:min(420px,100%)}
+
+/* ── Animación de entrada de la foto ──
+   Clase .visible dispara: clip-path de abajo-arriba + escala 0.96→1
+   Ajustar --dur-photo y el translateY para más/menos dramatismo    */
+.photo-frame{
+  position:relative;
+  clip-path:inset(0 0 100% 0);          /* oculto: recorta desde abajo */
+  transform:scale(.96) translateY(24px);
+  opacity:0;
+  transition:
+    clip-path var(--dur-photo) var(--ease),
+    transform  var(--dur-photo) var(--ease),
+    opacity    calc(var(--dur-photo)*.7) ease;
+}
+.photo-frame.visible{
+  clip-path:inset(0 0 0% 0);
+  transform:scale(1) translateY(0);
+  opacity:1;
+}
+
+.photo-aura{
+  position:absolute;inset:-20px -14px;
+  background:radial-gradient(ellipse 68% 55% at 50% 90%,rgba(139,63,214,.2) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.about-img{
+  position:relative;z-index:1;
+  width:100%;height:auto;display:block;
+  border-radius:4px;
+  filter:
+    drop-shadow(0 28px 56px rgba(139,63,214,.14))
+    drop-shadow(0 4px 12px rgba(0,0,0,.07));
+}
+
+/* Float continuo de la foto (inicia después de la revelación) */
+@keyframes photoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.about-img.float-anim{animation:photoFloat 5.5s ease-in-out infinite}
+
+/* ── COPY ────────────────────────────────────────────────── */
+.about-copy{display:flex;flex-direction:column;gap:28px}
+
+/* Helper para fade + slide en bloques de texto */
+.reveal{
+  opacity:0;
+  transform:translateY(18px);
+  transition:opacity var(--dur-text) ease,transform var(--dur-text) var(--ease);
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Eyebrow */
+.about-eyebrow{
+  font-size:10.5px;font-weight:700;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--v);
+}
+
+/* Título (2 líneas con tratamientos distintos) */
+.about-title{font-family:var(--serif);line-height:1.1}
+.title-serif{
+  display:block;
+  font-size:clamp(28px,3.2vw,44px);font-weight:700;color:var(--ink);
+}
+.title-italic{
+  display:block;
+  font-size:clamp(28px,3.2vw,44px);font-style:italic;font-weight:600;
+  color:var(--v);letter-spacing:.01em;
+}
+
+/* Párrafo de cuerpo */
+.about-body{
+  font-size:15.5px;line-height:1.92;color:#4B5563;max-width:520px;
+}
+.about-body strong{color:var(--ink);font-weight:700}
+
+/* ── ESTADÍSTICAS ────────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+/* ── Cada tarjeta de estadística entra con stagger ──
+   Los .stat-card con clase .visible hacen fade-in + slide
+   Velocidad: --dur-text. Stagger definido inline con transition-delay  */
+.stat-card{
+  background:#fff;
+  border:1px solid rgba(139,63,214,.13);
+  border-radius:18px;padding:22px 12px;text-align:center;
+  box-shadow:0 4px 24px rgba(139,63,214,.07);
+  opacity:0;transform:translateY(20px);
+  transition:opacity var(--dur-text) ease,transform var(--dur-text) var(--ease);
+}
+.stat-card.visible{opacity:1;transform:translateY(0)}
+
+.stat-num{
+  font-family:var(--serif);
+  font-size:clamp(32px,4vw,42px);font-weight:700;
+  color:var(--v);line-height:1;letter-spacing:-.02em;
+}
+.stat-lbl{
+  font-size:11px;font-weight:500;color:var(--muted);
+  margin-top:8px;line-height:1.45;
+}
+
+/* ── BADGES ──────────────────────────────────────────────── */
+.badges{display:flex;flex-wrap:wrap;gap:10px}
+
+/* ── Cada badge entra en cascada (stagger via transition-delay) ──
+   Velocidad individual: --dur-badge. Desfasaje: --stg-badge         */
+.badge{
+  padding:8px 18px;border-radius:100px;
+  border:1px solid rgba(139,63,214,.28);
+  background:rgba(139,63,214,.05);
+  font-size:12px;font-weight:600;color:var(--v2);
+  opacity:0;transform:translateY(12px) scale(.97);
+  transition:
+    opacity    var(--dur-badge) ease,
+    transform  var(--dur-badge) var(--ease);
+}
+.badge.visible{opacity:1;transform:translateY(0) scale(1)}
+
+/* ── TICKER (credenciales) ───────────────────────────────── */
+.ticker-wrap{
+  overflow:hidden;
+  mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+  border:1px solid rgba(139,63,214,.12);
+  border-radius:14px;
+  background:rgba(249,248,255,.7);
+  padding:0;
+}
+@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker-track{
+  display:flex;white-space:nowrap;
+  /* velocidad: ajustar duration para más/menos rápido */
+  animation:tickerScroll 28s linear infinite;
+  padding:12px 0;
+}
+.ticker-item{
+  display:inline-flex;align-items:center;gap:20px;
+  padding:0 20px;
+  font-size:11px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);flex-shrink:0;
+}
+.ticker-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--v);flex-shrink:0;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:860px){
+  #about{padding:80px 24px}
+  .about-inner{
+    grid-template-columns:1fr;gap:48px;
+  }
+  .photo-col{width:min(320px,90%);margin:0 auto}
+  .stats-grid{grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat-card{padding:16px 8px}
+}
+
+/* ── REDUCED MOTION ──────────────────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  .photo-frame{
+    clip-path:inset(0);transform:none;opacity:1;transition:none;
+  }
+  .reveal,.stat-card,.badge{
+    opacity:1;transform:none;transition:none;
+  }
+  .about-img.float-anim{animation:none}
+  .ticker-track{animation-play-state:paused}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ SECCIÓN SOBRE MÍ ══════════ -->
+<section id="about">
+  <div class="about-inner">
+
+    <!-- ─── COLUMNA FOTO ──────────────────────────────────── -->
+    <div class="photo-col">
+      <div class="photo-frame" id="photoFrame">
+        <div class="photo-aura"></div>
+        <!-- Foto principal de Caro — cambiar src si se mueve el archivo -->
+        <img id="aboutImg"
+          src="/images/caro-01.webp"
+          alt="Caro Chaparro — mentora y estratega comercial"
+          class="about-img"
+          loading="lazy"
+          width="420" height="560">
+      </div>
+    </div>
+
+    <!-- ─── COLUMNA COPY ──────────────────────────────────── -->
+    <div class="about-copy">
+
+      <!-- Eyebrow -->
+      <p class="about-eyebrow reveal" id="eyebrow">SOBRE MÍ</p>
+
+      <!-- Título (2 líneas con tratamiento tipográfico distinto) -->
+      <h2 class="about-title">
+        <!-- Línea 1: serif bold oscuro -->
+        <span class="title-serif reveal" id="title1">No te habla la teoría.</span>
+        <!-- Línea 2: italic elegante violeta -->
+        <span class="title-italic reveal" id="title2">Te habla la experiencia.</span>
+      </h2>
+
+      <!-- Párrafo de cuerpo — copy EXACTO, no modificar -->
+      <p class="about-body reveal" id="bodyText">
+        Durante más de 10 años fui dueña de negocio. Sentí en carne propia el dolor de sacar
+        plata de donde no había, de contratar un closer que aprendía y se iba, de tener todo
+        en la cabeza y nada documentado. Por eso construí <strong>CLOSE-PREDICT™</strong>:
+        el sistema que ordena lo que a la mayoría de los dueños los tiene apagando incendios.
+      </p>
+
+      <!-- Estadísticas — los números se animan desde 0 (via JS) -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card" data-count="10" data-suffix="+">
+          <div class="stat-num">0+</div>
+          <div class="stat-lbl">Años como dueña de negocio</div>
+        </div>
+        <div class="stat-card" data-count="20" data-suffix="+">
+          <div class="stat-num">0+</div>
+          <div class="stat-lbl">Proyectos como closer</div>
+        </div>
+        <div class="stat-card" data-count="5" data-suffix="+">
+          <div class="stat-num">0+</div>
+          <div class="stat-lbl">Empresas asesoradas</div>
+        </div>
+      </div>
+
+      <!-- Badges — 4 etiquetas tipo píldora -->
+      <div class="badges" id="badgesRow">
+        <span class="badge">Profesional en Comercio Internacional</span>
+        <span class="badge">Certificada como Closer Digital</span>
+        <span class="badge">Customer Service</span>
+        <span class="badge">Neuroventas</span>
+      </div>
+
+      <!-- Ticker horizontal de credenciales (loop infinito) -->
+      <div class="ticker-wrap">
+        <div class="ticker-track" id="tickerTrack">
+          <!-- Duplicado al doble para loop sin salto visual -->
+          <span class="ticker-item">Profesional en Comercio Internacional<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Closer Digital Certificada<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Customer Service<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Neuroventas<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Estratega Comercial<span class="ticker-dot"></span></span>
+          <!-- Copia para seamless loop -->
+          <span class="ticker-item">Profesional en Comercio Internacional<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Closer Digital Certificada<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Customer Service<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Neuroventas<span class="ticker-dot"></span></span>
+          <span class="ticker-item">Estratega Comercial<span class="ticker-dot"></span></span>
+        </div>
+      </div>
+
+    </div><!-- /about-copy -->
+  </div><!-- /about-inner -->
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT — animaciones de scroll trigger
+══════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ─── 1. CONTEO DE ESTADÍSTICAS ───────────────────────────────
+   Anima el número de 0 → target con easeOut cúbico.
+   Ajustar duración cambiando --dur-count en el CSS o DUR aquí.   */
+function animateCounter(el, target, suffix, DUR = 1800) {
+  const numEl = el.querySelector('.stat-num');
+  const t0 = performance.now();
+  (function tick(now) {
+    const p    = Math.min((now - t0) / DUR, 1);
+    const ease = 1 - Math.pow(1 - p, 3);    /* easeOut cúbico */
+    numEl.textContent = Math.round(ease * target) + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
+/* ─── 2. FLOAT CONTINUO DE LA FOTO ────────────────────────────
+   Movimiento ambiental suave con sinusoide.
+   Amplitud (8px) y período (5.5s) ajustables abajo.             */
+function startFloat(el) {
+  let t0;
+  const AMP    = 8;    /* amplitud en px */
+  const PERIOD = 5.5;  /* segundos por ciclo completo */
+  (function tick(ts) {
+    if (!t0) t0 = ts;
+    const t = (ts - t0) / 1000;
+    el.style.transform = `translateY(${Math.sin(t * (Math.PI*2/PERIOD)) * AMP}px)`;
+    requestAnimationFrame(tick);
+  })(performance.now());
+}
+
+/* ─── 3. SECUENCIA DE ANIMACIÓN PRINCIPAL ─────────────────────
+   Se dispara una sola vez al entrar la sección en viewport.
+   Stagger entre cada grupo de elementos definido en ms abajo.    */
+function runSequence() {
+  const delays = {
+    photo:    0,
+    eyebrow:  150,
+    title1:   280,
+    title2:   430,
+    body:     560,
+    stats:    700,     /* primer stat card; los siguientes se desfasan */
+    badges:   950,     /* primer badge; los siguientes se desfasan      */
+  };
+
+  /* Foto: clase .visible dispara la transición CSS */
+  setTimeout(() => {
+    document.getElementById('photoFrame').classList.add('visible');
+    /* float inicia 780ms después de que la foto termina de revelarse */
+    setTimeout(() => startFloat(document.getElementById('aboutImg')), 780);
+  }, delays.photo);
+
+  /* Eyebrow */
+  setTimeout(() => document.getElementById('eyebrow').classList.add('visible'), delays.eyebrow);
+
+  /* Título línea 1 y 2 */
+  setTimeout(() => document.getElementById('title1').classList.add('visible'), delays.title1);
+  setTimeout(() => document.getElementById('title2').classList.add('visible'), delays.title2);
+
+  /* Párrafo */
+  setTimeout(() => document.getElementById('bodyText').classList.add('visible'), delays.body);
+
+  /* ─── Stat cards: stagger de 180ms + conteo de números ─── */
+  const cards = document.querySelectorAll('.stat-card');
+  cards.forEach((card, i) => {
+    setTimeout(() => {
+      card.classList.add('visible');
+      const target = parseInt(card.dataset.count, 10);
+      const suffix = card.dataset.suffix || '';
+      animateCounter(card, target, suffix);
+    }, delays.stats + i * 180);
+  });
+
+  /* ─── Badges: stagger de --stg-badge (110ms) ────────────── */
+  const badges = document.querySelectorAll('.badge');
+  badges.forEach((badge, i) => {
+    /* Leer la variable CSS para poder cambiarla desde CSS solamente */
+    const stg = parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--stg-badge')
+    ) || 110;
+    setTimeout(() => badge.classList.add('visible'), delays.badges + i * stg);
+  });
+}
+
+/* ─── 4. REDUCED MOTION: mostrar todo ya revelado ─────────────
+   Si el usuario prefiere sin animaciones, aplicar estado final
+   inmediatamente y poner contadores en su valor final.           */
+if (REDUCED) {
+  document.getElementById('photoFrame').classList.add('visible');
+  document.getElementById('eyebrow').classList.add('visible');
+  document.getElementById('title1').classList.add('visible');
+  document.getElementById('title2').classList.add('visible');
+  document.getElementById('bodyText').classList.add('visible');
+  document.querySelectorAll('.stat-card').forEach(card => {
+    card.classList.add('visible');
+    card.querySelector('.stat-num').textContent =
+      card.dataset.count + (card.dataset.suffix || '');
+  });
+  document.querySelectorAll('.badge').forEach(b => b.classList.add('visible'));
+} else {
+  /* ─── IntersectionObserver: dispara la secuencia una sola vez ── */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        runSequence();
+        io.disconnect();   /* solo una vez */
+      }
+    });
+  }, { threshold: 0.18 });
+
+  io.observe(document.getElementById('about'));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caro Chaparro · CLOSE-PREDICT™</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --v:  #8B3FD6;
+  --v2: #9D4EDD;
+  --vl: #c084fc;
+  --ink:#1E0A33;
+  --ink2:#2B1142;
+  --gold:#F4C430;
+  --muted:#64748B;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Montserrat',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:#fff;
+  color:var(--ink);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  cursor:none;           /* custom cursor */
+}
+
+/* ── CURSOR ─────────────────────────────────────────────── */
+#cursor{
+  pointer-events:none;
+  position:fixed;
+  z-index:9999;
+  width:4px;height:4px;
+  border-radius:50%;
+  background:var(--v);
+  transform:translate(-50%,-50%);
+  transition:left .04s,top .04s;
+}
+
+/* ── NAV ─────────────────────────────────────────────────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 64px;
+  background:rgba(255,255,255,.90);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(139,63,214,.07);
+}
+.nav-brand{
+  font-family:var(--serif);font-size:21px;font-weight:700;
+  color:var(--ink);text-decoration:none;
+}
+.nav-brand em{font-style:italic;color:var(--v)}
+.nav-links{display:flex;gap:30px;list-style:none;align-items:center}
+.nav-links a{
+  font-size:13.5px;font-weight:500;color:var(--v);text-decoration:none;
+  position:relative;padding-bottom:2px;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;
+  height:1.5px;background:var(--v);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 300ms ease;
+}
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-cta{
+  padding:7px 22px;border:1.5px solid rgba(139,63,214,.35);
+  border-radius:100px;font-size:13px;font-weight:600;
+  color:var(--v);text-decoration:none;
+  transition:background .2s,color .2s;
+}
+.nav-cta:hover{background:var(--v);color:#fff}
+
+/* ── HERO ────────────────────────────────────────────────── */
+#hero{
+  min-height:100vh;
+  background:#fff;
+  display:flex;align-items:center;
+  padding-top:80px;
+}
+.hero-inner{
+  width:100%;max-width:1280px;margin:0 auto;
+  padding:60px 64px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:48px;align-items:center;
+}
+
+/* ── COPY ────────────────────────────────────────────────── */
+.hero-copy{display:flex;flex-direction:column;gap:28px}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:10.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--v);padding:5px 16px;
+  border:1px solid rgba(139,63,214,.22);border-radius:100px;
+  background:rgba(139,63,214,.05);width:fit-content;
+}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--v);flex-shrink:0}
+
+/* Title shine animation */
+@keyframes titleShine{
+  0%   {background-position:-200% center}
+  30%  {background-position:200% center}
+  100% {background-position:200% center}
+}
+.hero-h1{
+  font-family:var(--serif);
+  font-size:clamp(38px,5vw,72px);
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:-.015em;
+  background:linear-gradient(90deg,var(--v) 0%,var(--v2) 35%,var(--vl) 50%,var(--v2) 65%,var(--v) 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:titleShine 3s linear infinite;
+}
+.sistema{
+  background:linear-gradient(90deg,var(--v) 0%,var(--v2) 30%,#e9d5ff 50%,var(--v2) 70%,var(--v) 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:titleShine 3s linear infinite;
+  filter:drop-shadow(0 0 8px rgba(139,63,214,.55));
+}
+
+.hero-sub{
+  font-size:15.5px;line-height:1.85;color:var(--muted);max-width:450px;
+}
+.hero-sub strong{color:var(--ink);font-weight:600}
+
+/* Shine button */
+@keyframes btnShine{
+  0%  {left:-60%}
+  100%{left:160%}
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;
+  position:relative;overflow:hidden;
+  padding:0 48px;height:52px;
+  background:var(--v);color:#fff;
+  border-radius:100px;border:none;cursor:none;
+  font-size:14px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  text-decoration:none;width:fit-content;
+  box-shadow:0 0 30px rgba(139,63,214,.6);
+  transition:transform .2s var(--ease),box-shadow .2s;
+}
+.btn-primary:hover{transform:translateY(-2px) scale(1.02)}
+.btn-primary::after{
+  content:'';
+  position:absolute;top:0;width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);
+  transform:skewX(-12deg);
+  animation:btnShine 3s linear infinite;
+  pointer-events:none;
+}
+
+/* ── CANVAS COLUMN ───────────────────────────────────────── */
+.hero-canvas-col{display:flex;align-items:center;justify-content:center}
+#funnelWrap{
+  position:relative;width:100%;max-width:480px;
+  aspect-ratio:500/650;
+}
+#funnelCanvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  display:block;cursor:crosshair;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media(max-width:900px){
+  .nav{padding:14px 24px}
+  .nav-links{display:none}
+  .hero-inner{
+    grid-template-columns:1fr;
+    padding:40px 24px 60px;
+    gap:36px;
+  }
+  .hero-h1{font-size:clamp(32px,8vw,48px)}
+  #funnelWrap{max-width:320px;margin:0 auto}
+}
+
+/* ── REDUCED MOTION ──────────────────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  .hero-h1,.sistema{animation:none;-webkit-text-fill-color:var(--v)}
+  .btn-primary::after{animation:none;display:none}
+  #cursor{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor dot -->
+<div id="cursor"></div>
+
+<!-- ══════════ NAV ══════════ -->
+<nav class="nav">
+  <a href="#" class="nav-brand">Caro <em>Chaparro</em></a>
+  <ul class="nav-links">
+    <li><a href="#sobre-mi">Sobre mí</a></li>
+    <li><a href="#sistema">Close Predict</a></li>
+    <li><a href="#no-momento">Recursos</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <a href="diagnostico.html" class="nav-cta">Agendar</a>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+  <div class="hero-inner">
+
+    <div class="hero-copy">
+      <span class="eyebrow">CLOSE-PREDICT™ · Mentoría high-ticket</span>
+
+      <h1 class="hero-h1">
+        TU NEGOCIO NO TIENE<br>
+        UN PROBLEMA DE VENTAS.<br>
+        TIENE UN PROBLEMA DE <span class="sistema">SISTEMA.</span>
+      </h1>
+
+      <p class="hero-sub">
+        Transformo ventas que dependen del dueño en un
+        <strong>sistema comercial predecible</strong>
+        y escalable en 12 semanas.
+      </p>
+
+      <a href="#sobre-mi" class="btn-primary">SOBRE MÍ</a>
+    </div>
+
+    <div class="hero-canvas-col">
+      <div id="funnelWrap">
+        <canvas id="funnelCanvas"
+          aria-label="Embudo de ventas interactivo CLOSE-PREDICT™"></canvas>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── CURSOR ──────────────────────────────────────────────────── */
+const $cursor = document.getElementById('cursor');
+window.addEventListener('mousemove', e => {
+  $cursor.style.left = e.clientX + 'px';
+  $cursor.style.top  = e.clientY + 'px';
+}, {passive:true});
+
+/* ─────────────────────────────────────────────────────────────────
+   PARTICLE FUNNEL
+   · Canvas lógico: 500 × 650
+   · 4 piezas trapezoidales con GAPS explícitos de ~27px entre sí
+   · Cada pieza: relleno vidrio + borde violeta + glow difuminado
+   · Partículas: anillos/círculos morados con física spring + repulsión
+   · Física: STR = fuerza de empuje, SP = retorno, DM = amortiguación
+───────────────────────────────────────────────────────────────── */
+
+const W = 500, H = 650, CX = 250;
+const mob = () => window.innerWidth < 900;
+const REDUCED = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ── Piezas del embudo con gaps explícitos ── */
+const PIECES = [
+  /* [yTop, yBot, wTop, wBot, n_desktop, n_mobile] */
+  /* Pieza 1 */ [  26, 149, 430, 340,  900, 360 ],
+  /* GAP 27px */
+  /* Pieza 2 */ [ 176, 299, 320, 250,  680, 270 ],
+  /* GAP 27px */
+  /* Pieza 3 */ [ 326, 429, 230, 175,  460, 185 ],
+  /* GAP 27px */
+  /* Pieza 4 */ [ 456, 546, 160, 105,  290, 115 ],
+];
+
+/* ── Clase partícula ── */
+class Particle {
+  constructor(ox, oy) {
+    this.ox = ox; this.oy = oy;             /* origen */
+    this.x  = ox + (Math.random()-.5)*3;
+    this.y  = oy + (Math.random()-.5)*3;
+    this.vx = 0; this.vy = 0;
+    /* radio 1–2.5 px → diámetro 2–5 px */
+    this.r     = 1 + Math.random() * 1.5;
+    this.alpha = .45 + Math.random() * .55;
+  }
+}
+
+/* ── Sistema principal ── */
+class ParticleFunnel {
+  constructor(canvas) {
+    this.c   = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.pts = [];
+    /* física — ajustá aquí:
+       R    = radio de influencia del cursor (px)
+       STR  = fuerza de empuje
+       SP   = velocidad de retorno al origen
+       DM   = amortiguación (más bajo = más fricción)  */
+    this.R  = 70;
+    this.STR = 6.5;
+    this.SP  = 0.065;
+    this.DM  = 0.82;
+    this.mx = -9999; this.my = -9999;
+
+    this._resize();
+    this._build();
+    this._events();
+    this._loop();
+  }
+
+  /* ── Ajusta dimensiones del canvas al DPR del dispositivo ── */
+  _resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.c.width  = W * dpr;
+    this.c.height = H * dpr;
+    this.c.style.width  = W + 'px';
+    this.c.style.height = H + 'px';
+    this.ctx.scale(dpr, dpr);
+    this._dpr = dpr;
+  }
+
+  /* ── Genera partículas dentro de cada pieza trapezoidal ── */
+  _build() {
+    this.pts = [];
+    const m = mob();
+    PIECES.forEach(([yT, yB, wT, wB, nd, nm]) => {
+      const n = m ? nm : nd;
+      for (let i = 0; i < n; i++) {
+        const t = Math.random();
+        const y = yT + t * (yB - yT);
+        /* ancho interpolado en esa y */
+        const w = wT + t * (wB - wT);
+        const x = CX - w/2 + Math.random() * w;
+        this.pts.push(new Particle(x, y));
+      }
+    });
+  }
+
+  _events() {
+    const c = this.c;
+    /* mouse / touch → coordenadas del canvas lógico */
+    const toCanvas = e => {
+      const r  = c.getBoundingClientRect();
+      const src = e.touches ? e.touches[0] : e;
+      this.mx = (src.clientX - r.left) * (W / r.width);
+      this.my = (src.clientY - r.top)  * (H / r.height);
+    };
+    const clear = () => { this.mx = -9999; this.my = -9999; };
+    c.addEventListener('mousemove',  toCanvas, {passive:true});
+    c.addEventListener('touchmove',  toCanvas, {passive:true});
+    c.addEventListener('mouseleave', clear);
+    c.addEventListener('touchend',   clear);
+
+    /* reconstruir partículas al hacer resize */
+    let t;
+    window.addEventListener('resize', () => {
+      clearTimeout(t);
+      t = setTimeout(() => { this._resize(); this._build(); }, 250);
+    });
+  }
+
+  /* ── Física spring: repulsión + retorno ── */
+  _update() {
+    const { mx, my, R, STR, SP, DM, pts } = this;
+    const RR = R * R;
+    pts.forEach(p => {
+      const dx = p.x - mx, dy = p.y - my;
+      const d2 = dx*dx + dy*dy;
+      /* repulsión si cursor está dentro del radio R */
+      if (d2 < RR && d2 > .01) {
+        const d = Math.sqrt(d2);
+        const f = ((R - d) / R) * STR;
+        p.vx += (dx/d)*f;
+        p.vy += (dy/d)*f;
+      }
+      /* fuerza de retorno al origen */
+      p.vx += (p.ox - p.x) * SP;
+      p.vy += (p.oy - p.y) * SP;
+      /* amortiguación */
+      p.vx *= DM; p.vy *= DM;
+      p.x  += p.vx; p.y += p.vy;
+    });
+  }
+
+  /* ── Dibuja piezas (vidrio + glow) y partículas ── */
+  _draw() {
+    const { ctx, pts } = this;
+    ctx.clearRect(0, 0, W, H);
+
+    /* ─ Piezas trapezoidales ─ */
+    PIECES.forEach(([yT, yB, wT, wB]) => {
+      const x1 = CX-wT/2, x2 = CX+wT/2;
+      const x3 = CX+wB/2, x4 = CX-wB/2;
+
+      ctx.save();
+
+      /* relleno vidrio: degradado vertical translúcido */
+      const g = ctx.createLinearGradient(0, yT, 0, yB);
+      g.addColorStop(0, 'rgba(255,255,255,.72)');
+      g.addColorStop(1, 'rgba(237,233,254,.26)');
+      ctx.fillStyle = g;
+
+      /* sombra suave abajo (sensación de "flotando") */
+      ctx.shadowOffsetY = 14;
+      ctx.shadowBlur    = 32;
+      ctx.shadowColor   = 'rgba(0,0,0,.08)';
+
+      ctx.beginPath();
+      ctx.moveTo(x1,yT); ctx.lineTo(x2,yT);
+      ctx.lineTo(x3,yB); ctx.lineTo(x4,yB);
+      ctx.closePath();
+      ctx.fill();
+
+      /* contorno violeta difuminado */
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur    = 28;
+      ctx.shadowColor   = 'rgba(139,63,214,.32)';
+      ctx.strokeStyle   = 'rgba(139,63,214,.14)';
+      ctx.lineWidth     = 1;
+      ctx.beginPath();
+      ctx.moveTo(x1,yT); ctx.lineTo(x2,yT);
+      ctx.lineTo(x3,yB); ctx.lineTo(x4,yB);
+      ctx.closePath();
+      ctx.stroke();
+
+      /* borde superior neón + glow intenso */
+      ctx.shadowBlur    = 16;
+      ctx.shadowColor   = '#8B3FD6';
+      ctx.strokeStyle   = '#8B3FD6';
+      ctx.lineWidth     = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(x1,yT); ctx.lineTo(x2,yT);
+      ctx.stroke();
+
+      ctx.restore();
+    });
+
+    /* ─ Partículas ─ */
+    ctx.save();
+    ctx.strokeStyle = '#8B3FD6';
+    ctx.lineWidth   = 1.2;
+    pts.forEach(p => {
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.stroke();   /* anillos → más elegantes que círculos rellenos */
+    });
+    ctx.restore();
+  }
+
+  _loop() {
+    if (REDUCED) { this._draw(); return; }
+    this._update();
+    this._draw();
+    requestAnimationFrame(() => this._loop());
+  }
+}
+
+/* ── Boot ── */
+new ParticleFunnel(document.getElementById('funnelCanvas'));
+
+/* ── Scroll suave al hacer clic en "Sobre mí" ── */
+document.querySelector('.btn-primary')?.addEventListener('click', e => {
+  e.preventDefault();
+  document.getElementById('sobre-mi')?.scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>

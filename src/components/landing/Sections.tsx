@@ -940,7 +940,7 @@ export function CtaFinal({ portrait }: { portrait: string }) {
           rel="noreferrer"
           className="btn-gold pulse-glow group mt-10 inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-semibold uppercase tracking-wider hover:scale-[1.03]"
         >
-          Agenda tu llamada
+          Solicita tu diagnóstico
           <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
         </a>
 

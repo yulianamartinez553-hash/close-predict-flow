@@ -24,14 +24,15 @@ export function CursorFollower() {
 
   return (
     <div
-      className="pointer-events-none fixed z-[9999] h-2 w-2 rounded-full transition-opacity duration-300"
+      className="pointer-events-none fixed z-[9999] rounded-full transition-opacity duration-300"
       style={{
         left: pos.x,
         top: pos.y,
+        width: 3,
+        height: 3,
         transform: "translate(-50%, -50%)",
         opacity: visible ? 1 : 0,
-        background: "var(--violet-bright)",
-        boxShadow: "0 0 10px rgba(157,78,221,0.8), 0 0 20px rgba(157,78,221,0.4)",
+        background: "#8B3FD6",
       }}
     />
   );

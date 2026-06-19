@@ -1,187 +1,180 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShiningButton } from "@/components/animations/ShiningButton";
-
-const SCREENS = [
-  {
-    title: "¿TENÉS VENTAS IMPREDECIBLES?",
-    subtitle: ["Un mes crecés.", "Al siguiente no sabés por qué cayó."],
-    showButton: false,
-  },
-  {
-    title: "LEADS SIN SEGUIMIENTO",
-    subtitle: ["Los contactos te llegan, pero nadie sabe qué hacer después."],
-    showButton: false,
-  },
-  {
-    title: "NO NECESITÁS TRABAJAR MÁS",
-    subtitle: ["Necesitás un proceso mejor."],
-    showButton: true,
-  },
-] as const;
 
 interface Props {
   onComplete: () => void;
 }
 
+// Static seed — values must not change between SSR and hydration
+const PARTICLES = Array.from({ length: 38 }, (_, i) => ({
+  id: i,
+  x: ((i * 37 + 13) % 97) + 1.5,
+  y: ((i * 53 + 7) % 95) + 2,
+  size: 2 + (i % 3) * 1.5,
+  duration: 3.5 + (i % 5) * 0.7,
+  delay: (i % 8) * 0.35,
+  opacity: 0.18 + (i % 5) * 0.07,
+}));
+
+function BgParticles() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      {PARTICLES.map(p => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            background: "#8B3FD6",
+            opacity: p.opacity,
+          }}
+          animate={{ y: [0, -16, 0], opacity: [p.opacity, p.opacity * 2.2, p.opacity] }}
+          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function SequenceIntro({ onComplete }: Props) {
-  const [current, setCurrent] = useState(0);
-  const cooldownRef = useRef(false);
+  const [screen, setScreen] = useState(0);
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
 
   const advance = useCallback(() => {
-    if (cooldownRef.current) return;
-    cooldownRef.current = true;
-    setTimeout(() => { cooldownRef.current = false; }, 900);
-
-    setCurrent((prev) => {
-      if (prev < SCREENS.length - 1) return prev + 1;
+    if (screen === 0) {
+      setScreen(1);
+    } else {
+      document.body.style.overflow = "";
       onComplete();
-      return prev;
-    });
-  }, [onComplete]);
+    }
+  }, [screen, onComplete]);
 
-  // Scroll ≥ 30px triggers advance
   useEffect(() => {
-    const onWheel = (e: WheelEvent) => {
-      if (e.deltaY > 30) advance();
+    const handleKey = (e: KeyboardEvent) => {
+      if (["Enter", " ", "ArrowDown", "ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+        advance();
+      }
     };
-    const onTouch = (() => {
-      let startY = 0;
-      return {
-        start: (e: TouchEvent) => { startY = e.touches[0].clientY; },
-        end: (e: TouchEvent) => {
-          if (startY - e.changedTouches[0].clientY > 30) advance();
-        },
-      };
-    })();
-    window.addEventListener("wheel", onWheel, { passive: true });
-    window.addEventListener("touchstart", onTouch.start, { passive: true });
-    window.addEventListener("touchend", onTouch.end, { passive: true });
+    const handleWheel = (e: WheelEvent) => { if (e.deltaY > 20) advance(); };
+    window.addEventListener("keydown", handleKey);
+    window.addEventListener("wheel", handleWheel, { passive: true });
     return () => {
-      window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouch.start);
-      window.removeEventListener("touchend", onTouch.end);
+      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("wheel", handleWheel);
     };
   }, [advance]);
 
-  const screen = SCREENS[current];
-
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={current}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.75, ease: "easeInOut" }}
-        className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(160deg, #1a0533 0%, #0d0118 45%, #000000 100%)",
-        }}
-        onClick={!screen.showButton ? advance : undefined}
-      >
-        {/* Floating particles */}
-        <div className="pointer-events-none absolute inset-0">
-          {[...Array(32)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                left: `${(i * 37) % 100}%`,
-                top: `${(i * 53) % 100}%`,
-                width: 2 + (i % 3) * 2,
-                height: 2 + (i % 3) * 2,
-                background: i % 3 === 0 ? "#F4C430" : "#9D4EDD",
-                opacity: 0.25,
-              }}
-              animate={{ y: [0, -22, 0], opacity: [0.1, 0.4, 0.1] }}
-              transition={{
-                duration: 4 + (i % 5),
-                repeat: Infinity,
-                delay: i * 0.14,
-              }}
-            />
-          ))}
-        </div>
+    <div
+      className="fixed inset-0 z-[200] flex cursor-pointer select-none items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(160deg, #2B1142 0%, #1E0A33 100%)" }}
+      onClick={advance}
+    >
+      <BgParticles />
 
-        {/* Radial glow */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(139,63,214,0.22) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Content */}
-        <div className="relative z-10 px-6 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ delay: 0.18, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="display font-black text-white text-balance leading-tight tracking-tight"
-            style={{ fontSize: "clamp(34px, 7vw, 80px)" }}
-          >
-            {screen.title}
-          </motion.h1>
-
+      <AnimatePresence mode="wait">
+        {screen === 0 ? (
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            key="s1"
+            initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.42, duration: 0.8 }}
-            className="mt-6 space-y-3"
+            exit={{ opacity: 0, y: -28 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 mx-auto max-w-3xl px-8 text-center"
           >
-            {screen.subtitle.map((line, i) => (
-              <p key={i} className="text-lg font-light text-white/70 sm:text-2xl">
-                {line}
-              </p>
-            ))}
-          </motion.div>
-
-          {screen.showButton ? (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.62, duration: 0.8 }}
-              className="mt-12"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ShiningButton
-                text="CONOCER CLOSE PREDICT"
-                onClick={onComplete}
-                size="lg"
-              />
-            </motion.div>
-          ) : (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.85, duration: 0.8 }}
-              className="display mt-12 text-[11px] uppercase tracking-[0.3em] text-white/30"
-            >
-              Click o scroll para continuar
-            </motion.p>
-          )}
-        </div>
-
-        {/* Progress dots */}
-        <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 gap-2">
-          {SCREENS.map((_, i) => (
-            <div
-              key={i}
-              className="h-1 rounded-full transition-all duration-500"
+            <h1
+              className="text-white"
               style={{
-                width: i === current ? 24 : 8,
-                background:
-                  i === current
-                    ? "#F4C430"
-                    : "rgba(255,255,255,0.22)",
+                fontSize: "clamp(48px, 7vw, 72px)",
+                fontWeight: 900,
+                lineHeight: 1.08,
+                letterSpacing: "-0.02em",
               }}
-            />
-          ))}
-        </div>
-      </motion.div>
-    </AnimatePresence>
+            >
+              ¿VENTAS IMPREDECIBLES?
+            </h1>
+            <p
+              className="mt-6"
+              style={{
+                fontSize: "clamp(16px, 2vw, 22px)",
+                color: "rgba(255,255,255,0.62)",
+                lineHeight: 1.65,
+              }}
+            >
+              Los contactos te llegan, pero nadie sabe qué hacer después.
+            </p>
+            <p
+              className="mt-12 text-xs uppercase"
+              style={{ color: "rgba(255,255,255,0.22)", letterSpacing: "0.3em" }}
+            >
+              Click para continuar
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="s2"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -28 }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10 mx-auto max-w-3xl px-8 text-center"
+          >
+            <h1
+              className="text-white"
+              style={{
+                fontSize: "clamp(48px, 7vw, 72px)",
+                fontWeight: 900,
+                lineHeight: 1.08,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              NO NECESITÁS<br />TRABAJAR MÁS
+            </h1>
+            <p
+              className="mt-6"
+              style={{
+                fontSize: "clamp(16px, 2vw, 20px)",
+                color: "rgba(255,255,255,0.62)",
+              }}
+            >
+              Necesitás mejorar tu proceso.
+            </p>
+            <button
+              onClick={e => { e.stopPropagation(); advance(); }}
+              className="relative mt-10 overflow-hidden rounded-full font-black uppercase text-white"
+              style={{
+                fontSize: "16px",
+                padding: "16px 40px",
+                background: "#8B3FD6",
+                boxShadow: "0 0 20px rgba(139,63,214,0.6)",
+                cursor: "pointer",
+                border: "none",
+                letterSpacing: "0.1em",
+              }}
+            >
+              <span className="relative z-10">CONOCER CLOSE PREDICT</span>
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -skew-x-12"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.32) 50%, transparent 100%)",
+                }}
+                animate={{ x: ["-120%", "220%"] }}
+                transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 1.9, ease: "linear" }}
+              />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

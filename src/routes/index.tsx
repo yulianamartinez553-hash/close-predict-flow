@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
+import { SequenceIntro } from "@/components/landing/SequenceIntro";
 import { AboutMe } from "@/components/landing/AboutMe";
 import { CaosToSistema } from "@/components/landing/CaosToSistema";
 import {
   Problema, Narrative, Sistema, Entregables, Resultado, Garantia,
   Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
 } from "@/components/landing/Sections";
+import { CursorFollower } from "@/components/animations/CursorFollower";
 import caroPortrait from "@/assets/caro-portrait.png";
 
 export const Route = createFileRoute("/")({
@@ -21,8 +24,14 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [introComplete, setIntroComplete] = useState(false);
+
   return (
     <main className="overflow-x-hidden bg-white text-foreground">
+      <CursorFollower />
+      {!introComplete && (
+        <SequenceIntro onComplete={() => setIntroComplete(true)} />
+      )}
       <Hero />
       <AboutMe />
       <Problema />

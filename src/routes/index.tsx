@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
+import { SequenceIntro } from "@/components/landing/SequenceIntro";
 import { AboutMe } from "@/components/landing/AboutMe";
 import { CaosToSistema } from "@/components/landing/CaosToSistema";
 import {
@@ -22,9 +24,14 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [introComplete, setIntroComplete] = useState(false);
+
   return (
     <main className="overflow-x-hidden bg-background text-foreground">
       <CursorFollower />
+      {!introComplete && (
+        <SequenceIntro onComplete={() => setIntroComplete(true)} />
+      )}
       <Hero />
       <AboutMe />
       <Problema />

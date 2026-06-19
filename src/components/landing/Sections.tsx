@@ -332,13 +332,170 @@ function NarrativeBlock({ title, body, index }: { title: string; body: string; i
 }
 
 /* ========================= 4. SISTEMA CLOSE-PREDICT ========================= */
-const PHASES = [
-  { n: 1, weeks: "Sem 1–2", name: "Radiografía Comercial", desc: "Diagnóstico del estado real: leads, ventas, pauta, procesos. Identifica fugas. Punto actual vs. meta." },
-  { n: 2, weeks: "Sem 3–4", name: "Arquitectura Comercial", desc: "Diseño del sistema: embudo, fases, criterios de calificación, herramientas para decidir y escalar." },
-  { n: 3, weeks: "Sem 5–7", name: "Guiones y Calificación", desc: "Ruta de comunicación completa: qué decir y cuándo. Cómo calificar, cerrar o descartar leads.", highlight: true },
-  { n: 4, weeks: "Sem 8–9", name: "KPIs y Dashboard", desc: "Métricas clave del embudo para decidir sobre precios y equipo. Optimización y rentabilidad." },
-  { n: 5, weeks: "Sem 10–12", name: "Delegación y Escala", desc: "Roadmap de ejecución para el equipo. Sistema aplicable y delegable." },
+const CARD_IMAGES = [
+  "/images/fase-1.png",
+  "/images/fase-2.png",
+  "/images/fase-3.png",
+  "/images/fase-4.png",
+  "/images/fase-5.png",
 ];
+
+/* --- 3D infinite premium carousel of the phase cards --- */
+const CARD_W = 280;
+const CARD_H = 420;
+const THICK = 30; // real volumetric thickness (px)
+const LAYERS = 12; // stacked layers that fake the extruded body
+const SPACING = 300; // horizontal gap between consecutive cards
+const DEPTH = 240; // how far side cards recede
+const TILT = 42; // rotateY of side cards (deg)
+const SPEED = 0.42; // cards per second — a bit faster
+
+function PhaseCarousel3D() {
+  const N = CARD_IMAGES.length;
+  const stageRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const targetMouse = useRef({ x: 0, y: 0 });
+  const smoothMouse = useRef({ x: 0, y: 0 });
+  const lastRef = useRef(performance.now());
+  const [offset, setOffset] = useState(0);
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    let raf = 0;
+    const loop = (now: number) => {
+      const dt = Math.min((now - lastRef.current) / 1000, 0.05);
+      lastRef.current = now;
+      offsetRef.current += dt * SPEED;
+      // inertia / smoothing toward the cursor target
+      smoothMouse.current.x += (targetMouse.current.x - smoothMouse.current.x) * 0.07;
+      smoothMouse.current.y += (targetMouse.current.y - smoothMouse.current.y) * 0.07;
+      setOffset(offsetRef.current);
+      setParallax({ x: smoothMouse.current.x, y: smoothMouse.current.y });
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const handleMove = (e: React.MouseEvent) => {
+    const r = stageRef.current?.getBoundingClientRect();
+    if (!r) return;
+    targetMouse.current.x = ((e.clientX - r.left) / r.width - 0.5) * 2; // -1..1
+    targetMouse.current.y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+  };
+  const handleLeave = () => {
+    targetMouse.current.x = 0;
+    targetMouse.current.y = 0;
+  };
+
+  return (
+    <div
+      ref={stageRef}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      className="relative mx-auto flex h-[560px] w-full max-w-5xl items-center justify-center"
+      style={{ perspective: "1350px" }}
+    >
+      <div
+        className="relative h-full w-full"
+        style={{
+          transformStyle: "preserve-3d",
+          transform: `rotateX(${-parallax.y * 8}deg) rotateY(${parallax.x * 14}deg)`,
+          transition: "transform 0.05s linear",
+        }}
+      >
+        {CARD_IMAGES.map((src, i) => {
+          // circular position in range (-N/2 .. N/2) so the carousel is infinite
+          let p = (((i - offset) % N) + N) % N;
+          if (p > N / 2) p -= N;
+          const abs = Math.abs(p);
+          const tx = p * SPACING;
+          const tz = -abs * DEPTH;
+          const ry = -p * TILT;
+          const scale = 1 - abs * 0.05;
+          // progressive appear / disappear at the edges (offscreen wrap is invisible)
+          const opacity = abs > 2.2 ? 0 : 1 - Math.min(abs / 2.4, 1) * 0.9;
+          const z = 200 - Math.round(abs * 20);
+
+          return (
+            <div
+              key={i}
+              className="absolute left-1/2 top-1/2"
+              style={{
+                width: CARD_W,
+                height: CARD_H,
+                marginLeft: -CARD_W / 2,
+                marginTop: -CARD_H / 2,
+                transformStyle: "preserve-3d",
+                transform: `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`,
+                opacity,
+                zIndex: z,
+                transition: "opacity 0.3s ease",
+              }}
+            >
+              {/* soft glow behind the image */}
+              <div
+                className="absolute inset-0 rounded-[16px]"
+                style={{
+                  transform: "translateZ(-4px)",
+                  boxShadow: "0 30px 80px -20px rgba(124,58,237,0.55)",
+                  background: "rgba(124,58,237,0.35)",
+                  filter: "blur(26px)",
+                }}
+              />
+
+              {/* stacked layers — real volumetric thickness (the extruded body) */}
+              {Array.from({ length: LAYERS }).map((_, k) => (
+                <img
+                  key={k}
+                  src={src}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full rounded-[16px] object-cover"
+                  style={{
+                    transform: `translateZ(${THICK - (k + 1) * (THICK / LAYERS)}px)`,
+                    filter: "blur(2px) brightness(.45)",
+                  }}
+                />
+              ))}
+
+              {/* back face — same image, blurred + darkened with overlay */}
+              <div
+                className="absolute inset-0 rounded-[16px] overflow-hidden"
+                style={{ transform: "translateZ(0px)" }}
+              >
+                <img
+                  src={src}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full object-cover rounded-[16px]"
+                  style={{ filter: "blur(18px) brightness(.5)", transform: "scale(1.15)" }}
+                />
+                <div className="absolute inset-0 rounded-[16px]" style={{ background: "rgba(0,0,0,.35)" }} />
+              </div>
+
+              {/* front face — the phase image covering the whole card */}
+              <div
+                className="absolute inset-0 rounded-[16px] overflow-hidden"
+                style={{
+                  transform: `translateZ(${THICK}px)`,
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  boxShadow: "0 20px 60px -20px rgba(0,0,0,0.5)",
+                }}
+              >
+                <img
+                  src={src}
+                  className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
+                  alt=""
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function Sistema() {
   return (
@@ -355,37 +512,9 @@ export function Sistema() {
           </p>
         </div>
 
-        {/* roadmap */}
-        <div className="relative mt-20">
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 1.6, ease: "easeInOut" }}
-            className="absolute left-0 right-0 top-12 hidden h-px origin-left bg-gradient-to-r from-violet/0 via-violet to-violet/0 lg:block"
-          />
-          <div className="grid gap-6 lg:grid-cols-5">
-            {PHASES.map((p, i) => (
-              <motion.div
-                key={p.n}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: i * 0.12 }}
-                className={`relative rounded-3xl border bg-white p-6 shadow-[0_20px_60px_-30px_rgba(43,17,66,0.25)] ${p.highlight ? "border-violet shadow-[0_24px_70px_-20px_rgba(139,63,214,0.5)] ring-1 ring-violet/30" : "border-border"}`}
-              >
-                <div
-                  className={`mx-auto -mt-12 mb-4 flex h-12 w-12 items-center justify-center rounded-full font-semibold text-white ${p.highlight ? "bg-violet ring-4 ring-violet/20" : "bg-ink"}`}
-                  style={p.highlight ? { boxShadow: "0 0 30px rgba(139,63,214,0.6)" } : undefined}
-                >
-                  {p.n}
-                </div>
-                <div className="display text-[10px] uppercase tracking-[0.25em] text-violet">{p.weeks}</div>
-                <h3 className="serif mt-2 text-xl text-ink">{p.name}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+        {/* 3D infinite carousel of the phase cards */}
+        <div className="relative mt-12">
+          <PhaseCarousel3D />
         </div>
       </div>
     </section>

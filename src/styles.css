@@ -170,3 +170,22 @@
 @utility cursor-blink {
   animation: blink 1s step-end infinite;
 }
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.5); }
+  50%       { box-shadow: 0 0 40px rgba(139,92,246,0.85); }
+}
+@utility animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(139,63,214,0.45);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(157,78,221,0.75);
+}

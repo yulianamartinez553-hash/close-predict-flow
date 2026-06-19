@@ -359,44 +359,65 @@ const TILT     = 42;
 const SPEED    = 0.42;
 const FPS_CAR  = 30;          /* frame-limit del carrusel */
 
-/* Tarjeta de entregable — sin imágenes, solo número + título + línea de color */
-function EntregableCard({ card }: { card: Deliverable }) {
-  const bg = card.premium
-    ? "linear-gradient(145deg, #2B1142 0%, #1E0A33 100%)"
-    : "linear-gradient(145deg, #8B3FD6 0%, #9D4EDD 100%)";
-  const line = card.premium
-    ? "linear-gradient(90deg, #F4C430, #E8C547, #F4C430)"
-    : "linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.18), rgba(255,255,255,0.55))";
-  const lineShadow = card.premium
-    ? "0 0 14px rgba(244,196,48,0.55)"
-    : "0 0 8px rgba(255,255,255,0.28)";
+/* Paleta de gradientes oscuros — rota por índice */
+const DARK_GRADIENTS = [
+  "linear-gradient(160deg, #2B1142, #1E0A33)",
+  "linear-gradient(160deg, #3A1D63, #1E0A33)",
+  "linear-gradient(160deg, #2B1142, #4B1E7A)",
+  "linear-gradient(160deg, #1E0A33, #2B1142)",
+  "linear-gradient(160deg, #4B1E7A, #2B1142)",
+];
+
+/* Tarjeta de entregable — fondo morado oscuro rotado + línea diagonal */
+function EntregableCard({ card, index }: { card: Deliverable; index: number }) {
+  const bg = DARK_GRADIENTS[index % DARK_GRADIENTS.length];
+
+  /* Línea diagonal: estándar = púrpura/blanco, premium = dorada */
+  const lineGrad = card.premium
+    ? "linear-gradient(90deg, #F4C430, #E8C547 50%, #F4C430)"
+    : "linear-gradient(90deg, rgba(157,78,221,0.9), rgba(255,255,255,0.65), rgba(139,63,214,0.9))";
+  const lineGlow = card.premium
+    ? "0 0 16px rgba(244,196,48,0.65)"
+    : "0 0 12px rgba(157,78,221,0.55)";
 
   return (
     <div
       style={{
         position: "absolute", inset: 0,
-        borderRadius: 20, overflow: "hidden",
+        borderRadius: 16, overflow: "hidden",
         background: bg,
-        border: card.premium ? "1px solid rgba(244,196,48,0.3)" : "1px solid rgba(255,255,255,0.14)",
-        boxShadow: card.premium
-          ? "0 20px 60px -16px rgba(43,17,66,0.65)"
-          : "0 20px 60px -16px rgba(139,63,214,0.45)",
+        border: card.premium
+          ? "1px solid rgba(244,196,48,0.28)"
+          : "1px solid rgba(255,255,255,0.15)",
+        boxShadow: "0 20px 60px -16px rgba(30,10,51,0.7)",
         display: "flex", flexDirection: "column",
         padding: "28px 24px",
       }}
     >
-      {/* Línea de color con brillo (gloss) */}
-      <div style={{
-        height: 3, borderRadius: 2, marginBottom: 28,
-        background: line, boxShadow: lineShadow,
-      }} />
+      {/* Línea de brillo DIAGONAL — cruza la tarjeta rotada -35 deg */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          left: "-20%",
+          top: "28%",
+          width: "145%",
+          height: 4,
+          background: lineGrad,
+          boxShadow: lineGlow,
+          transform: "rotate(-35deg)",
+          transformOrigin: "center",
+          pointerEvents: "none",
+          borderRadius: 2,
+        }}
+      />
 
-      {/* Número pequeño */}
+      {/* Número — gris #C9C5D1 como indica la paleta */}
       <span style={{
         fontFamily: "'Montserrat', system-ui, sans-serif",
         fontWeight: 700, fontSize: 12,
-        color: "rgba(255,255,255,0.45)", letterSpacing: "0.12em",
-        marginBottom: 16,
+        color: "#C9C5D1", letterSpacing: "0.12em",
+        marginBottom: 16, position: "relative", zIndex: 1,
       }}>
         {card.num}
       </span>
@@ -406,6 +427,7 @@ function EntregableCard({ card }: { card: Deliverable }) {
         fontFamily: "'Cormorant Garamond', Georgia, serif",
         fontWeight: 700, fontSize: "clamp(1.25rem, 2.2vw, 1.75rem)",
         color: "#fff", lineHeight: 1.2, flex: 1,
+        position: "relative", zIndex: 1,
       }}>
         {card.title}
       </p>
@@ -419,15 +441,16 @@ function EntregableCard({ card }: { card: Deliverable }) {
           color: "#F4C430", border: "1px solid rgba(244,196,48,0.6)",
           borderRadius: 4, padding: "3px 9px",
           alignSelf: "flex-start", marginTop: 16,
+          position: "relative", zIndex: 1,
         }}>
           PREMIUM
         </span>
       )}
 
-      {/* Gloss diagonal */}
-      <div style={{
-        position: "absolute", inset: 0, borderRadius: 20, pointerEvents: "none",
-        background: "linear-gradient(135deg, rgba(255,255,255,0.10) 0%, transparent 55%)",
+      {/* Gloss de esquina superior izquierda */}
+      <div aria-hidden style={{
+        position: "absolute", inset: 0, borderRadius: 16, pointerEvents: "none",
+        background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)",
       }} />
     </div>
   );
@@ -523,7 +546,7 @@ function EntregablesCarousel3D() {
                 transition: "opacity 0.3s ease",
               }}
             >
-              <EntregableCard card={card} />
+              <EntregableCard card={card} index={i} />
             </div>
           );
         })}

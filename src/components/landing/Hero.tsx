@@ -94,43 +94,6 @@ function initFunnel(canvas: HTMLCanvasElement): () => void {
   function draw() {
     ctx.clearRect(0, 0, W, H);
 
-    /* ── Piezas trapezoidales: vidrio + glow ── */
-    PIECES.forEach(([yT, yB, wT, wB]) => {
-      const x1 = CX - wT / 2, x2 = CX + wT / 2;
-      const x3 = CX + wB / 2, x4 = CX - wB / 2;
-
-      ctx.save();
-
-      /* relleno de vidrio */
-      const g = ctx.createLinearGradient(0, yT, 0, yB);
-      g.addColorStop(0, "rgba(255,255,255,.72)");
-      g.addColorStop(1, "rgba(237,233,254,.26)");
-      ctx.fillStyle = g;
-      ctx.shadowOffsetY = 14;
-      ctx.shadowBlur    = 32;
-      ctx.shadowColor   = "rgba(0,0,0,.08)";   // sombra abajo = sensación de "flotando"
-      ctx.beginPath();
-      ctx.moveTo(x1, yT); ctx.lineTo(x2, yT);
-      ctx.lineTo(x3, yB); ctx.lineTo(x4, yB);
-      ctx.closePath(); ctx.fill();
-
-      /* contorno violeta difuminado */
-      ctx.shadowOffsetY = 0; ctx.shadowBlur = 28;
-      ctx.shadowColor   = "rgba(139,63,214,.32)";
-      ctx.strokeStyle   = "rgba(139,63,214,.14)"; ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(x1, yT); ctx.lineTo(x2, yT);
-      ctx.lineTo(x3, yB); ctx.lineTo(x4, yB);
-      ctx.closePath(); ctx.stroke();
-
-      /* borde superior neón */
-      ctx.shadowBlur  = 16; ctx.shadowColor = "#8B3FD6";
-      ctx.strokeStyle = "#8B3FD6"; ctx.lineWidth = 2.4;
-      ctx.beginPath(); ctx.moveTo(x1, yT); ctx.lineTo(x2, yT); ctx.stroke();
-
-      ctx.restore();
-    });
-
     /* ── Partículas (anillos morados) ── */
     ctx.save();
     ctx.strokeStyle = "#8B3FD6"; ctx.lineWidth = 1.2;

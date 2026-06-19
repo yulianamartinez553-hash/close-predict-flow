@@ -10,13 +10,6 @@ const STATS = [
   { value: 5,  label: "Empresas asesoradas",         suffix: "+" },
 ];
 
-const BADGES = [
-  "Profesional en Comercio Internacional",
-  "Certificada como Closer Digital",
-  "Customer Service",
-  "Neuroventas",
-];
-
 const CREDENTIALS = [
   "Profesional en Comercio Internacional",
   "Closer Digital Certificada",
@@ -30,16 +23,6 @@ const CREDENTIALS = [
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
   show:   { opacity: 1, y: 0,  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
-};
-
-/* Stagger para badges — ajustar staggerChildren para cambiar velocidad */
-const badgeContainer = {
-  hidden: {},
-  show:   { transition: { staggerChildren: 0.11, delayChildren: 0 } },
-};
-const badgeItem = {
-  hidden: { opacity: 0, y: 12, scale: 0.97 },
-  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
 };
 
 /* ── COMPONENTE ─────────────────────────────────────────────── */
@@ -208,31 +191,6 @@ export function AboutMe() {
                   >
                     <MetricCounter value={s.value} label={s.label} suffix={s.suffix} />
                   </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Badges en cascada (stagger via variantes) */}
-              <motion.div
-                className="flex flex-wrap gap-[10px]"
-                variants={badgeContainer}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.2 }}
-              >
-                {BADGES.map(b => (
-                  <motion.span
-                    key={b}
-                    variants={badgeItem}
-                    className="rounded-full text-xs font-semibold"
-                    style={{
-                      padding: "8px 18px",
-                      border: "1px solid rgba(139,63,214,.28)",
-                      background: "rgba(139,63,214,.05)",
-                      color: "#9D4EDD",
-                    }}
-                  >
-                    {b}
-                  </motion.span>
                 ))}
               </motion.div>
 

@@ -3,9 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
 import { SequenceIntro } from "@/components/landing/SequenceIntro";
 import { AboutMe } from "@/components/landing/AboutMe";
-import { CaosToSistema } from "@/components/landing/CaosToSistema";
 import {
-  Problema, Narrative, Sistema, Entregables, Resultado, Garantia,
+  Sistema, Entregables, Resultado, Garantia,
   Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
 } from "@/components/landing/Sections";
 import { CursorFollower } from "@/components/animations/CursorFollower";
@@ -34,9 +33,6 @@ function Landing() {
       )}
       <Hero />
       <AboutMe />
-      <Problema />
-      <CaosToSistema />
-      <Narrative />
       <Sistema />
       <Entregables />
       <Resultado />

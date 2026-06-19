@@ -372,13 +372,10 @@ const DARK_GRADIENTS = [
 function EntregableCard({ card, index }: { card: Deliverable; index: number }) {
   const bg = DARK_GRADIENTS[index % DARK_GRADIENTS.length];
 
-  /* Línea diagonal: estándar = púrpura/blanco, premium = dorada */
+  /* Gradiente neón que se desvanece en los bordes — da profundidad */
   const lineGrad = card.premium
-    ? "linear-gradient(90deg, #F4C430, #E8C547 50%, #F4C430)"
-    : "linear-gradient(90deg, rgba(157,78,221,0.9), rgba(255,255,255,0.65), rgba(139,63,214,0.9))";
-  const lineGlow = card.premium
-    ? "0 0 16px rgba(244,196,48,0.65)"
-    : "0 0 12px rgba(157,78,221,0.55)";
+    ? "linear-gradient(90deg, transparent 0%, rgba(244,196,48,0.85) 18%, rgba(255,245,180,0.95) 50%, rgba(244,196,48,0.85) 82%, transparent 100%)"
+    : "linear-gradient(90deg, transparent 0%, rgba(139,63,214,0.85) 18%, rgba(255,255,255,0.90) 50%, rgba(157,78,221,0.85) 82%, transparent 100%)";
 
   return (
     <div
@@ -394,23 +391,46 @@ function EntregableCard({ card, index }: { card: Deliverable; index: number }) {
         padding: "28px 24px",
       }}
     >
-      {/* Línea de brillo DIAGONAL — cruza la tarjeta rotada -35 deg */}
+      {/* Neón diagonal — 2 capas: outer glow + core brillante */}
       <div
         aria-hidden
         style={{
           position: "absolute",
-          left: "-20%",
-          top: "28%",
-          width: "145%",
-          height: 4,
-          background: lineGrad,
-          boxShadow: lineGlow,
+          left: "-20%", top: "28%",
+          width: "145%", height: 0,
           transform: "rotate(-35deg)",
           transformOrigin: "center",
           pointerEvents: "none",
-          borderRadius: 2,
         }}
-      />
+      >
+        {/* Capa 1 — glow amplio y difuminado */}
+        <div style={{
+          position: "absolute", left: 0, right: 0,
+          top: -14, height: 28,
+          background: lineGrad,
+          filter: card.premium ? "blur(11px)" : "blur(9px)",
+          borderRadius: 14,
+          opacity: 0.75,
+        }} />
+        {/* Capa 2 — halo intermedio */}
+        <div style={{
+          position: "absolute", left: 0, right: 0,
+          top: -6, height: 12,
+          background: lineGrad,
+          filter: "blur(4px)",
+          borderRadius: 6,
+          opacity: 0.88,
+        }} />
+        {/* Capa 3 — core: línea nítida y brillante */}
+        <div style={{
+          position: "absolute", left: 0, right: 0,
+          top: -1.5, height: 3,
+          background: lineGrad,
+          filter: "blur(0.6px)",
+          borderRadius: 2,
+          opacity: 1,
+        }} />
+      </div>
 
       {/* Número — gris #C9C5D1 como indica la paleta */}
       <span style={{

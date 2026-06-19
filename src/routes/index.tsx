@@ -27,7 +27,7 @@ function Landing() {
   const [introComplete, setIntroComplete] = useState(false);
 
   return (
-    <main className="overflow-x-hidden bg-white text-foreground">
+    <main className="bg-white text-foreground" style={{ overflowX: "clip" }}>
       <CursorFollower />
       {!introComplete && (
         <SequenceIntro onComplete={() => setIntroComplete(true)} />

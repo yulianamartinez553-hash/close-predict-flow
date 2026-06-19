@@ -206,7 +206,7 @@ function PhasesAccordionSection() {
             style={{
               fontFamily: SERIF, fontWeight: 700,
               textTransform: "uppercase", letterSpacing: "-0.01em", lineHeight: 1,
-              fontSize: "clamp(3rem, 12vw, 140px)",
+              fontSize: "clamp(2rem, 6vw, 72px)",
               textAlign: "center", marginBottom: "clamp(3rem, 6vw, 6rem)",
             }}
           >
@@ -246,27 +246,31 @@ function PhaseCard({
       position: "sticky",
       top: `${80 + index * 28}px`,
     }}>
-      <motion.div style={{
-        scale,
-        width: "100%", maxWidth: "64rem", margin: "0 auto",
-        borderRadius: "clamp(30px, 5vw, 60px)",
-        border: phase.highlighted ? "2px solid #9D4EDD" : "2px solid #2B1142",
-        background: phase.highlighted
-          ? "linear-gradient(145deg, #1E0A33 0%, #2B1142 60%, #1a0530 100%)"
-          : "#0C0C0C",
-        padding: "clamp(1.5rem, 3vw, 2.5rem)",
-        willChange: "transform",
-        boxShadow: phase.highlighted
-          ? "0 0 0 1px #8B3FD640, 0 24px 64px #8B3FD620"
-          : "0 8px 32px rgba(0,0,0,0.4)",
-        position: "relative", overflow: "hidden",
-      }}>
+      <motion.div
+        style={{
+          scale,
+          width: "100%",
+          maxWidth: "64rem",
+          margin: "0 auto",
+          borderRadius: "clamp(30px, 5vw, 60px)",
+          border: phase.highlighted ? "2px solid #9D4EDD" : "2px solid #8B3FD630",
+          background: phase.highlighted
+            ? "linear-gradient(145deg, #2B1142 0%, #3D1660 50%, #8B3FD620 100%)"
+            : "linear-gradient(145deg, #1E0A33 0%, #2B1142 100%)",
+          padding: "clamp(1.5rem, 3vw, 2.5rem)",
+          willChange: "transform",
+          boxShadow: phase.highlighted
+            ? "0 0 0 2px #9D4EDD30, 0 24px 64px #8B3FD635, inset 0 1px 0 #9D4EDD20"
+            : "0 8px 40px #1E0A3360",
+          position: "relative",
+          overflow: "hidden",
+        }}>
         {/* Blob de resplandor en fase destacada */}
         {phase.highlighted && (
           <div style={{
             position: "absolute", top: -60, right: -60,
             width: 260, height: 260, borderRadius: "50%",
-            background: "radial-gradient(circle, #8B3FD630 0%, transparent 70%)",
+            background: "radial-gradient(circle, #9D4EDD45 0%, #8B3FD615 50%, transparent 70%)",
             pointerEvents: "none",
           }} />
         )}
@@ -282,7 +286,7 @@ function PhaseCard({
             <span style={{
               fontFamily: SERIF, fontWeight: 700,
               fontSize: "clamp(3rem, 8vw, 120px)", lineHeight: 1,
-              background: "linear-gradient(180deg, #646973 0%, #BBCCD7 100%)",
+              background: "linear-gradient(180deg, #9D4EDD 0%, #F5F3F7 100%)",
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
             }}>
               {phase.num}
@@ -295,8 +299,8 @@ function PhaseCard({
                 fontFamily: SANS, fontWeight: 500,
                 fontSize: "clamp(0.7rem, 1.2vw, 0.9rem)", textTransform: "uppercase",
                 letterSpacing: "0.1em", padding: "0.25rem 0.9rem",
-                borderRadius: "999px", border: "1px solid #8B3FD6",
-                color: "#9D4EDD", marginBottom: "0.5rem",
+                borderRadius: "999px", border: "1px solid #9D4EDD50",
+                color: "#C084FC", background: "#8B3FD615", marginBottom: "0.5rem",
               }}>
                 {phase.weeks}
               </span>
@@ -332,8 +336,8 @@ function PhaseCard({
         <div style={{
           height: 1,
           background: phase.highlighted
-            ? "linear-gradient(90deg, #8B3FD640, #9D4EDD60, #8B3FD640)"
-            : "rgba(215,226,234,0.1)",
+            ? "linear-gradient(90deg, transparent, #9D4EDD70, transparent)"
+            : "linear-gradient(90deg, transparent, #8B3FD625, transparent)",
           marginBottom: "clamp(1.5rem, 3vw, 2rem)",
         }} />
 
@@ -342,14 +346,14 @@ function PhaseCard({
           <p style={{
             fontFamily: SANS, fontWeight: 300,
             fontSize: "clamp(0.75rem, 1.2vw, 1rem)", textTransform: "uppercase",
-            letterSpacing: "0.12em", color: "#8B3FD6", marginBottom: "0.75rem",
+            letterSpacing: "0.12em", color: "#C084FC", marginBottom: "0.75rem",
           }}>
             Objetivo
           </p>
           <p style={{
             fontFamily: SANS, fontWeight: 400,
             fontSize: "clamp(0.9rem, 1.8vw, 1.35rem)",
-            color: "#D7E2EA", lineHeight: 1.6, maxWidth: "48rem",
+            color: "#F5F3F7", lineHeight: 1.6, maxWidth: "48rem",
           }}>
             {phase.objetivo}
           </p>
@@ -357,13 +361,15 @@ function PhaseCard({
 
         {/* Duración */}
         <div style={{ marginTop: "clamp(1.5rem, 3vw, 2rem)" }}>
-          <span style={{
-            fontFamily: SANS, fontWeight: 800,
-            fontSize: "clamp(0.7rem, 1.1vw, 0.85rem)", textTransform: "uppercase",
-            letterSpacing: "0.15em", color: "#646973",
-          }}>
+          <span
+            style={{
+              fontFamily: SANS, fontWeight: 800,
+              fontSize: "clamp(0.7rem, 1.1vw, 0.85rem)", textTransform: "uppercase",
+              letterSpacing: "0.15em", color: "#9D4EDD80",
+            }}
+          >
             Duración:{" "}
-            <span style={{ color: "#9D4EDD" }}>{phase.duration}</span>
+            <span style={{ color: "#C084FC" }}>{phase.duration}</span>
           </span>
         </div>
       </motion.div>
@@ -410,7 +416,7 @@ function PhaseCardsSection() {
             style={{
               fontFamily: SERIF, fontWeight: 700,
               textTransform: "uppercase", letterSpacing: "-0.01em", lineHeight: 1,
-              fontSize: "clamp(3rem, 12vw, 140px)",
+              fontSize: "clamp(2rem, 6vw, 72px)",
               textAlign: "center", marginBottom: "clamp(3rem, 6vw, 6rem)",
             }}
           >

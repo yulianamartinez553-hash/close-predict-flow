@@ -883,42 +883,28 @@ export function CtaFinal({ portrait }: { portrait: string }) {
         ))}
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1fr_1.2fr]">
-        {/* Portrait */}
-        <div className="relative mx-auto h-[460px] w-[300px] sm:h-[520px] sm:w-[340px]">
-          <div className="absolute inset-0 rounded-[36px]" style={{ background: "radial-gradient(120% 80% at 50% 0%, #5B2A8C 0%, #2B1142 55%, #1E0A33 100%)" }} />
-          <div className="absolute inset-0 overflow-hidden rounded-[36px] border border-white/15 shadow-[0_40px_120px_-30px_rgba(244,196,48,0.35)]">
-            <img src={portrait} alt="Caro Chaparro" className="absolute inset-x-0 bottom-0 mx-auto h-[96%] w-auto object-contain object-bottom" />
-          </div>
-          <div className="absolute -bottom-4 -right-4 rounded-2xl bg-white/10 px-4 py-2 backdrop-blur-xl">
-            <div className="display text-[10px] uppercase tracking-[0.25em] text-gold">Caro Chaparro</div>
-            <div className="text-xs text-white/80">Mentora · Estratega</div>
-          </div>
-        </div>
+      <div className="relative mx-auto max-w-3xl px-6 text-center">
+        <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-gold">Tu próximo paso</div>
+        <h2 className="serif text-4xl leading-[1.05] text-balance sm:text-5xl lg:text-6xl">
+          ¿Listo para construir tu <em className="text-gold">sistema comercial</em>?
+        </h2>
+        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
+          Agendá tu Diagnóstico Comercial Estratégico y descubrí exactamente dónde se están perdiendo tus ventas y cómo convertirlas en crecimiento.
+        </p>
 
-        <div>
-          <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-gold">Tu próximo paso</div>
-          <h2 className="serif text-4xl leading-[1.05] text-balance sm:text-5xl lg:text-6xl">
-            ¿Listo para construir tu <em className="text-gold">sistema comercial</em>?
-          </h2>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
-            Agendá tu Diagnóstico Comercial Estratégico y descubrí exactamente dónde se están perdiendo tus ventas y cómo convertirlas en crecimiento.
-          </p>
+        <a
+          href="/diagnostico.html"
+          target="_blank"
+          rel="noreferrer"
+          className="btn-gold pulse-glow group mt-10 inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-semibold uppercase tracking-wider hover:scale-[1.03]"
+        >
+          Agenda tu llamada
+          <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
+        </a>
 
-          <a
-            href="/diagnostico.html"
-            target="_blank"
-            rel="noreferrer"
-            className="btn-gold pulse-glow group mt-10 inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-semibold uppercase tracking-wider hover:scale-[1.03]"
-          >
-            Agenda tu llamada
-            <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
-          </a>
-
-          <p className="display mt-8 text-sm tracking-[0.15em] text-gold/90 sm:text-base">
-            A la cima de ventas no se llega con conocimiento,<br className="hidden sm:block" /> sino con <em>estrategia</em>.
-          </p>
-        </div>
+        <p className="display mt-8 text-sm tracking-[0.15em] text-gold/90 sm:text-base">
+          A la cima de ventas no se llega con conocimiento,<br className="hidden sm:block" /> sino con <em>estrategia</em>.
+        </p>
       </div>
     </section>
   );
@@ -934,13 +920,6 @@ export function Footer() {
           <p className="mt-3 max-w-sm text-sm text-white/60">
             Caro Chaparro · Mentora & Estratega de ventas. Sistemas comerciales predecibles para infoproductores LATAM.
           </p>
-          <a
-            href="/diagnostico.html"
-            className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/40 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-gold transition hover:bg-gold hover:text-ink-deep"
-          >
-            Agendar diagnóstico
-            <ArrowRight className="h-3.5 w-3.5" />
-          </a>
         </div>
 
         <div>

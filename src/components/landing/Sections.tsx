@@ -840,12 +840,12 @@ export function LeadCapture() {
             ¿Todavía no es tu momento para el <em className="text-violet">sistema completo</em>?
           </h2>
           <p className="mt-4 text-muted-foreground">Tres puertas suaves para empezar a ordenar tus ventas hoy.</p>
-        </div>
+</div>
 
         <div className="mt-14 grid gap-5 lg:grid-cols-3">
           {[
             { t: "Diagnóstico gratuito", d: "Responde unas preguntas y obtené una primera luz de dónde está fallando tu proceso." },
-            { t: "Comunidad gratuita “Sala Flows”", d: "Conectate cada 15 días y recibí contenido de valor en ventas y marketing." },
+            { t: "Comunidad gratuita \"Sala Flows\"", d: "Conectate cada 15 días y recibí contenido de valor en ventas y marketing." },
             { t: "Recursos / lead magnets", d: "Guías prácticas para empezar a ordenar tus ventas hoy." },
           ].map((c, i) => (
             <motion.div
@@ -856,59 +856,11 @@ export function LeadCapture() {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className="rounded-3xl border border-violet/20 bg-white p-7 shadow-[0_18px_50px_-30px_rgba(43,17,66,0.25)] transition hover:-translate-y-1 hover:shadow-[0_30px_70px_-30px_rgba(139,63,214,0.4)]"
             >
-              <div className="display text-[10px] uppercase tracking-[0.25em] text-violet">Opción 0{i + 1}</div>
               <h3 className="serif mt-2 text-2xl text-ink">{c.t}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.d}</p>
             </motion.div>
           ))}
         </div>
-
-        {/* Form */}
-        <motion.form
-          onSubmit={(e) => e.preventDefault()}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="glass-card mx-auto mt-14 max-w-2xl rounded-3xl p-8 sm:p-10"
-        >
-          <div className="display mb-2 text-[10px] uppercase tracking-[0.3em] text-violet">Quiero más información</div>
-          <h3 className="serif text-2xl text-ink sm:text-3xl">Contame de tu proyecto</h3>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {[
-              { l: "Nombre", t: "text", ph: "Tu nombre" },
-              { l: "Gmail", t: "email", ph: "tucorreo@gmail.com" },
-              { l: "Compañía", t: "text", ph: "Nombre de tu empresa" },
-              { l: "WhatsApp", t: "tel", ph: "+57 322 0000000" },
-            ].map((f) => (
-              <label key={f.l} className="block">
-                <span className="display text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{f.l}</span>
-                <input
-                  type={f.t}
-                  placeholder={f.ph}
-                  className="mt-1.5 w-full rounded-xl border border-violet/20 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
-                />
-              </label>
-            ))}
-          </div>
-          <label className="mt-4 block">
-            <span className="display text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Descripción de tu proyecto</span>
-            <textarea
-              rows={4}
-              placeholder="Contame en qué estás trabajando hoy"
-              className="mt-1.5 w-full resize-none rounded-xl border border-violet/20 bg-white px-4 py-3 text-sm text-ink outline-none transition focus:border-violet focus:ring-2 focus:ring-violet/20"
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="btn-violet mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-7 py-4 text-sm font-semibold uppercase tracking-wider hover:scale-[1.01]"
-          >
-            Quiero más información
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </motion.form>
       </div>
     </section>
   );

@@ -840,7 +840,7 @@ export function LeadCapture() {
             ¿Todavía no es tu momento para el <em className="text-violet">sistema completo</em>?
           </h2>
           <p className="mt-4 text-muted-foreground">Tres puertas suaves para empezar a ordenar tus ventas hoy.</p>
-</div>
+        </div>
 
         <div className="mt-14 grid gap-5 lg:grid-cols-3">
           {[

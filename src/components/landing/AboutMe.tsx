@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { MetricCounter } from "@/components/animations/MetricCounter";
-import { TickerHorizontal } from "@/components/animations/TickerHorizontal";
 
 /* ── DATOS ──────────────────────────────────────────────────── */
 const STATS = [
@@ -12,11 +11,9 @@ const STATS = [
 
 const CREDENTIALS = [
   "Profesional en Comercio Internacional",
-  "Closer Digital Certificada",
+  "Certificada como Closer Digital",
   "Customer Service",
   "Neuroventas",
-  "Estratega Comercial",
-  "Mentora High-Ticket",
 ];
 
 /* ── VARIANTES FRAMER MOTION ───────────────────────────────── */
@@ -194,12 +191,21 @@ export function AboutMe() {
                 ))}
               </motion.div>
 
-              {/* Ticker horizontal de credenciales — loop infinito */}
-              <div
-                className="rounded-[14px] border"
-                style={{ borderColor: "rgba(139,63,214,.12)", background: "rgba(249,248,255,.7)" }}
-              >
-                <TickerHorizontal items={CREDENTIALS} speed={30} />
+              {/* Franja de badges separadora */}
+              <div className="mt-8 flex w-full flex-wrap justify-center gap-3">
+                {[
+                  "Profesional en Comercio Internacional",
+                  "Certificada como Closer Digital",
+                  "Customer Service",
+                  "Neuroventas",
+                ].map((b) => (
+                  <span
+                    key={b}
+                    className="inline-block rounded-full border border-violet/20 bg-violet/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-violet"
+                  >
+                    {b}
+                  </span>
+                ))}
               </div>
 
             </div>

@@ -39,8 +39,13 @@ export function AboutMe() {
           0%, 100% { transform: translateY(0); }
           50%       { transform: translateY(-12px); }
         }
-        /* Amplitud 12 px, período 5.5 s — ajustable aquí */
         .about-float { animation: photoFloat 5.5s ease-in-out infinite; }
+        @keyframes credTicker {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+        .cred-track { animation: credTicker 18s linear infinite; }
+        @media (prefers-reduced-motion: reduce) { .cred-track { animation: none; } }
       `}</style>
 
       <section id="sobre-mi" className="relative overflow-hidden bg-white py-28">
@@ -191,21 +196,40 @@ export function AboutMe() {
                 ))}
               </motion.div>
 
-              {/* Franja de badges separadora */}
-              <div className="mt-8 flex w-full flex-wrap justify-center gap-3">
-                {[
-                  "Profesional en Comercio Internacional",
-                  "Certificada como Closer Digital",
-                  "Customer Service",
-                  "Neuroventas",
-                ].map((b) => (
-                  <span
-                    key={b}
-                    className="inline-block rounded-full border border-violet/20 bg-violet/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-violet"
-                  >
-                    {b}
-                  </span>
-                ))}
+              {/* Ticker continuo de credenciales */}
+              <div
+                style={{
+                  overflow: "hidden",
+                  borderTop: "1px solid rgba(139,63,214,0.12)",
+                  borderBottom: "1px solid rgba(139,63,214,0.12)",
+                  padding: "10px 0",
+                  maskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)",
+                  WebkitMaskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)",
+                }}
+              >
+                <div className="cred-track" style={{ display: "flex", whiteSpace: "nowrap" }}>
+                  {/* Duplicado al doble para loop seamless */}
+                  {[...CREDENTIALS, ...CREDENTIALS].map((c, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        display: "inline-flex", alignItems: "center", flexShrink: 0,
+                        padding: "0 28px",
+                        fontSize: "11px", fontWeight: 600,
+                        textTransform: "uppercase", letterSpacing: "0.22em",
+                        color: "#8B3FD6",
+                      }}
+                    >
+                      {c}
+                      <span style={{
+                        display: "inline-block", flexShrink: 0,
+                        width: 4, height: 4, borderRadius: "50%",
+                        background: "#8B3FD6", opacity: 0.35,
+                        marginLeft: 28,
+                      }} />
+                    </span>
+                  ))}
+                </div>
               </div>
 
             </div>

@@ -67,6 +67,16 @@ This repo is connected to **Lovable** (`AGENTS.md`). Commits pushed to the conne
 
 `bunfig.toml` sets `minimumReleaseAge = 86400` (skips packages published <24h ago) to mitigate supply-chain attacks. Only `@lovable.dev/*` packages are excluded. Confirm with the user before adding any new exclusion.
 
+## Coordinación multi-agente (`coordination/`)
+
+Trabajo en equipo de varias IAs se coordina con tres archivos markdown en `coordination/` — **consultalos y actualizalos** al trabajar en tareas del proyecto:
+
+- **`SPEC.md`** — fuente de verdad: objetivo, alcance y la pila de tareas con IDs estables `T-XXX`, prioridad, dependencias y _criterio de done_. Marcá `[x]` solo cuando se cumple el criterio.
+- **`PROGRESS.md`** — estado vivo: tablero (ID · estado · responsable · fecha), bloqueos y una **bitácora append-only** (agregá líneas al final; no edites las de otra IA).
+- **`DECISIONS.md`** — registro tipo ADR append-only del "por qué" de cada decisión.
+
+Reglas: IDs nunca se reusan; una tarea = un dueño a la vez (marcalo `in-progress` en PROGRESS antes de empezar); estados válidos `todo · in-progress · blocked · review · done`.
+
 ## Static assets
 
 `public/` contains standalone HTML mockups (`hero-v3.html`, `diagnostico.html`, etc.) and `public/images/` (phase/`fase-*.png`, webp). These are reference/preview artifacts served statically, separate from the React app.

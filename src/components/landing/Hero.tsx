@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { viewTransition } from "@/lib/animations";
 
 /* ═══════════════════════════════════════════════════════════════
    CANVAS PARTICLE FUNNEL  (portado de hero-v3.html)
@@ -49,9 +51,8 @@ function buildParticles(mobile: boolean): Pt[] {
   return pts;
 }
 
-function initFunnel(canvas: HTMLCanvasElement): () => void {
+function initFunnel(canvas: HTMLCanvasElement, reduced: boolean): () => void {
   const ctx = canvas.getContext("2d")!;
-  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* Física — cambiar aquí para ajustar el comportamiento:
      R   = radio de influencia del cursor (px)
@@ -70,6 +71,7 @@ function initFunnel(canvas: HTMLCanvasElement): () => void {
     canvas.height = H * dpr;
     canvas.style.width  = "100%";
     canvas.style.height = "100%";
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
   }
 
@@ -104,14 +106,28 @@ function initFunnel(canvas: HTMLCanvasElement): () => void {
     ctx.restore();
   }
 
+  resize();
+  rebuild();
+  draw();
+
+  if (reduced) {
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { resize(); rebuild(); draw(); }, 250);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      clearTimeout(resizeTimer);
+    };
+  }
+
   function loop() {
-    if (!REDUCED) update();
+    update();
     draw();
     rafId = requestAnimationFrame(loop);
   }
-
-  resize();
-  rebuild();
 
   const onMouseMove = (e: MouseEvent) => {
     const r = canvas.getBoundingClientRect();
@@ -162,16 +178,17 @@ const NAV_LINKS = [
 ];
 
 export function Hero() {
+  const reduced = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    return initFunnel(canvasRef.current);
-  }, []);
+    return initFunnel(canvasRef.current, reduced);
+  }, [reduced]);
 
   const scrollTo = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
   };
 
   return (
@@ -269,9 +286,9 @@ export function Hero() {
           {/* Columna texto */}
           <motion.div
             className="flex flex-col gap-7"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            initial={reduced ? false : { opacity: 0, y: 24 }}
+            animate={reduced ? undefined : { opacity: 1, y: 0 }}
+            transition={viewTransition(reduced, { duration: 0.8, ease: [0.22, 1, 0.36, 1] })}
           >
             <span
               className="inline-flex items-center gap-2 w-fit rounded-full px-4 py-[5px]"
@@ -325,6 +342,7 @@ export function Hero() {
               }}
             >
               <span className="relative z-10">SOBRE MÍ</span>
+              {!reduced && (
               <motion.span
                 aria-hidden
                 className="pointer-events-none absolute inset-0 -skew-x-12"
@@ -335,15 +353,16 @@ export function Hero() {
                 animate={{ x: ["-120%", "220%"] }}
                 transition={{ duration: 1.0, repeat: Infinity, repeatDelay: 2.0, ease: "linear" }}
               />
+              )}
             </button>
           </motion.div>
 
           {/* Columna canvas */}
           <motion.div
             className="flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.0, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            initial={reduced ? false : { opacity: 0, scale: 0.97 }}
+            animate={reduced ? undefined : { opacity: 1, scale: 1 }}
+            transition={viewTransition(reduced, { duration: 1.0, delay: 0.15, ease: [0.22, 1, 0.36, 1] })}
           >
             <div
               className="relative w-full cursor-crosshair"

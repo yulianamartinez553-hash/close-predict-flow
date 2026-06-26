@@ -7,6 +7,8 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { instantTransition, viewTransition } from "@/lib/animations";
 
 /* ─────────────────────────────────────────────────────────────────
    FUENTES
@@ -78,13 +80,14 @@ function FadeIn({
   delay?: number; duration?: number;
   x?: number; y?: number; className?: string;
 }) {
+  const reduced = useReducedMotion();
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, x, y }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      initial={reduced ? false : { opacity: 0, x, y }}
+      whileInView={reduced ? undefined : { opacity: 1, x: 0, y: 0 }}
       viewport={{ once: true, margin: "50px", amount: 0 }}
-      transition={{ duration, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={viewTransition(reduced, { duration, delay, ease: [0.25, 0.1, 0.25, 1] })}
     >
       {children}
     </motion.div>
@@ -97,6 +100,7 @@ function AccordionItem({
 }: {
   phase: Phase; index: number; isOpen: boolean; onToggle: () => void;
 }) {
+  const reduced = useReducedMotion();
   return (
     <FadeIn delay={index * 0.1} y={20}>
       <div style={{
@@ -149,10 +153,10 @@ function AccordionItem({
           {isOpen && (
             <motion.div
               key="content"
-              initial={{ height: 0, opacity: 0 }}
+              initial={reduced ? false : { height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+              exit={reduced ? undefined : { height: 0, opacity: 0 }}
+              transition={viewTransition(reduced, { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] })}
               style={{ overflow: "hidden" }}
             >
               <div style={{
@@ -230,25 +234,27 @@ function PhasesAccordionSection() {
 
 /* ── SECCIÓN 2: CARDS STICKY ──────────────────────────────────── */
 function PhaseCard({
-  phase, index, totalCards, progress,
+  phase, index, totalCards, progress, reduced,
 }: {
   phase: Phase; index: number; totalCards: number; progress: MotionValue<number>;
+  reduced: boolean;
 }) {
   /* La última carta mantiene escala 1; las anteriores se achican 0.035 por posición */
   const targetScale = 1 - (totalCards - 1 - index) * 0.035;
-  const scale = useTransform(progress, [index / totalCards, 1], [1, targetScale]);
+  const scaleMotion = useTransform(progress, [index / totalCards, 1], [1, targetScale]);
 
   return (
     /* Contenedor sticky — offset escalonado: 80 · 108 · 136 · 164 · 192 px */
     <div style={{
-      height: "85vh",
+      height: reduced ? "auto" : "85vh",
       display: "flex", alignItems: "flex-start", justifyContent: "center",
-      position: "sticky",
-      top: `${80 + index * 28}px`,
+      position: reduced ? "relative" : "sticky",
+      top: reduced ? undefined : `${80 + index * 28}px`,
+      marginBottom: reduced ? "1.5rem" : undefined,
     }}>
       <motion.div
         style={{
-          scale,
+          scale: reduced ? 1 : scaleMotion,
           width: "100%",
           maxWidth: "64rem",
           margin: "0 auto",
@@ -378,6 +384,7 @@ function PhaseCard({
 }
 
 function PhaseCardsSection() {
+  const reduced = useReducedMotion();
   const containerRef = useRef<HTMLElement>(null);
 
   /* useScroll apunta al contenedor de las cards, no al window */
@@ -430,6 +437,7 @@ function PhaseCardsSection() {
           <PhaseCard
             key={phase.num} phase={phase} index={i}
             totalCards={PHASES.length} progress={scrollYProgress}
+            reduced={reduced}
           />
         ))}
       </div>

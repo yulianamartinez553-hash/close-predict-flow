@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { MetricCounter } from "@/components/animations/MetricCounter";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { instantTransition } from "@/lib/animations";
 
 /* ── DATOS ──────────────────────────────────────────────────── */
 const STATS = [
@@ -16,20 +18,21 @@ const CREDENTIALS = [
   "Neuroventas",
 ];
 
-/* ── VARIANTES FRAMER MOTION ───────────────────────────────── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show:   { opacity: 1, y: 0,  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
-};
-
-/* ── COMPONENTE ─────────────────────────────────────────────── */
 export function AboutMe() {
+  const reduced = useReducedMotion();
   /* Ref para saber cuándo entra la foto en viewport */
   const photoRef = useRef<HTMLDivElement>(null);
   const photoInView = useInView(photoRef, { once: true, amount: 0.2 });
 
   /* El float empieza cuando termina la animación de revelado */
   const [floating, setFloating] = useState(false);
+
+  const fadeUp = reduced
+    ? { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0, transition: instantTransition } }
+    : {
+        hidden: { opacity: 0, y: 18 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+      };
 
   return (
     <>
@@ -41,6 +44,9 @@ export function AboutMe() {
         }
         /* Amplitud 12 px, período 5.5 s — ajustable aquí */
         .about-float { animation: photoFloat 5.5s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .about-float { animation: none !important; }
+        }
       `}</style>
 
       <section id="sobre-mi" className="relative overflow-hidden bg-white py-28">
@@ -62,12 +68,12 @@ export function AboutMe() {
                   Ajustar duration y ease de la transición aquí               */}
               <motion.div
                 className="relative"
-                initial={{ clipPath: "inset(0 0 100% 0)", opacity: 0, scale: 0.96 }}
-                animate={photoInView
+                initial={reduced ? false : { clipPath: "inset(0 0 100% 0)", opacity: 0, scale: 0.96 }}
+                animate={reduced || photoInView
                   ? { clipPath: "inset(0 0 0% 0)", opacity: 1, scale: 1 }
                   : {}}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                onAnimationComplete={() => setFloating(true)}
+                transition={reduced ? instantTransition : { duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                onAnimationComplete={() => { if (!reduced) setFloating(true); }}
               >
                 {/* Halo debajo de la foto */}
                 <div
@@ -85,7 +91,7 @@ export function AboutMe() {
                   alt="Caro Chaparro — mentora y estratega comercial"
                   width={420}
                   height={560}
-                  className={`relative z-10 block w-full h-auto rounded-sm${floating ? " about-float" : ""}`}
+                  className={`relative z-10 block w-full h-auto rounded-sm${floating && !reduced ? " about-float" : ""}`}
                   style={{
                     filter:
                       "drop-shadow(0 28px 56px rgba(139,63,214,.14)) drop-shadow(0 4px 12px rgba(0,0,0,.07))",

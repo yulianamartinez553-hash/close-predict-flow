@@ -54,3 +54,12 @@ export const scaleIn: Variants = {
     transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
   },
 };
+
+export const instantTransition = { duration: 0 } as const;
+
+export function viewTransition(
+  reduced: boolean,
+  normal: { duration?: number; delay?: number; ease?: number[] } = { duration: 0.5 },
+) {
+  return reduced ? instantTransition : normal;
+}

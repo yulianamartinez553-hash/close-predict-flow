@@ -4,6 +4,34 @@ import {
   Shield, Play, Quote, ArrowRight, Check, Sparkles, Mail, Phone,
   Instagram, Linkedin, MessageCircle, Star,
 } from "lucide-react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { viewTransition } from "@/lib/animations";
+
+const WHATSAPP_URL = "https://wa.me/573229172709";
+
+const LEAD_CAPTURE_CARDS = [
+  {
+    title: "Diagnóstico gratuito",
+    description: "Responde unas preguntas y obtené una primera luz de dónde está fallando tu proceso.",
+    href: "/diagnostico.html",
+    cta: "Empezar diagnóstico",
+    external: false,
+  },
+  {
+    title: 'Comunidad gratuita "Sala Flows"',
+    description: "Conectate cada 15 días y recibí contenido de valor en ventas y marketing.",
+    href: WHATSAPP_URL,
+    cta: "Unirme",
+    external: true,
+  },
+  {
+    title: "Recursos / lead magnets",
+    description: "Guías prácticas para empezar a ordenar tus ventas hoy.",
+    href: WHATSAPP_URL,
+    cta: "Descargar",
+    external: true,
+  },
+] as const;
 
 /* ========================= 2. PROBLEMA — embudo + palabras laterales ========================= */
 const SIDE_WORDS = [
@@ -41,6 +69,7 @@ type SideWord = {
 };
 
 export function Problema() {
+  const reduced = useReducedMotion();
   const [words, setWords] = useState<SideWord[]>([]);
   const idRef = useRef(0);
   const [isMobile, setIsMobile] = useState(false);
@@ -53,6 +82,7 @@ export function Problema() {
   }, []);
 
   useEffect(() => {
+    if (reduced) return;
     const maxVisible = isMobile ? 6 : 11;
     const interval = setInterval(() => {
       setWords((prev) => {
@@ -74,7 +104,7 @@ export function Problema() {
       });
     }, isMobile ? 900 : 600);
     return () => clearInterval(interval);
-  }, [isMobile]);
+  }, [isMobile, reduced]);
 
   const removeWord = (id: number) =>
     setWords((prev) => prev.filter((w) => w.id !== id));
@@ -105,14 +135,14 @@ export function Problema() {
           {FUNNEL_BARS.map((bar, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 28, scale: 0.92, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+              initial={reduced ? false : { opacity: 0, y: 28, scale: 0.92, filter: "blur(10px)" }}
+              whileInView={reduced ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
               viewport={{ once: true, amount: 0.4 }}
-              transition={{
+              transition={viewTransition(reduced, {
                 duration: 0.75,
                 delay: i * 0.24,
                 ease: [0.22, 1, 0.36, 1],
-              }}
+              })}
               style={{
                 width: `min(${bar.w}px, 78vw)`,
                 height: bar.h,
@@ -144,10 +174,10 @@ export function Problema() {
       {/* Title bottom */}
       <div className="relative mx-auto mt-12 max-w-4xl px-6 text-center">
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={reduced ? false : { opacity: 0, y: 20 }}
+          whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={viewTransition(reduced, { duration: 0.8 })}
           className="serif text-3xl leading-[1.1] text-ink text-balance sm:text-5xl lg:text-6xl"
         >
           ¿Cuántas oportunidades estás perdiendo<br />
@@ -477,6 +507,7 @@ function EntregableCard({ card, index }: { card: Deliverable; index: number }) {
 }
 
 function EntregablesCarousel3D() {
+  const reduced = useReducedMotion();
   const N = ENTREGABLES_DATA.length;
   const stageRef    = useRef<HTMLDivElement>(null);
   const offsetRef   = useRef(0);
@@ -488,6 +519,7 @@ function EntregablesCarousel3D() {
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
+    if (reduced) return;
     let raf = 0;
     const INTERVAL = 1000 / FPS_CAR;
 
@@ -516,9 +548,10 @@ function EntregablesCarousel3D() {
     if (stageRef.current) io.observe(stageRef.current);
 
     return () => { cancelAnimationFrame(raf); io.disconnect(); };
-  }, []);
+  }, [reduced]);
 
   const handleMove = (e: React.MouseEvent) => {
+    if (reduced) return;
     const r = stageRef.current?.getBoundingClientRect();
     if (!r) return;
     targetMouse.current.x = ((e.clientX - r.left) / r.width  - 0.5) * 2;
@@ -627,9 +660,12 @@ const DELIVERABLES = [
 ];
 
 export function Entregables() {
+  const reduced = useReducedMotion();
+
   return (
     <section id="entregables" className="relative overflow-hidden bg-ink-deep py-28 text-white">
       {/* Video background */}
+      {!reduced ? (
       <video
         autoPlay
         loop
@@ -638,11 +674,15 @@ export function Entregables() {
         className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_105406_16f4600d-7a92-4292-b96e-b19156c7830a.mp4"
       />
+      ) : (
+      <div className="pointer-events-none absolute inset-0 z-0 bg-ink-deep" aria-hidden />
+      )}
       <div className="pointer-events-none absolute inset-0 z-0 bg-ink-deep/70" />
 
       {/* radial glow */}
       <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet/20 blur-3xl" />
       {/* particles */}
+      {!reduced && (
       <div className="pointer-events-none absolute inset-0 z-10">
         {[...Array(30)].map((_, i) => (
           <motion.span
@@ -654,6 +694,7 @@ export function Entregables() {
           />
         ))}
       </div>
+      )}
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 text-center">
         <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-gold">Entregables · Bonos</div>
@@ -669,8 +710,8 @@ export function Entregables() {
       <div className="relative z-10 mt-20 overflow-hidden" style={{ maskImage: "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)" }}>
         <motion.div
           className="flex gap-6 px-6"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          animate={reduced ? undefined : { x: ["0%", "-50%"] }}
+          transition={reduced ? undefined : { duration: 25, repeat: Infinity, ease: "linear" }}
         >
           {[...DELIVERABLES, ...DELIVERABLES].map((d, i) => (
             <DeliverableCard key={i} {...d} />
@@ -685,7 +726,7 @@ export function Entregables() {
 function DeliverableCard({ title, desc, featured, bonus }: { title: string; desc: string; featured?: boolean; bonus?: boolean }) {
   return (
     <div
-      className="group relative w-[300px] shrink-0 rounded-3xl border p-7 backdrop-blur-xl transition-all duration-500 hover:scale-[1.06]"
+      className="group relative w-[300px] shrink-0 rounded-3xl border p-7 backdrop-blur-xl transition-all duration-500 hover:scale-[1.06] motion-reduce:hover:scale-100"
       style={{
         background: bonus
           ? "linear-gradient(160deg, rgba(244,196,48,0.10), rgba(139,63,214,0.18))"
@@ -722,6 +763,8 @@ const CHECKS = [
 ];
 
 export function Resultado() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="relative bg-white py-28">
       <div className="mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-2">
@@ -734,10 +777,10 @@ export function Resultado() {
             {CHECKS.map((c, i) => (
               <motion.li
                 key={c}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={reduced ? false : { opacity: 0, x: -10 }}
+                whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
+                transition={viewTransition(reduced, { duration: 0.5, delay: i * 0.08 })}
                 className="flex items-start gap-3"
               >
                 <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet/10 text-violet">
@@ -751,10 +794,10 @@ export function Resultado() {
 
         {/* Dashboard card */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={reduced ? false : { opacity: 0, y: 30 }}
+          whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={viewTransition(reduced, { duration: 0.8 })}
           className="glass-card relative rounded-3xl p-7"
         >
           <div className="mb-6 flex items-center justify-between">
@@ -798,10 +841,10 @@ export function Resultado() {
                   <span className="w-24 text-muted-foreground">{b.l}</span>
                   <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${b.w}%` }}
+                      initial={reduced ? false : { width: 0 }}
+                      whileInView={reduced ? undefined : { width: `${b.w}%` }}
                       viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.2 }}
+                      transition={viewTransition(reduced, { duration: 1, delay: 0.2 })}
                       className="absolute inset-y-0 left-0 rounded-full"
                       style={{ background: "var(--gradient-violet)" }}
                     />
@@ -819,14 +862,16 @@ export function Resultado() {
 
 /* ========================= 7. GARANTÍA ========================= */
 export function Garantia() {
+  const reduced = useReducedMotion();
+
   return (
     <section className="relative bg-cloud py-28">
       <div className="mx-auto max-w-3xl px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={reduced ? false : { opacity: 0, y: 20 }}
+          whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={viewTransition(reduced, { duration: 0.8 })}
           className="glass-card relative overflow-hidden rounded-3xl p-10 text-center sm:p-14"
         >
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet via-gold to-violet" />
@@ -852,6 +897,8 @@ const TESTIMONIALS = [
 ];
 
 export function Testimonios() {
+  const reduced = useReducedMotion();
+
   return (
     <section id="testimonios" className="relative bg-white py-28">
       <div className="mx-auto max-w-7xl px-6">
@@ -867,7 +914,7 @@ export function Testimonios() {
           <div className="group relative aspect-video overflow-hidden rounded-3xl border border-violet/30 shadow-[0_30px_80px_-30px_rgba(43,17,66,0.4)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,#3B1A5C,#1E0A33)]" />
             <div className="absolute inset-0 grid place-items-center">
-              <button className="group/play flex h-20 w-20 items-center justify-center rounded-full bg-white/95 text-ink shadow-2xl transition hover:scale-110">
+              <button className="group/play flex h-20 w-20 items-center justify-center rounded-full bg-white/95 text-ink shadow-2xl transition hover:scale-110 motion-reduce:hover:scale-100">
                 <Play className="ml-1 h-7 w-7 fill-current" />
               </button>
             </div>
@@ -883,10 +930,10 @@ export function Testimonios() {
             {TESTIMONIALS.map((t, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={reduced ? false : { opacity: 0, x: 20 }}
+                whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+                transition={viewTransition(reduced, { duration: 0.5, delay: i * 0.1 })}
                 className="relative rounded-2xl border border-violet/15 bg-cloud p-6"
               >
                 <Quote className="absolute right-4 top-4 h-5 w-5 text-violet/30" />
@@ -917,6 +964,8 @@ export function Testimonios() {
 
 /* ========================= 9. LEAD CAPTURE ========================= */
 export function LeadCapture() {
+  const reduced = useReducedMotion();
+
   return (
     <section id="contacto" className="relative bg-cloud py-28">
       <div className="mx-auto max-w-7xl px-6">
@@ -928,22 +977,24 @@ export function LeadCapture() {
         </div>
 
         <div className="mt-14 grid gap-5 lg:grid-cols-3">
-          {[
-            { t: "Diagnóstico gratuito", d: "Responde unas preguntas y obtené una primera luz de dónde está fallando tu proceso." },
-            { t: "Comunidad gratuita \"Sala Flows\"", d: "Conectate cada 15 días y recibí contenido de valor en ventas y marketing." },
-            { t: "Recursos / lead magnets", d: "Guías prácticas para empezar a ordenar tus ventas hoy." },
-          ].map((c, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+          {LEAD_CAPTURE_CARDS.map((card, i) => (
+            <motion.a
+              key={card.title}
+              href={card.href}
+              {...(card.external ? { target: "_blank", rel: "noreferrer" } : {})}
+              initial={reduced ? false : { opacity: 0, y: 20 }}
+              whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="rounded-3xl border border-violet/20 bg-white p-7 shadow-[0_18px_50px_-30px_rgba(43,17,66,0.25)] transition hover:-translate-y-1 hover:shadow-[0_30px_70px_-30px_rgba(139,63,214,0.4)]"
+              transition={viewTransition(reduced, { duration: 0.5, delay: i * 0.1 })}
+              className="group flex flex-col rounded-3xl border border-violet/20 bg-white p-7 shadow-[0_18px_50px_-30px_rgba(43,17,66,0.25)] transition hover:-translate-y-1 hover:shadow-[0_30px_70px_-30px_rgba(139,63,214,0.4)] motion-reduce:hover:translate-y-0"
             >
-              <h3 className="serif mt-2 text-2xl text-ink">{c.t}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.d}</p>
-            </motion.div>
+              <h3 className="serif mt-2 text-2xl text-ink">{card.title}</h3>
+              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{card.description}</p>
+              <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-violet transition group-hover:gap-3">
+                {card.cta}
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </motion.a>
           ))}
         </div>
       </div>
@@ -953,9 +1004,12 @@ export function LeadCapture() {
 
 /* ========================= 10. CTA FINAL ========================= */
 export function CtaFinal({ portrait }: { portrait: string }) {
+  const reduced = useReducedMotion();
+
   return (
     <section id="cta" className="relative overflow-hidden aurora-bg py-28 text-white">
       {/* particles */}
+      {!reduced && (
       <div className="pointer-events-none absolute inset-0">
         {[...Array(25)].map((_, i) => (
           <motion.span
@@ -967,6 +1021,7 @@ export function CtaFinal({ portrait }: { portrait: string }) {
           />
         ))}
       </div>
+      )}
 
       <div className="relative mx-auto max-w-3xl px-6 text-center">
         <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-gold">Tu próximo paso</div>
@@ -981,7 +1036,7 @@ export function CtaFinal({ portrait }: { portrait: string }) {
           href="/diagnostico.html"
           target="_blank"
           rel="noreferrer"
-          className="btn-gold pulse-glow group mt-10 inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-semibold uppercase tracking-wider hover:scale-[1.03]"
+          className="btn-gold pulse-glow group mt-10 inline-flex items-center gap-3 rounded-full px-9 py-5 text-base font-semibold uppercase tracking-wider hover:scale-[1.03] motion-reduce:hover:scale-100"
         >
           Solicita tu diagnóstico
           <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
@@ -1043,7 +1098,7 @@ export function Footer() {
 export function WhatsAppFloat() {
   return (
     <a
-      href="https://wa.me/573229172709"
+      href={WHATSAPP_URL}
       target="_blank"
       rel="noreferrer"
       aria-label="WhatsApp Caro Chaparro"

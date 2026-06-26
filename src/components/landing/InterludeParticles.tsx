@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 /* ── PALETA ──────────────────────────────────────────────────── */
 const COLORS = ["#8B3FD6", "#9D4EDD", "#F4C430", "#FFFFFF", "#C9C5D1"];
@@ -26,6 +27,7 @@ function spawnPt(x: number, y: number): Pt {
 }
 
 export function InterludeParticles() {
+  const reduced = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const ptsRef     = useRef<Pt[]>([]);
@@ -37,6 +39,7 @@ export function InterludeParticles() {
   const INTERVAL   = 1000 / 30;
 
   useEffect(() => {
+    if (reduced) return;
     const section = sectionRef.current;
     const canvas  = canvasRef.current;
     if (!section || !canvas) return;
@@ -130,7 +133,7 @@ export function InterludeParticles() {
       io.disconnect();
       section.removeEventListener("mousemove", onMouseMove);
     };
-  }, []);
+  }, [reduced]);
 
   return (
     <section

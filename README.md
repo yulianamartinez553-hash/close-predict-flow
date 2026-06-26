@@ -62,3 +62,16 @@ Este proyecto está conectado a [Lovable](https://lovable.dev). Los commits que 
 - `bunfig.toml` aplica un guard de cadena de suministro (omite paquetes publicados hace menos de 24h).
 
 Para más detalle de arquitectura, ver [CLAUDE.md](./CLAUDE.md).
+
+## Coordinación y tareas pendientes
+
+El trabajo del equipo (varias IAs + humanos) se coordina en `coordination/`:
+
+| Archivo | Para qué |
+|---------|----------|
+| [coordination/SPEC.md](./coordination/SPEC.md) | Fuente de verdad: backlog con IDs `T-XXX`, hitos y criterios de done |
+| [coordination/PROGRESS.md](./coordination/PROGRESS.md) | Estado vivo, bloqueos y bitácora de sesiones |
+| [coordination/DECISIONS.md](./coordination/DECISIONS.md) | Decisiones de diseño/negocio (append-only) |
+| [coordination/REUNION-SEBAS-CARO.md](./coordination/REUNION-SEBAS-CARO.md) | Acta de reunión + entregables de Caro (`C-XX`) |
+
+Antes de implementar una tarea: leer SPEC, marcar responsable en PROGRESS, registrar decisiones en DECISIONS.

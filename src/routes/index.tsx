@@ -10,6 +10,7 @@ import {
   Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
 } from "@/components/landing/Sections";
 import { CursorFollower } from "@/components/animations/CursorFollower";
+import { useReducedMotionState } from "@/lib/use-reduced-motion";
 import caroPortrait from "@/assets/caro-portrait.png";
 
 export const Route = createFileRoute("/")({
@@ -25,12 +26,15 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const { reduced, ready } = useReducedMotionState();
   const [introComplete, setIntroComplete] = useState(false);
+
+  const showIntro = ready && !reduced && !introComplete;
 
   return (
     <main className="bg-white text-foreground" style={{ overflowX: "clip" }}>
-      <CursorFollower />
-      {!introComplete && (
+      {ready && !reduced && <CursorFollower />}
+      {showIntro && (
         <SequenceIntro onComplete={() => setIntroComplete(true)} />
       )}
       <Hero />

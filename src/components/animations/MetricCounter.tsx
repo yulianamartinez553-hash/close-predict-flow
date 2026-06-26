@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 interface MetricCounterProps {
   value: number;
@@ -8,11 +9,16 @@ interface MetricCounterProps {
 }
 
 export function MetricCounter({ value, label, suffix = "+" }: MetricCounterProps) {
+  const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.5 });
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(reduced ? value : 0);
 
   useEffect(() => {
+    if (reduced) {
+      setCount(value);
+      return;
+    }
     if (!inView) return;
     let frame: number;
     const start = performance.now();
@@ -25,7 +31,7 @@ export function MetricCounter({ value, label, suffix = "+" }: MetricCounterProps
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [inView, value]);
+  }, [inView, value, reduced]);
 
   return (
     <div ref={ref} className="text-center">

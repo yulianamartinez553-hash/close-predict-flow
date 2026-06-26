@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { viewTransition } from "@/lib/animations";
 
 interface Props {
   onComplete: () => void;
@@ -16,7 +18,8 @@ const PARTICLES = Array.from({ length: 38 }, (_, i) => ({
   opacity: 0.18 + (i % 5) * 0.07,
 }));
 
-function BgParticles() {
+function BgParticles({ reduced }: { reduced: boolean }) {
+  if (reduced) return null;
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
       {PARTICLES.map(p => (
@@ -40,6 +43,7 @@ function BgParticles() {
 }
 
 export function SequenceIntro({ onComplete }: Props) {
+  const reduced = useReducedMotion();
   const [screen, setScreen] = useState(0);
 
   useEffect(() => {
@@ -78,16 +82,16 @@ export function SequenceIntro({ onComplete }: Props) {
       style={{ background: "linear-gradient(160deg, #2B1142 0%, #1E0A33 100%)" }}
       onClick={advance}
     >
-      <BgParticles />
+      <BgParticles reduced={reduced} />
 
       <AnimatePresence mode="wait">
         {screen === 0 ? (
           <motion.div
             key="s1"
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -28 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            initial={reduced ? false : { opacity: 0, y: 28 }}
+            animate={reduced ? undefined : { opacity: 1, y: 0 }}
+            exit={reduced ? undefined : { opacity: 0, y: -28 }}
+            transition={viewTransition(reduced, { duration: 0.65, ease: [0.22, 1, 0.36, 1] })}
             className="relative z-10 mx-auto max-w-3xl px-8 text-center"
           >
             <h1
@@ -121,10 +125,10 @@ export function SequenceIntro({ onComplete }: Props) {
         ) : (
           <motion.div
             key="s2"
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -28 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            initial={reduced ? false : { opacity: 0, y: 28 }}
+            animate={reduced ? undefined : { opacity: 1, y: 0 }}
+            exit={reduced ? undefined : { opacity: 0, y: -28 }}
+            transition={viewTransition(reduced, { duration: 0.65, ease: [0.22, 1, 0.36, 1] })}
             className="relative z-10 mx-auto max-w-3xl px-8 text-center"
           >
             <h1
@@ -161,6 +165,7 @@ export function SequenceIntro({ onComplete }: Props) {
               }}
             >
               <span className="relative z-10">CONOCER CLOSE PREDICT</span>
+              {!reduced && (
               <motion.span
                 aria-hidden
                 className="pointer-events-none absolute inset-0 -skew-x-12"
@@ -171,6 +176,7 @@ export function SequenceIntro({ onComplete }: Props) {
                 animate={{ x: ["-120%", "220%"] }}
                 transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 1.9, ease: "linear" }}
               />
+              )}
             </button>
           </motion.div>
         )}

@@ -179,6 +179,22 @@
   animation: glow 2s ease-in-out infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .aurora-bg,
+  .pulse-glow,
+  .float-y,
+  .animate-glow,
+  .cursor-blink {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

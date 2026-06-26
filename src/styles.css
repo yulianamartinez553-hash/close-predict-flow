@@ -40,6 +40,7 @@
   --color-gold-soft: var(--gold-soft);
   --color-mist: var(--mist);
   --color-cloud: var(--cloud);
+  --color-surface-soft: var(--surface-soft);
 
   --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
   --font-sans: "Inter", "Montserrat", system-ui, sans-serif;
@@ -78,6 +79,7 @@
   --gold-soft: #E8C547;
   --mist: #C9C5D1;
   --cloud: #F5F3F7;
+  --surface-soft: #F9F8FF;
 
   --gradient-aurora: radial-gradient(60% 80% at 20% 20%, #4B1E7A 0%, transparent 60%),
                      radial-gradient(50% 70% at 80% 30%, #6B2BB5 0%, transparent 60%),

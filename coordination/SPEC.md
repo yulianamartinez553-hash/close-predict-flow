@@ -106,7 +106,7 @@ respetar dependencias (`depende de:`).
 - [ ] **T-010** — Integrar logo CLOSE-PREDICT™ · _alta_ · depende de: C-07
   - **Contexto:** usar logo de Close Predict; ignorar borrador "Caro Chaparro" (D-002).
   - **Done cuando:** logo visible en header/footer o hero según diseño acordado con Yuli.
-- [ ] **T-011** — Ajustar paleta del hero / secciones iniciales · _media_ · depende de: —
+- [x] **T-011** — Ajustar paleta del hero / secciones iniciales · _media_ · depende de: —
   - **Contexto:** Caro pidió menos blanco al inicio; probar fondo morado o gris (`src/styles.css`, `Hero.tsx`).
   - **Done cuando:** variante revisada en navegador sin romper contraste ni legibilidad.
 - [ ] **T-012** — Alinear tono de amarillo (`gold`) a publicaciones de Caro · _media_ · depende de: —
@@ -117,7 +117,7 @@ respetar dependencias (`depende de:`).
 
 ### Hito 4 — Copy e idioma
 
-- [ ] **T-014** — Pasar copy a español colombiano (ajustes conocidos) · _media_ · depende de: —
+- [x] **T-014** — Pasar copy a español colombiano (ajustes conocidos) · _media_ · depende de: —
   - **Contexto:** ej. hero "No necesitas trabajar más" (sin lápiz), "tienes" vs "tenés" según tono acordado.
   - **Done cuando:** textos acordados en reunión corregidos en `Hero`, `Sections.tsx` y CTAs.
 - [ ] **T-015** — Revisar copy de `AboutMe` · _media_ · depende de: C-01

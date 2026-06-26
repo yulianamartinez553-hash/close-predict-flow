@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Caro Chaparro · CLOSE-PREDICT™ — Sistema comercial predecible en 12 semanas" },
-      { name: "description", content: "Transformo ventas que dependen del dueño en un sistema comercial predecible y escalable. Agendá tu Diagnóstico Comercial Estratégico." },
+      { name: "description", content: "Transformo ventas que dependen del dueño en un sistema comercial predecible y escalable. Agenda tu Diagnóstico Comercial Estratégico." },
       { property: "og:title", content: "Caro Chaparro · CLOSE-PREDICT™" },
       { property: "og:description", content: "Sistema comercial delegable y predecible para infoproductores LATAM." },
     ],
@@ -32,7 +32,7 @@ function Landing() {
   const showIntro = ready && !reduced && !introComplete;
 
   return (
-    <main className="bg-white text-foreground" style={{ overflowX: "clip" }}>
+    <main className="bg-surface-soft text-foreground" style={{ overflowX: "clip" }}>
       {ready && !reduced && <CursorFollower />}
       {showIntro && (
         <SequenceIntro onComplete={() => setIntroComplete(true)} />

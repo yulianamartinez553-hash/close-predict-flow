@@ -12,14 +12,14 @@ const WHATSAPP_URL = "https://wa.me/573229172709";
 const LEAD_CAPTURE_CARDS = [
   {
     title: "Diagnóstico gratuito",
-    description: "Responde unas preguntas y obtené una primera luz de dónde está fallando tu proceso.",
+    description: "Responde unas preguntas y obtén una primera luz de dónde está fallando tu proceso.",
     href: "/diagnostico.html",
     cta: "Empezar diagnóstico",
     external: false,
   },
   {
     title: 'Comunidad gratuita "Sala Flows"',
-    description: "Conectate cada 15 días y recibí contenido de valor en ventas y marketing.",
+    description: "Conéctate cada 15 días y recibe contenido de valor en ventas y marketing.",
     href: WHATSAPP_URL,
     cta: "Unirme",
     external: true,
@@ -312,11 +312,11 @@ const STATES = [
   },
   {
     title: "Ventas impredecibles",
-    body: "Un mes creces.\n\nAl siguiente,\nno sabés por qué cayó.",
+    body: "Un mes creces.\n\nAl siguiente,\nno sabes por qué cayó.",
   },
   {
-    title: "No necesitás trabajar más.",
-    body: "Necesitás un proceso\nque convierta mejor.",
+    title: "No necesitas trabajar más.",
+    body: "Necesitas un proceso\nque convierta mejor.",
   },
 ];
 
@@ -644,11 +644,11 @@ const DELIVERABLES = [
   { title: "Calculadora comercial", desc: "Modelo de simulación de pipeline, conversiones y rentabilidad." },
   { title: "Playbook de ventas completo", desc: "Procesos, scripts y estructura comercial documentada.", featured: true },
   { title: "BANT de calificación", desc: "Marco para calificar oportunidades con criterio." },
-  { title: "Mapa de fuga", desc: "Visualizá dónde se cae cada venta y por qué." },
+  { title: "Mapa de fuga", desc: "Visualiza dónde se cae cada venta y por qué." },
   { title: "Cierres en 5 pasos", desc: "Secuencia probada para cerrar high-ticket." },
   { title: "KPIs comerciales", desc: "Métricas clave para decidir con datos." },
   { title: "Roadmap de ejecución", desc: "Plan claro de implementación semana a semana." },
-  { title: "Roleplay comercial", desc: "Entrená objeciones reales con tu equipo." },
+  { title: "Roleplay comercial", desc: "Entrena objeciones reales con tu equipo." },
   { title: "Scripts de WhatsApp", desc: "Mensajes optimizados para cada fase del embudo." },
   { title: "Dashboard comercial", desc: "Tablero visual con métricas y alertas." },
   { title: "Sistema de seguimiento", desc: "Nada se pierde. Cada lead, trackeado." },
@@ -771,7 +771,7 @@ export function Resultado() {
         <div>
           <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-violet">Resultado final</div>
           <h2 className="serif text-4xl text-ink text-balance sm:text-5xl">
-            Al finalizar, tenés un <em className="text-violet">sistema comercial</em> funcionando y escalando.
+            Al finalizar, tienes un <em className="text-violet">sistema comercial</em> funcionando y escalando.
           </h2>
           <ul className="mt-10 space-y-4">
             {CHECKS.map((c, i) => (
@@ -881,7 +881,7 @@ export function Garantia() {
           <div className="display mb-2 text-xs uppercase tracking-[0.3em] text-gold">Nuestro compromiso</div>
           <h2 className="serif text-3xl text-ink sm:text-4xl">Nuestra garantía</h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Si al terminar el programa aún no tenés tu sistema comercial implementado correctamente, seguimos contigo hasta dejarlo 100% listo. Tu éxito es nuestro compromiso.
+            Si al terminar el programa aún no tienes tu sistema comercial implementado correctamente, seguimos contigo hasta dejarlo 100% listo. Tu éxito es nuestro compromiso.
           </p>
         </motion.div>
       </div>
@@ -1029,7 +1029,7 @@ export function CtaFinal({ portrait }: { portrait: string }) {
           ¿Listo para construir tu <em className="text-gold">sistema comercial</em>?
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
-          Agendá tu Diagnóstico Comercial Estratégico y descubrí exactamente dónde se están perdiendo tus ventas y cómo convertirlas en crecimiento.
+          Agenda tu Diagnóstico Comercial Estratégico y descubre exactamente dónde se están perdiendo tus ventas y cómo convertirlas en crecimiento.
         </p>
 
         <a

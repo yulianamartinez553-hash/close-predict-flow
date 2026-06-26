@@ -21,10 +21,10 @@
 | T-008 | Integrar Medidor CLOSE-PREDICT™               | blocked  | —           | 2026-06-26  |
 | T-009 | WhatsApp medidor → línea negocio               | blocked  | —           | 2026-06-26  |
 | T-010 | Logo CLOSE-PREDICT™                           | blocked  | —           | 2026-06-26  |
-| T-011 | Paleta hero (menos blanco)                    | todo     | —           | 2026-06-26  |
+| T-011 | Paleta hero (menos blanco)                    | done     | Auto        | 2026-06-26  |
 | T-012 | Tono amarillo alineado a redes                | todo     | —           | 2026-06-26  |
 | T-013 | Fotos profesionales de Caro                   | blocked  | —           | 2026-06-26  |
-| T-014 | Copy español colombiano                       | todo     | —           | 2026-06-26  |
+| T-014 | Copy español colombiano                       | done     | Auto        | 2026-06-26  |
 | T-015 | Copy `AboutMe`                                | blocked  | —           | 2026-06-26  |
 | T-016 | Plazo 12 vs 7 semanas                         | blocked  | —           | 2026-06-26  |
 | T-017 | Propuesta de valor                            | blocked  | —           | 2026-06-26  |
@@ -71,3 +71,4 @@
 - 2026-06-26 · Auto · — · Reunión Caro documentada en REUNION-SEBAS-CARO.md; SPEC ampliado T-007..T-030 (7 hitos) → T-004/T-005 sin bloqueo, o T-027 infra; desbloquear T-007+ cuando Caro envíe Calendly y medidor.
 - 2026-06-26 · Auto · T-004,T-005 · LeadCapture: 3 tarjetas con CTA (diagnóstico, WhatsApp Sala Flows/recursos); reduced-motion global (hook, CSS, intro/cursor/carousel/partículas) → T-007 Calendly o T-011 paleta.
 - 2026-06-26 · Auto · T-004,T-005 · Refinamiento post-revisión: ReducedMotionProvider + `ready` (sin flash intro), Hero canvas estático sin RAF, CSS hovers `motion-reduce:`, diagnóstico misma pestaña, guards legacy (Problema, Entregables, CaosToSistema) → T-007 Calendly o T-011 paleta.
+- 2026-06-26 · Auto · T-011,T-014 · Token `surface-soft` (#F9F8FF) en hero/AboutMe/main; voseo → español colombiano en intro, CTAs y secciones activas → T-006 decisión lead magnets o T-012 amarillo.

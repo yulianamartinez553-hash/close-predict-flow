@@ -49,7 +49,7 @@ export function AboutMe() {
         }
       `}</style>
 
-      <section id="sobre-mi" className="relative overflow-hidden bg-white py-28">
+      <section id="sobre-mi" className="relative overflow-hidden bg-surface-soft py-28">
         {/* Halos de ambiente */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           <div className="absolute -left-32 top-1/4 h-[460px] w-[460px] rounded-full"

@@ -140,7 +140,7 @@ export function SequenceIntro({ onComplete }: Props) {
                 letterSpacing: "-0.02em",
               }}
             >
-              NO NECESITÁS<br />TRABAJAR MÁS
+              NO NECESITAS<br />TRABAJAR MÁS
             </h1>
             <p
               className="mt-6"
@@ -149,7 +149,7 @@ export function SequenceIntro({ onComplete }: Props) {
                 color: "rgba(255,255,255,0.62)",
               }}
             >
-              Necesitás mejorar tu proceso.
+              Necesitas mejorar tu proceso.
             </p>
             <button
               onClick={e => { e.stopPropagation(); advance(); }}

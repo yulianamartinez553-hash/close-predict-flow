@@ -241,15 +241,26 @@ export function Hero() {
         }
       `}</style>
 
-      <section className="relative min-h-screen" style={{ background: "#fff" }}>
+      <section className="relative min-h-screen bg-surface-soft">
+        {/* Halos de ambiente */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div
+            className="absolute -left-32 top-1/4 h-[460px] w-[460px] rounded-full"
+            style={{ background: "rgba(139,63,214,.06)", filter: "blur(80px)" }}
+          />
+          <div
+            className="absolute -right-24 bottom-1/3 h-[360px] w-[360px] rounded-full"
+            style={{ background: "rgba(157,78,221,.05)", filter: "blur(80px)" }}
+          />
+        </div>
 
         {/* ── Navegación ── */}
         <nav
           className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
           style={{
-            background: "rgba(255,255,255,.90)",
+            background: "rgba(249,248,255,.92)",
             backdropFilter: "blur(14px)",
-            borderBottom: "1px solid rgba(139,63,214,.07)",
+            borderBottom: "1px solid rgba(139,63,214,.08)",
           }}
         >
           <a href="#" style={{ fontFamily: "var(--font-serif)", fontSize: "21px", fontWeight: 700, color: "#1E0A33", textDecoration: "none" }}>
@@ -280,7 +291,7 @@ export function Hero() {
 
         {/* ── Hero grid ── */}
         <div
-          className="mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-6 lg:px-[64px] pt-[148px] pb-24"
+          className="relative mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-6 lg:px-[64px] pt-[148px] pb-24"
           style={{ maxWidth: "1280px" }}
         >
           {/* Columna texto */}

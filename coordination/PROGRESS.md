@@ -17,7 +17,7 @@
 | T-004 | Tarjetas de `LeadCapture` accionables          | done     | Auto        | 2026-06-26  |
 | T-005 | Respetar `prefers-reduced-motion` global       | done     | Auto        | 2026-06-26  |
 | T-006 | Destino de "Recursos / lead magnets"           | blocked  | —           | 2026-06-26  |
-| T-007 | Calendly en CTA diagnóstico                    | blocked  | —           | 2026-06-26  |
+| T-007 | Calendly en CTA diagnóstico                    | done     | Auto        | 2026-06-27  |
 | T-008 | Integrar Medidor CLOSE-PREDICT™               | blocked  | —           | 2026-06-26  |
 | T-009 | WhatsApp medidor → línea negocio               | blocked  | —           | 2026-06-26  |
 | T-010 | Logo CLOSE-PREDICT™                           | blocked  | —           | 2026-06-26  |

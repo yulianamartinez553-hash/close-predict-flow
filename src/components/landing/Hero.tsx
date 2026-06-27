@@ -3,390 +3,417 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { viewTransition } from "@/lib/animations";
 
-/* ═══════════════════════════════════════════════════════════════
-   CANVAS PARTICLE FUNNEL  (portado de hero-v3.html)
-   · Canvas lógico: 500 × 650
-   · 4 piezas trapezoidales con 27 px de GAP entre sí
-   · Cada pieza: vidrio + glow violeta + sombra flotante
-   · Partículas: anillos morados con física spring + repulsión
-═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   SMOKE PARTICLE SYSTEM — efecto de humo localizado al cursor
+═══════════════════════════════════════════════════════════ */
 
-const W = 500, H = 650, CX = 250;
-
-/* Piezas: [yTop, yBot, wTop, wBot, n_desktop, n_mobile]
-   Los gaps de 27 px entre piezas son explícitos en los valores de yTop/yBot */
-const PIECES: [number, number, number, number, number, number][] = [
-  [  26, 149, 430, 340,  900, 360 ],   // Pieza 1 (más ancha)
-  [ 176, 299, 320, 250,  680, 270 ],   // gap 27 px ↑
-  [ 326, 429, 230, 175,  460, 185 ],   // gap 27 px ↑
-  [ 456, 546, 160, 105,  290, 115 ],   // gap 27 px ↑
-];
-
-interface Pt {
-  ox: number; oy: number;
-  x: number;  y: number;
+interface SmokeParticle {
+  x: number; y: number;
   vx: number; vy: number;
-  r: number;  alpha: number;
+  size: number; alpha: number;
+  decay: number; color: string;
 }
 
-function buildParticles(mobile: boolean): Pt[] {
-  const pts: Pt[] = [];
-  PIECES.forEach(([yT, yB, wT, wB, nd, nm]) => {
-    const n = mobile ? nm : nd;
-    for (let i = 0; i < n; i++) {
-      const t = Math.random();
-      const y = yT + t * (yB - yT);
-      const w = wT + t * (wB - wT);
-      const x = CX - w / 2 + Math.random() * w;
-      pts.push({
-        ox: x, oy: y,
-        x: x + (Math.random() - 0.5) * 3,
-        y: y + (Math.random() - 0.5) * 3,
-        vx: 0, vy: 0,
-        r:     1.0 + Math.random() * 1.5,    // radio 1–2.5 px
-        alpha: 0.45 + Math.random() * 0.55,
-      });
-    }
-  });
-  return pts;
+const SMOKE_COLORS = ["#C77DFF", "#B08FFF", "#9D4EDD", "#D4AAFF", "#8B3FD6"];
+
+function spawnSmoke(x: number, y: number): SmokeParticle[] {
+  return Array.from({ length: 4 }, () => ({
+    x: x + (Math.random() - 0.5) * 30,
+    y: y + (Math.random() - 0.5) * 30,
+    vx: (Math.random() - 0.5) * 1.5,
+    vy: -(0.5 + Math.random() * 1.8),
+    size: 14 + Math.random() * 28,
+    alpha: 0.10 + Math.random() * 0.22,
+    decay: 0.007 + Math.random() * 0.014,
+    color: SMOKE_COLORS[Math.floor(Math.random() * SMOKE_COLORS.length)],
+  }));
 }
 
-function initFunnel(canvas: HTMLCanvasElement, reduced: boolean): () => void {
+function initSmoke(canvas: HTMLCanvasElement): () => void {
   const ctx = canvas.getContext("2d")!;
-
-  /* Física — cambiar aquí para ajustar el comportamiento:
-     R   = radio de influencia del cursor (px)
-     STR = fuerza de empuje
-     SP  = velocidad de retorno al origen
-     DM  = amortiguación (0.80 = más fricción, 0.90 = más deslizamiento) */
-  const R = 70, STR = 6.5, SP = 0.065, DM = 0.82;
-
-  let pts: Pt[] = [];
-  let mx = -9999, my = -9999;
+  let W = 1, H = 1;
+  let particles: SmokeParticle[] = [];
   let rafId = 0;
+  let running = false;
 
   function resize() {
+    const rect = canvas.getBoundingClientRect();
+    W = Math.max(rect.width, 1);
+    H = Math.max(rect.height, 1);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width  = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width  = "100%";
-    canvas.style.height = "100%";
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
+    canvas.width  = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  function rebuild() {
-    pts = buildParticles(window.innerWidth < 900);
-  }
-
-  function update() {
-    const RR = R * R;
-    pts.forEach(p => {
-      const dx = p.x - mx, dy = p.y - my, d2 = dx * dx + dy * dy;
-      if (d2 < RR && d2 > 0.01) {
-        const d = Math.sqrt(d2), f = ((R - d) / R) * STR;
-        p.vx += (dx / d) * f; p.vy += (dy / d) * f;
-      }
-      p.vx += (p.ox - p.x) * SP; p.vy += (p.oy - p.y) * SP;
-      p.vx *= DM; p.vy *= DM;
-      p.x += p.vx; p.y += p.vy;
-    });
-  }
-
-  function draw() {
+  function tick() {
     ctx.clearRect(0, 0, W, H);
-
-    /* ── Partículas (anillos morados) ── */
-    ctx.save();
-    ctx.strokeStyle = "#8B3FD6"; ctx.lineWidth = 1.2;
-    pts.forEach(p => {
+    const alive: SmokeParticle[] = [];
+    for (const p of particles) {
+      p.x  += p.vx;  p.y  += p.vy;
+      p.vy *= 0.985; p.vx *= 0.99;
+      p.size  *= 1.018;
+      p.alpha -= p.decay;
+      if (p.alpha <= 0) continue;
+      ctx.save();
+      ctx.filter      = "blur(14px)";
       ctx.globalAlpha = p.alpha;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.stroke();
-    });
-    ctx.restore();
+      ctx.fillStyle   = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      alive.push(p);
+    }
+    particles = alive;
+    if (particles.length > 0) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      running = false;
+    }
   }
 
+  function onMove(e: MouseEvent) {
+    const rect = canvas.getBoundingClientRect();
+    particles.push(...spawnSmoke(e.clientX - rect.left, e.clientY - rect.top));
+    if (!running) { running = true; rafId = requestAnimationFrame(tick); }
+  }
+
+  const obs = new ResizeObserver(() => resize());
+  obs.observe(canvas);
   resize();
-  rebuild();
-  draw();
-
-  if (reduced) {
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    const onResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { resize(); rebuild(); draw(); }, 250);
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("resize", onResize);
-      clearTimeout(resizeTimer);
-    };
-  }
-
-  function loop() {
-    update();
-    draw();
-    rafId = requestAnimationFrame(loop);
-  }
-
-  const onMouseMove = (e: MouseEvent) => {
-    const r = canvas.getBoundingClientRect();
-    mx = (e.clientX - r.left) * (W / r.width);
-    my = (e.clientY - r.top)  * (H / r.height);
-  };
-  const onTouchMove = (e: TouchEvent) => {
-    const r = canvas.getBoundingClientRect();
-    mx = (e.touches[0].clientX - r.left) * (W / r.width);
-    my = (e.touches[0].clientY - r.top)  * (H / r.height);
-  };
-  const onLeave = () => { mx = -9999; my = -9999; };
-
-  canvas.addEventListener("mousemove",  onMouseMove,  { passive: true });
-  canvas.addEventListener("touchmove",  onTouchMove,  { passive: true });
-  canvas.addEventListener("mouseleave", onLeave);
-  canvas.addEventListener("touchend",   onLeave);
-
-  let resizeTimer: ReturnType<typeof setTimeout>;
-  const onResize = () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { resize(); rebuild(); }, 250);
-  };
-  window.addEventListener("resize", onResize);
-
-  rafId = requestAnimationFrame(loop);
+  canvas.addEventListener("mousemove", onMove, { passive: true });
 
   return () => {
     cancelAnimationFrame(rafId);
-    canvas.removeEventListener("mousemove",  onMouseMove);
-    canvas.removeEventListener("touchmove",  onTouchMove);
-    canvas.removeEventListener("mouseleave", onLeave);
-    canvas.removeEventListener("touchend",   onLeave);
-    window.removeEventListener("resize", onResize);
-    clearTimeout(resizeTimer);
+    canvas.removeEventListener("mousemove", onMove);
+    obs.disconnect();
   };
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   NAV + COMPONENT
-═══════════════════════════════════════════════════════════════ */
-
+/* ═══════════════════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════════════════ */
 const NAV_LINKS = [
-  { label: "Sobre mí",      href: "#sobre-mi" },
-  { label: "Close Predict", href: "#sistema" },
+  { label: "Sobre mí",      href: "#sobre-mi"   },
+  { label: "Close Predict", href: "#sistema"    },
   { label: "Recursos",      href: "#no-momento" },
-  { label: "Contacto",      href: "#contacto" },
+  { label: "Contacto",      href: "#contacto"   },
 ];
 
+/* ═══════════════════════════════════════════════════════════
+   COMPONENT
+═══════════════════════════════════════════════════════════ */
 export function Hero() {
-  const reduced = useReducedMotion();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const reduced  = useReducedMotion();
+  const smokeRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
-    return initFunnel(canvasRef.current, reduced);
+    if (reduced || !smokeRef.current) return;
+    return initSmoke(smokeRef.current);
   }, [reduced]);
 
-  const scrollTo = (e: React.MouseEvent, id: string) => {
+  const scrollTo = (e: { preventDefault(): void }, id: string) => {
     e.preventDefault();
     document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
   };
 
   return (
     <>
-      {/* ── CSS keyframes inyectados una sola vez ── */}
       <style>{`
-        @keyframes heroShine {
-          0%   { background-position: -200% center; }
-          30%  { background-position:  200% center; }
-          100% { background-position:  200% center; }
+        @keyframes cpShimmer {
+          0%   { background-position: -270% center; }
+          40%  { background-position: 270% center; }
+          100% { background-position: 270% center; }
         }
-        .hero-title {
-          background: linear-gradient(90deg,#8B3FD6 0%,#9D4EDD 35%,#c4b5fd 50%,#9D4EDD 65%,#8B3FD6 100%);
-          background-size: 200% auto;
+        .cp-logo-text {
+          font-family: 'Montserrat', 'Inter', system-ui, sans-serif;
+          font-weight: 900;
+          letter-spacing: -0.025em;
+          line-height: 1.0;
+          background: linear-gradient(
+            100deg,
+            #8B3FD6 0%,
+            #B689FF 38%,
+            #DCC2FF 52%,
+            #B689FF 66%,
+            #8B3FD6 100%
+          );
+          background-size: 280% auto;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          animation: heroShine 3s linear infinite;
+          filter: drop-shadow(0 2px 28px rgba(157,78,221,0.55));
+          animation: cpShimmer 3.8s ease-in-out infinite;
         }
-        .sistema-word {
-          background: linear-gradient(90deg,#8B3FD6 0%,#9D4EDD 30%,#e9d5ff 50%,#9D4EDD 70%,#8B3FD6 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: heroShine 3s linear infinite;
-          filter: drop-shadow(0 0 8px rgba(139,63,214,.55));
-        }
-        .nav-pill {
-          position: relative;
-          color: #8B3FD6;
-          font-size: 13.5px;
-          font-weight: 500;
-          text-decoration: none;
-          padding-bottom: 2px;
-        }
-        .nav-pill::after {
-          content: '';
-          position: absolute;
-          bottom: -2px; left: 0; right: 0;
-          height: 1.5px;
-          background: #8B3FD6;
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform 300ms ease;
-        }
-        .nav-pill:hover::after { transform: scaleX(1); }
         @media (prefers-reduced-motion: reduce) {
-          .hero-title, .sistema-word { animation: none; -webkit-text-fill-color: #8B3FD6; }
+          .cp-logo-text {
+            animation: none;
+            -webkit-text-fill-color: #C077FF;
+            filter: none;
+          }
+        }
+        .cp-nav-link {
+          color: rgba(220,194,255,0.68);
+          font-size: 13px; font-weight: 500;
+          text-decoration: none;
+          position: relative; padding-bottom: 2px;
+          transition: color 220ms;
+        }
+        .cp-nav-link:hover { color: #DCC2FF; }
+        .cp-nav-link::after {
+          content: '';
+          position: absolute; bottom: -2px; left: 0; right: 0;
+          height: 1px; background: #C77DFF;
+          transform: scaleX(0); transform-origin: left;
+          transition: transform 260ms ease;
+        }
+        .cp-nav-link:hover::after { transform: scaleX(1); }
+        .cp-agendar {
+          padding: 8px 24px;
+          border: 1.5px solid rgba(199,125,255,0.42);
+          border-radius: 100px;
+          font-size: 13px; font-weight: 600;
+          color: #C77DFF; text-decoration: none;
+          background: rgba(199,125,255,0.07);
+          transition: border-color 220ms, background 220ms, color 220ms;
+          display: inline-block;
+        }
+        .cp-agendar:hover {
+          border-color: rgba(199,125,255,0.75);
+          background: rgba(199,125,255,0.15);
+          color: #EDD6FF;
         }
       `}</style>
 
-      <section className="relative min-h-screen bg-surface-soft">
+      {/* ── NAV ── */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
+        style={{
+          background: "rgba(16,7,42,0.88)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          borderBottom: "1px solid rgba(157,78,221,0.14)",
+        }}
+      >
+        <a href="#" style={{
+          fontFamily: "'Montserrat','Inter',sans-serif",
+          fontSize: "15px", fontWeight: 800,
+          letterSpacing: "0.12em", color: "#C77DFF",
+          textDecoration: "none",
+        }}>
+          CLOSE<span style={{ color: "rgba(199,125,255,0.38)", margin: "0 3px", fontWeight: 300 }}>·</span>PREDICT
+        </a>
+
+        <div className="hidden md:flex items-center gap-7">
+          {NAV_LINKS.map(({ label, href }) => (
+            <a key={href} href={href} className="cp-nav-link"
+               onClick={e => scrollTo(e, href.slice(1))}>
+              {label}
+            </a>
+          ))}
+          <a
+            href="https://calendly.com/caroventascoach/30min?month=2026-06"
+            target="_blank" rel="noopener noreferrer"
+            className="cp-agendar"
+          >
+            Agendar
+          </a>
+        </div>
+      </nav>
+
+      {/* ── HERO ── */}
+      <section
+        className="relative flex items-center justify-center overflow-hidden"
+        style={{
+          minHeight: "100vh",
+          background: "radial-gradient(ellipse 105% 88% at 48% 52%, #1B0F3F 0%, #160B35 44%, #10072A 100%)",
+        }}
+      >
+        {/* Textura de ruido digital */}
+        <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden>
+          <filter id="cp-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.70" numOctaves="4" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+        </svg>
+        <div aria-hidden style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          filter: "url(#cp-noise)", opacity: 0.028,
+        }} />
+
         {/* Halos de ambiente */}
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div
-            className="absolute -left-32 top-1/4 h-[460px] w-[460px] rounded-full"
-            style={{ background: "rgba(139,63,214,.06)", filter: "blur(80px)" }}
-          />
-          <div
-            className="absolute -right-24 bottom-1/3 h-[360px] w-[360px] rounded-full"
-            style={{ background: "rgba(157,78,221,.05)", filter: "blur(80px)" }}
-          />
+        <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+          <div style={{
+            position: "absolute", left: "5%", top: "14%",
+            width: 520, height: 520, borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(107,31,209,0.22) 0%, transparent 70%)",
+            filter: "blur(65px)",
+          }} />
+          <div style={{
+            position: "absolute", right: "8%", bottom: "14%",
+            width: 380, height: 380, borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(157,78,221,0.15) 0%, transparent 70%)",
+            filter: "blur(60px)",
+          }} />
+          <div style={{
+            position: "absolute", left: "44%", top: "30%",
+            width: 260, height: 260, borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(199,125,255,0.08) 0%, transparent 70%)",
+            filter: "blur(45px)",
+          }} />
         </div>
 
-        {/* ── Navegación ── */}
-        <nav
-          className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
+        {/* ── Composición central ── */}
+        <motion.div
           style={{
-            background: "rgba(249,248,255,.92)",
-            backdropFilter: "blur(14px)",
-            borderBottom: "1px solid rgba(139,63,214,.08)",
+            position: "relative", zIndex: 10,
+            width: "82%", maxWidth: 1080,
+            display: "flex", alignItems: "center",
+            justifyContent: "center",
+            gap: "5rem", flexWrap: "wrap",
           }}
+          initial={reduced ? false : { opacity: 0 }}
+          animate={reduced ? undefined : { opacity: 1 }}
+          transition={viewTransition(reduced, { duration: 1.1, ease: [0.22, 1, 0.36, 1] })}
         >
-          <a href="#" style={{ fontFamily: "var(--font-serif)", fontSize: "21px", fontWeight: 700, color: "#1E0A33", textDecoration: "none" }}>
-            Caro <em style={{ fontStyle: "italic", color: "#8B3FD6" }}>Chaparro</em>
-          </a>
-          <div className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map(({ label, href }) => (
-              <a key={href} href={href} className="nav-pill" onClick={e => scrollTo(e, href.slice(1))}>
-                {label}
-              </a>
-            ))}
-            <a
-              href="/diagnostico.html"
-              style={{
-                padding: "7px 22px",
-                border: "1.5px solid rgba(139,63,214,.35)",
-                borderRadius: "100px",
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "#8B3FD6",
-                textDecoration: "none",
-              }}
-            >
-              Agendar
-            </a>
-          </div>
-        </nav>
-
-        {/* ── Hero grid ── */}
-        <div
-          className="relative mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-6 lg:px-[64px] pt-[148px] pb-24"
-          style={{ maxWidth: "1280px" }}
-        >
-          {/* Columna texto */}
+          {/* ── IZQUIERDA: Embudo SVG + canvas de humo ── */}
           <motion.div
-            className="flex flex-col gap-7"
-            initial={reduced ? false : { opacity: 0, y: 24 }}
-            animate={reduced ? undefined : { opacity: 1, y: 0 }}
-            transition={viewTransition(reduced, { duration: 0.8, ease: [0.22, 1, 0.36, 1] })}
+            style={{ position: "relative", width: "min(42%, 400px)", flexShrink: 0 }}
+            initial={reduced ? false : { opacity: 0, x: -30 }}
+            animate={reduced ? undefined : { opacity: 1, x: 0 }}
+            transition={viewTransition(reduced, { duration: 1.0, delay: 0.18, ease: [0.22, 1, 0.36, 1] })}
           >
-            <span
-              className="inline-flex items-center gap-2 w-fit rounded-full px-4 py-[5px]"
-              style={{
-                fontSize: "10.5px", fontWeight: 700, letterSpacing: ".22em",
-                textTransform: "uppercase", color: "#8B3FD6",
-                border: "1px solid rgba(139,63,214,.22)",
-                background: "rgba(139,63,214,.05)",
-              }}
+            {/* Embudo SVG: 4 franjas curvas separadas por espacios negativos */}
+            <svg
+              viewBox="-12 -24 366 290"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ width: "100%", height: "auto", display: "block" }}
+              aria-label="Embudo de ventas Close Predict"
             >
-              <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: "#8B3FD6" }} />
-              CLOSE-PREDICT™ · Mentoría high-ticket
-            </span>
+              <defs>
+                {/* Degradado horizontal: azul profundo → violeta → lila */}
+                <linearGradient id="cpFg" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%"   stopColor="#223B8F" />
+                  <stop offset="20%"  stopColor="#6B1FD1" />
+                  <stop offset="50%"  stopColor="#9D4EDD" />
+                  <stop offset="78%"  stopColor="#C77DFF" />
+                  <stop offset="100%" stopColor="#A869E8" />
+                </linearGradient>
+                {/* Brillo superior (gloss) */}
+                <linearGradient id="cpGloss" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stopColor="rgba(255,255,255,0.22)" />
+                  <stop offset="45%"  stopColor="rgba(255,255,255,0.05)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0.00)" />
+                </linearGradient>
+                {/* Glow violeta exterior */}
+                <filter id="cpGlow" x="-22%" y="-22%" width="144%" height="144%">
+                  <feGaussianBlur stdDeviation="14" result="glow" in="SourceGraphic" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
 
-            <h1
-              className="hero-title"
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "clamp(38px, 5vw, 72px)",
-                fontWeight: 900,
-                lineHeight: 1.05,
-                letterSpacing: "-.015em",
-              }}
-            >
-              TU NEGOCIO NO TIENE<br />
-              UN PROBLEMA DE VENTAS.<br />
-              TIENE UN PROBLEMA DE{" "}
-              <span className="sistema-word">SISTEMA.</span>
-            </h1>
+              <g filter="url(#cpGlow)">
+                {/*
+                  Franja 1 — la más ancha, inclinada, termina en flecha ↗
+                  La franja sube de izquierda a derecha y la punta de la flecha
+                  apunta arriba-derecha (x=342, y=8).
+                */}
+                <path
+                  d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
+                  fill="url(#cpFg)"
+                />
+                <path
+                  d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
+                  fill="url(#cpGloss)" opacity="0.70"
+                />
 
-            <p style={{ fontSize: "15.5px", lineHeight: 1.85, color: "#64748B", maxWidth: "450px" }}>
-              Transformo ventas que dependen del dueño en un{" "}
-              <strong style={{ color: "#1E0A33", fontWeight: 600 }}>sistema comercial predecible</strong>{" "}
-              y escalable en 12 semanas.
-            </p>
+                {/* Franja 2 — media */}
+                <path
+                  d="M 0,93 L 0,133 Q 112,129 238,119 L 238,99 Q 112,100 0,93 Z"
+                  fill="url(#cpFg)"
+                />
+                <path
+                  d="M 0,93 L 0,133 Q 112,129 238,119 L 238,99 Q 112,100 0,93 Z"
+                  fill="url(#cpGloss)" opacity="0.58"
+                />
 
-            {/* Botón SOBRE MÍ con shine continuo */}
-            <button
-              onClick={e => scrollTo(e as unknown as React.MouseEvent, "sobre-mi")}
-              className="relative overflow-hidden text-white font-black uppercase w-fit"
-              style={{
-                height: 52,
-                padding: "0 48px",
-                borderRadius: "100px",
-                background: "#8B3FD6",
-                fontSize: "14px",
-                letterSpacing: ".1em",
-                border: "none",
-                cursor: "pointer",
-                boxShadow: "0 0 30px rgba(139,63,214,.6)",
-              }}
-            >
-              <span className="relative z-10">SOBRE MÍ</span>
-              {!reduced && (
-              <motion.span
+                {/* Franja 3 — más estrecha */}
+                <path
+                  d="M 0,157 L 0,189 Q 84,186 182,177 L 182,163 Q 84,162 0,157 Z"
+                  fill="url(#cpFg)"
+                />
+                <path
+                  d="M 0,157 L 0,189 Q 84,186 182,177 L 182,163 Q 84,162 0,157 Z"
+                  fill="url(#cpGloss)" opacity="0.50"
+                />
+
+                {/* Franja 4 — la más pequeña, triangular-curva */}
+                <path
+                  d="M 0,213 L 0,237 Q 58,235 133,228 L 133,216 Q 58,214 0,213 Z"
+                  fill="url(#cpFg)"
+                />
+                <path
+                  d="M 0,213 L 0,237 Q 58,235 133,228 L 133,216 Q 58,214 0,213 Z"
+                  fill="url(#cpGloss)" opacity="0.42"
+                />
+              </g>
+            </svg>
+
+            {/* Canvas de humo — captura el mouse, efecto localizado */}
+            {!reduced && (
+              <canvas
+                ref={smokeRef}
                 aria-hidden
-                className="pointer-events-none absolute inset-0 -skew-x-12"
                 style={{
-                  background:
-                    "linear-gradient(90deg,transparent 0%,rgba(255,255,255,.30) 50%,transparent 100%)",
+                  position: "absolute", inset: 0,
+                  width: "100%", height: "100%",
+                  cursor: "crosshair",
+                  pointerEvents: "auto",
                 }}
-                animate={{ x: ["-120%", "220%"] }}
-                transition={{ duration: 1.0, repeat: Infinity, repeatDelay: 2.0, ease: "linear" }}
               />
-              )}
-            </button>
+            )}
           </motion.div>
 
-          {/* Columna canvas */}
+          {/* ── DERECHA: Texto "Close Predict®" ── */}
           <motion.div
-            className="flex items-center justify-center"
-            initial={reduced ? false : { opacity: 0, scale: 0.97 }}
-            animate={reduced ? undefined : { opacity: 1, scale: 1 }}
-            transition={viewTransition(reduced, { duration: 1.0, delay: 0.15, ease: [0.22, 1, 0.36, 1] })}
+            style={{
+              display: "flex", flexDirection: "column",
+              alignItems: "flex-start",
+              marginBottom: "6%",
+              flexShrink: 0, minWidth: 200,
+            }}
+            initial={reduced ? false : { opacity: 0, x: 30 }}
+            animate={reduced ? undefined : { opacity: 1, x: 0 }}
+            transition={viewTransition(reduced, { duration: 1.0, delay: 0.30, ease: [0.22, 1, 0.36, 1] })}
           >
             <div
-              className="relative w-full cursor-crosshair"
-              style={{ maxWidth: "480px", aspectRatio: "500/650" }}
+              className="cp-logo-text"
+              style={{ fontSize: "clamp(50px, 5.8vw, 90px)" }}
             >
-              <canvas
-                ref={canvasRef}
-                aria-label="Embudo de ventas interactivo CLOSE-PREDICT™"
-                className="absolute inset-0 w-full h-full block"
-              />
+              Close
+              <br />
+              Predict
+              <span style={{ fontSize: "0.50em", verticalAlign: "super", letterSpacing: 0 }}>
+                ®
+              </span>
+            </div>
+
+            <div style={{
+              marginTop: "1.4rem",
+              fontSize: "clamp(9px, 0.95vw, 11.5px)",
+              fontFamily: "'Montserrat','Inter',sans-serif",
+              fontWeight: 700, letterSpacing: "0.30em",
+              textTransform: "uppercase",
+              color: "rgba(199,125,255,0.46)",
+            }}>
+              Sistema comercial predecible
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </section>
     </>
   );

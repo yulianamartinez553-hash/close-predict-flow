@@ -135,7 +135,10 @@ export function Hero() {
         className="relative flex items-center justify-center overflow-hidden"
         style={{
           minHeight: "100vh",
-          background: "radial-gradient(ellipse 105% 88% at 48% 52%, #1B0F3F 0%, #160B35 44%, #10072A 100%)",
+          background: `
+            radial-gradient(circle at center, rgba(155,90,255,.22) 0%, rgba(110,55,210,.14) 18%, rgba(70,30,130,.08) 35%, transparent 60%),
+            radial-gradient(ellipse at center, #6C39B3 0%, #572996 15%, #431C73 35%, #2F124D 58%, #1A0A2B 82%, #08030F 100%)
+          `,
         }}
       >
         {/* Textura de ruido */}

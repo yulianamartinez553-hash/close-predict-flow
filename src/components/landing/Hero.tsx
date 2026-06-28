@@ -287,18 +287,21 @@ export function Hero() {
             }}
           >
             <picture>
+              <source srcSet="/images/logo-close-predict.avif" type="image/avif" />
               <source srcSet="/images/logo-close-predict.webp" type="image/webp" />
               <img
                 src="/images/logo-close-predict.png"
                 alt="Close Predict® — Sistema comercial predecible"
                 draggable={false}
+                width={1600}
+                height={848}
                 style={{
-                  width: "min(75vw, 560px)",
+                  width: "min(90vw, 680px)",
                   height: "auto",
                   display: "block",
                   userSelect: "none",
-                  filter:
-                    "drop-shadow(0 0 48px rgba(107,31,209,0.55)) drop-shadow(0 0 20px rgba(199,125,255,0.30))",
+                  borderRadius: "12px",
+                  willChange: "transform",
                 }}
               />
             </picture>

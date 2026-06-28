@@ -264,106 +264,46 @@ export function Hero() {
           }} />
         </div>
 
-        {/* ── Composición central ── */}
+        {/* ── Logo centrado con animación de flotación ── */}
         <motion.div
           style={{
             position: "relative", zIndex: 10,
-            width: "82%", maxWidth: 1080,
-            display: "flex", alignItems: "center",
-            justifyContent: "center",
-            gap: "5rem", flexWrap: "wrap",
+            display: "flex", flexDirection: "column",
+            alignItems: "center", gap: "2rem",
           }}
-          initial={reduced ? false : { opacity: 0 }}
-          animate={reduced ? undefined : { opacity: 1 }}
+          initial={reduced ? false : { opacity: 0, y: 24 }}
+          animate={reduced ? undefined : { opacity: 1, y: 0 }}
           transition={viewTransition(reduced, { duration: 1.1, ease: [0.22, 1, 0.36, 1] })}
         >
-          {/* ── IZQUIERDA: Embudo SVG + canvas de humo ── */}
+          {/* Logo flotante */}
           <motion.div
-            style={{ position: "relative", width: "min(42%, 400px)", flexShrink: 0 }}
-            initial={reduced ? false : { opacity: 0, x: -30 }}
-            animate={reduced ? undefined : { opacity: 1, x: 0 }}
-            transition={viewTransition(reduced, { duration: 1.0, delay: 0.18, ease: [0.22, 1, 0.36, 1] })}
+            style={{ position: "relative" }}
+            animate={reduced ? undefined : { y: [0, -14, 0] }}
+            transition={reduced ? undefined : {
+              duration: 5.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              repeatType: "loop",
+            }}
           >
-            {/* Embudo SVG: 4 franjas curvas separadas por espacios negativos */}
-            <svg
-              viewBox="-12 -24 366 290"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ width: "100%", height: "auto", display: "block" }}
-              aria-label="Embudo de ventas Close Predict"
-            >
-              <defs>
-                {/* Degradado horizontal: azul profundo → violeta → lila */}
-                <linearGradient id="cpFg" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%"   stopColor="#223B8F" />
-                  <stop offset="20%"  stopColor="#6B1FD1" />
-                  <stop offset="50%"  stopColor="#9D4EDD" />
-                  <stop offset="78%"  stopColor="#C77DFF" />
-                  <stop offset="100%" stopColor="#A869E8" />
-                </linearGradient>
-                {/* Brillo superior (gloss) */}
-                <linearGradient id="cpGloss" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="rgba(255,255,255,0.22)" />
-                  <stop offset="45%"  stopColor="rgba(255,255,255,0.05)" />
-                  <stop offset="100%" stopColor="rgba(255,255,255,0.00)" />
-                </linearGradient>
-                {/* Glow violeta exterior */}
-                <filter id="cpGlow" x="-22%" y="-22%" width="144%" height="144%">
-                  <feGaussianBlur stdDeviation="14" result="glow" in="SourceGraphic" />
-                  <feMerge>
-                    <feMergeNode in="glow" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
+            <picture>
+              <source srcSet="/images/logo-close-predict.webp" type="image/webp" />
+              <img
+                src="/images/logo-close-predict.png"
+                alt="Close Predict® — Sistema comercial predecible"
+                draggable={false}
+                style={{
+                  width: "min(75vw, 560px)",
+                  height: "auto",
+                  display: "block",
+                  userSelect: "none",
+                  filter:
+                    "drop-shadow(0 0 48px rgba(107,31,209,0.55)) drop-shadow(0 0 20px rgba(199,125,255,0.30))",
+                }}
+              />
+            </picture>
 
-              <g filter="url(#cpGlow)">
-                {/*
-                  Franja 1 — la más ancha, inclinada, termina en flecha ↗
-                  La franja sube de izquierda a derecha y la punta de la flecha
-                  apunta arriba-derecha (x=342, y=8).
-                */}
-                <path
-                  d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
-                  fill="url(#cpFg)"
-                />
-                <path
-                  d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
-                  fill="url(#cpGloss)" opacity="0.70"
-                />
-
-                {/* Franja 2 — media */}
-                <path
-                  d="M 0,93 L 0,133 Q 112,129 238,119 L 238,99 Q 112,100 0,93 Z"
-                  fill="url(#cpFg)"
-                />
-                <path
-                  d="M 0,93 L 0,133 Q 112,129 238,119 L 238,99 Q 112,100 0,93 Z"
-                  fill="url(#cpGloss)" opacity="0.58"
-                />
-
-                {/* Franja 3 — más estrecha */}
-                <path
-                  d="M 0,157 L 0,189 Q 84,186 182,177 L 182,163 Q 84,162 0,157 Z"
-                  fill="url(#cpFg)"
-                />
-                <path
-                  d="M 0,157 L 0,189 Q 84,186 182,177 L 182,163 Q 84,162 0,157 Z"
-                  fill="url(#cpGloss)" opacity="0.50"
-                />
-
-                {/* Franja 4 — la más pequeña, triangular-curva */}
-                <path
-                  d="M 0,213 L 0,237 Q 58,235 133,228 L 133,216 Q 58,214 0,213 Z"
-                  fill="url(#cpFg)"
-                />
-                <path
-                  d="M 0,213 L 0,237 Q 58,235 133,228 L 133,216 Q 58,214 0,213 Z"
-                  fill="url(#cpGloss)" opacity="0.42"
-                />
-              </g>
-            </svg>
-
-            {/* Canvas de humo — captura el mouse, efecto localizado */}
+            {/* Canvas de humo — captura el mouse sobre el logo */}
             {!reduced && (
               <canvas
                 ref={smokeRef}
@@ -378,40 +318,20 @@ export function Hero() {
             )}
           </motion.div>
 
-          {/* ── DERECHA: Texto "Close Predict®" ── */}
+          {/* Tagline */}
           <motion.div
+            initial={reduced ? false : { opacity: 0, y: 10 }}
+            animate={reduced ? undefined : { opacity: 1, y: 0 }}
+            transition={viewTransition(reduced, { duration: 0.9, delay: 0.55, ease: [0.22, 1, 0.36, 1] })}
             style={{
-              display: "flex", flexDirection: "column",
-              alignItems: "flex-start",
-              marginBottom: "6%",
-              flexShrink: 0, minWidth: 200,
-            }}
-            initial={reduced ? false : { opacity: 0, x: 30 }}
-            animate={reduced ? undefined : { opacity: 1, x: 0 }}
-            transition={viewTransition(reduced, { duration: 1.0, delay: 0.30, ease: [0.22, 1, 0.36, 1] })}
-          >
-            <div
-              className="cp-logo-text"
-              style={{ fontSize: "clamp(50px, 5.8vw, 90px)" }}
-            >
-              Close
-              <br />
-              Predict
-              <span style={{ fontSize: "0.50em", verticalAlign: "super", letterSpacing: 0 }}>
-                ®
-              </span>
-            </div>
-
-            <div style={{
-              marginTop: "1.4rem",
-              fontSize: "clamp(9px, 0.95vw, 11.5px)",
+              fontSize: "clamp(9px, 1.1vw, 12px)",
               fontFamily: "'Montserrat','Inter',sans-serif",
-              fontWeight: 700, letterSpacing: "0.30em",
+              fontWeight: 700, letterSpacing: "0.32em",
               textTransform: "uppercase",
-              color: "rgba(199,125,255,0.46)",
-            }}>
-              Sistema comercial predecible
-            </div>
+              color: "rgba(199,125,255,0.48)",
+            }}
+          >
+            Sistema comercial predecible
           </motion.div>
         </motion.div>
       </section>

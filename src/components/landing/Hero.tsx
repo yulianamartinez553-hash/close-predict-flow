@@ -7,14 +7,6 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 ───────────────────────────────────────────────────────────────── */
 const EXPO = [0.16, 1, 0.3, 1] as const;
 
-/* 4 barras del embudo — paths exactos del logo original */
-const BARS = [
-  { key: "b0", d: "M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z", gloss: 0.70, delay: 0.10 },
-  { key: "b1", d: "M 0,93 L 0,133 Q 112,129 238,119 L 238,99 Q 112,100 0,93 Z",       gloss: 0.58, delay: 0.26 },
-  { key: "b2", d: "M 0,157 L 0,189 Q 84,186 182,177 L 182,163 Q 84,162 0,157 Z",      gloss: 0.50, delay: 0.42 },
-  { key: "b3", d: "M 0,213 L 0,237 Q 58,235 133,228 L 133,216 Q 58,214 0,213 Z",      gloss: 0.42, delay: 0.58 },
-];
-
 const NAV_LINKS = [
   { label: "Sobre mí",      href: "#sobre-mi"   },
   { label: "Close Predict", href: "#sistema"    },
@@ -230,70 +222,41 @@ export function Hero() {
                 transformStyle: "preserve-3d",
               }}
             >
-              {/* Respiración suave — solo activa tras construirse el embudo */}
+              {/* Respiración suave — solo activa tras aparecer el embudo */}
               <motion.div
-                style={{ filter: "drop-shadow(0 0 22px rgba(108,57,179,0.42))" }}
+                style={{ filter: "drop-shadow(0 0 24px rgba(108,57,179,0.45))", willChange: "transform" }}
                 animate={funnelDone ? { scale: [1, 1.012, 1] } : undefined}
                 transition={funnelDone
                   ? { duration: 6.5, repeat: Infinity, ease: "easeInOut" }
                   : undefined
                 }
               >
-                <svg
-                  viewBox="-12 -24 366 290"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{ width: "100%", height: "auto", display: "block", overflow: "visible" }}
-                  aria-label="Embudo de ventas Close Predict"
+                {/* Imagen real del embudo con fondo transparente */}
+                <motion.div
+                  style={{ willChange: "transform" }}
+                  initial={reduced ? undefined : { opacity: 0, y: 22, scale: 0.93, filter: "blur(8px)" }}
+                  animate={reduced ? undefined : { opacity: 1, y: 0,  scale: 1,    filter: "blur(0px)" }}
+                  transition={reduced ? undefined : { delay: 0.10, duration: 0.65, ease: EXPO }}
+                  onAnimationComplete={() => setFunnelDone(true)}
                 >
-                  <defs>
-                    {/* Degradado horizontal — azul profundo → violeta → lila */}
-                    <linearGradient id="cpHFg" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%"   stopColor="#223B8F"/>
-                      <stop offset="20%"  stopColor="#6B1FD1"/>
-                      <stop offset="50%"  stopColor="#9D4EDD"/>
-                      <stop offset="78%"  stopColor="#C77DFF"/>
-                      <stop offset="100%" stopColor="#A869E8"/>
-                    </linearGradient>
-                    {/* Gloss superior */}
-                    <linearGradient id="cpHGl" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%"   stopColor="rgba(255,255,255,0.22)"/>
-                      <stop offset="45%"  stopColor="rgba(255,255,255,0.05)"/>
-                      <stop offset="100%" stopColor="rgba(255,255,255,0.00)"/>
-                    </linearGradient>
-                  </defs>
-
-                  {/* Las 4 barras, cada una como motion.g independiente */}
-                  {BARS.map((bar) => (
-                    <motion.g
-                      key={bar.key}
+                  <picture>
+                    <source srcSet="/images/embudo-close-predict.avif" type="image/avif" />
+                    <source srcSet="/images/embudo-close-predict.webp" type="image/webp" />
+                    <img
+                      src="/images/embudo-close-predict.png"
+                      alt="Embudo Close Predict"
+                      draggable={false}
+                      width={532}
+                      height={552}
                       style={{
-                        transformBox: "fill-box",
-                        transformOrigin: "center",
-                        willChange: "transform",
+                        width: "100%",
+                        height: "auto",
+                        display: "block",
+                        userSelect: "none",
                       }}
-                      initial={reduced ? undefined : {
-                        opacity: 0,
-                        y: 18,
-                        scale: 0.92,
-                        filter: "blur(6px)",
-                      }}
-                      animate={reduced ? undefined : {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        filter: "blur(0px)",
-                      }}
-                      transition={reduced ? undefined : {
-                        delay: bar.delay,
-                        duration: 0.55,
-                        ease: EXPO,
-                      }}
-                    >
-                      <path d={bar.d} fill="url(#cpHFg)"/>
-                      <path d={bar.d} fill="url(#cpHGl)" opacity={bar.gloss}/>
-                    </motion.g>
-                  ))}
-                </svg>
+                    />
+                  </picture>
+                </motion.div>
               </motion.div>
             </motion.div>
           </div>

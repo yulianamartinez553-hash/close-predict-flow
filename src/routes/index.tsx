@@ -37,7 +37,7 @@ function Landing() {
       {showIntro && (
         <SequenceIntro onComplete={() => setIntroComplete(true)} />
       )}
-      <Hero />
+      <Hero introComplete={introComplete} />
       <AboutMe />
       <InterludeParticles />
       <Phases />

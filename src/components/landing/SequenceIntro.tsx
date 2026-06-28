@@ -3,16 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 /* ─────────────────────────────────────────────────────────────────
-   TIPOS Y CONSTANTES
+   TIPOS
 ───────────────────────────────────────────────────────────────── */
 interface Props { onComplete: () => void }
+type Phase = "idle" | "contracting" | "traveling" | "done";
 
-type Phase = "idle" | "contracting" | "traveling" | "fusing" | "done";
-
-const CLOSE_PREDICT = "Close Predict";
-const CHARS = CLOSE_PREDICT.split("");
-
-/* Partículas decorativas — seed estático para SSR */
+/* ─────────────────────────────────────────────────────────────────
+   CONSTANTES
+───────────────────────────────────────────────────────────────── */
+/* Partículas decorativas — seed estático (SSR safe) */
 const PARTICLES = Array.from({ length: 38 }, (_, i) => ({
   id: i,
   x: ((i * 37 + 13) % 97) + 1.5,
@@ -23,10 +22,21 @@ const PARTICLES = Array.from({ length: 38 }, (_, i) => ({
   opacity: 0.18 + (i % 5) * 0.07,
 }));
 
+/* IDs de los chars en el Hero: C(0) l(1) o(2) s(3) e(4) P(5) r(6) e(7) d(8) i(9) c(10) t(11) ®(12) */
+const CHAR_COUNT = 13;
+
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
+/* Clip-path del embudo por barra (inset desde abajo) */
+const FUNNEL_CLIPS = [
+  "inset(0% 0% 69% 0%)",  // solo barra 1 (arrow)
+  "inset(0% 0% 46% 0%)",  // + barra 2
+  "inset(0% 0% 27% 0%)",  // + barra 3
+  "inset(0% 0% 0%  0%)",  // todo visible
+];
+
 /* ─────────────────────────────────────────────────────────────────
-   PARTÍCULAS DE FONDO
+   PARTÍCULAS
 ───────────────────────────────────────────────────────────────── */
 function BgParticles({ reduced }: { reduced: boolean }) {
   if (reduced) return null;
@@ -46,41 +56,28 @@ function BgParticles({ reduced }: { reduced: boolean }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   ARROW SVG — forma exacta de la barra superior del embudo
+   FLECHA — misma geometría que la barra superior del logo
 ───────────────────────────────────────────────────────────────── */
-function ArrowShape({ glow = false }: { glow?: boolean }) {
+function ArrowSVG() {
   return (
-    <svg
-      viewBox="0 0 342 65"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ width: 130, height: "auto", display: "block", overflow: "visible" }}
+    <svg viewBox="0 0 342 65" xmlns="http://www.w3.org/2000/svg"
+      style={{ width: 110, height: "auto", display: "block", overflow: "visible" }}
     >
       <defs>
-        <linearGradient id="arrowFg" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id="aFg" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%"   stopColor="#2D0057"/>
           <stop offset="45%"  stopColor="#6B00B6"/>
           <stop offset="100%" stopColor="#A855F7"/>
         </linearGradient>
-        {glow && (
-          <filter id="arrowGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="8" result="blur" in="SourceGraphic"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        )}
+        <filter id="aGlow" x="-30%" y="-60%" width="160%" height="220%">
+          <feGaussianBlur stdDeviation="7" result="b" in="SourceGraphic"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
       </defs>
-      <path
-        d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
-        fill="url(#arrowFg)"
-        filter={glow ? "url(#arrowGlow)" : undefined}
-      />
-      {/* Gloss superior */}
-      <path
-        d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
-        fill="rgba(255,255,255,0.14)"
-      />
+      <path d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
+        fill="url(#aFg)" filter="url(#aGlow)"/>
+      <path d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
+        fill="rgba(255,255,255,0.13)"/>
     </svg>
   );
 }
@@ -90,26 +87,24 @@ function ArrowShape({ glow = false }: { glow?: boolean }) {
 ───────────────────────────────────────────────────────────────── */
 export function SequenceIntro({ onComplete }: Props) {
   const reduced = useReducedMotion();
-  const [screen, setScreen]           = useState<0 | 1>(0);
-  const [phase, setPhase]             = useState<Phase>("idle");
-  const [letters, setLetters]         = useState<boolean[]>(Array(CHARS.length).fill(false));
-  const [bars, setBars]               = useState([false, false, false]);
-  const [overlayFade, setOverlayFade] = useState(false);
+  const [screen, setScreen] = useState<0 | 1>(0);
+  const [phase,  setPhase]  = useState<Phase>("idle");
+  const [overlayOut, setOverlayOut] = useState(false);
 
   const arrowRef  = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const tlRef     = useRef<{ kill(): void } | null>(null);
+  const gsapTl    = useRef<{ kill(): void } | null>(null);
 
-  /* Bloquear scroll mientras la intro está activa */
+  /* Bloquear scroll */
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";
-      tlRef.current?.kill();
+      gsapTl.current?.kill();
     };
   }, []);
 
-  /* Teclado / wheel */
+  /* Teclado / wheel — solo en fase idle */
   const advance = useCallback(() => {
     if (phase !== "idle") return;
     if (screen === 0) { setScreen(1); return; }
@@ -118,159 +113,197 @@ export function SequenceIntro({ onComplete }: Props) {
   }, [screen, phase]);
 
   useEffect(() => {
-    const onKey   = (e: KeyboardEvent) => { if (["Enter"," ","ArrowDown","ArrowRight"].includes(e.key)) { e.preventDefault(); advance(); } };
-    const onWheel = (e: WheelEvent)    => { if (e.deltaY > 20) advance(); };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("wheel", onWheel, { passive: true });
-    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("wheel", onWheel); };
+    const k = (e: KeyboardEvent) => {
+      if (["Enter"," ","ArrowDown","ArrowRight"].includes(e.key)) { e.preventDefault(); advance(); }
+    };
+    const w = (e: WheelEvent) => { if (e.deltaY > 20) advance(); };
+    window.addEventListener("keydown", k);
+    window.addEventListener("wheel", w, { passive: true });
+    return () => { window.removeEventListener("keydown", k); window.removeEventListener("wheel", w); };
   }, [advance]);
 
-  /* ── LÓGICA DE TRANSICIÓN ── */
+  /* ── SECUENCIA DE TRANSICIÓN ── */
   const startTransition = useCallback(async () => {
     if (reduced) { onComplete(); return; }
 
-    /* FASE 1 — Contracción del fondo (0 → 1.8s) */
+    /* FASE 1: clip-path contrae el fondo violeta hacia el centro (1.2s) */
     setPhase("contracting");
-    await sleep(1800);
+    await sleep(1250);
 
-    /* FASE 2 — Flecha viaja (1.8 → 4.5s) */
+    /* FASE 2: la flecha vuela — cargamos GSAP en cliente */
     setPhase("traveling");
 
-    /* Inicializar canvas para la estela */
+    const gsapMod = await import("gsap");
+    const gsap = (gsapMod as any).gsap ?? (gsapMod as any).default ?? gsapMod;
+    const { MotionPathPlugin } = await import("gsap/MotionPathPlugin");
+    gsap.registerPlugin(MotionPathPlugin);
+
+    /* Canvas para la estela */
     const canvas = canvasRef.current;
     if (canvas) {
       canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
     }
+    const ctx = canvas?.getContext("2d") ?? null;
 
-    /* Cargar GSAP en cliente */
-    const gsapPkg = await import("gsap");
-    const gsap    = (gsapPkg as any).gsap ?? (gsapPkg as any).default ?? gsapPkg;
-    const { MotionPathPlugin } = await import("gsap/MotionPathPlugin");
-    gsap.registerPlugin(MotionPathPlugin);
+    /* Posición real del embudo en el Hero */
+    const funnelEl = document.getElementById("cp-funnel-img") as HTMLImageElement | null;
+    const funnelRect = funnelEl?.getBoundingClientRect();
+
+    /* Centro de la barra superior del embudo = ~15% desde arriba del img */
+    const funnelTargetX = funnelRect
+      ? funnelRect.left + funnelRect.width  * 0.40
+      : window.innerWidth  * 0.22;
+    const funnelTargetY = funnelRect
+      ? funnelRect.top  + funnelRect.height * 0.12
+      : window.innerHeight * 0.45;
+
+    /* Posiciones X de cada carácter para el revelado sincronizado */
+    const charXPositions: number[] = Array.from({ length: CHAR_COUNT }, (_, i) => {
+      const el = document.getElementById(`cp-char-${i}`);
+      if (!el) return window.innerWidth * (0.55 + i * 0.015);
+      const r = el.getBoundingClientRect();
+      return r.left + r.width / 2;
+    });
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+
+    /* Posición inicial de la flecha: centro de pantalla */
     const arrowEl = arrowRef.current;
     if (!arrowEl) return;
+    gsap.set(arrowEl, { xPercent: -50, yPercent: -50, x: vw * 0.5, y: vh * 0.5, opacity: 1, rotation: 0 });
 
-    /* Posición inicial: centro de pantalla */
-    gsap.set(arrowEl, { x: vw * 0.50 - 65, y: vh * 0.50 - 16, rotation: -45 });
-
-    /* Estela */
-    const trail: { x: number; y: number; born: number }[] = [];
+    /* Trail: puntos de posición con timestamp */
+    const trail: { x: number; y: number; t: number }[] = [];
     let rafId = 0;
-    const ctx = canvas?.getContext("2d") ?? null;
 
     function drawTrail() {
       if (!ctx || !canvas) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      /* Desvanecimiento semi-transparente en lugar de clearRect total */
+      ctx.fillStyle = "rgba(8,3,15,0.35)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
       const now = Date.now();
-      trail.forEach(p => {
-        const age = (now - p.born) / 300;
-        if (age > 1) return;
-        ctx.globalAlpha = 0.08 * (1 - age);
-        ctx.fillStyle = "#7C3AED";
+      for (const p of trail) {
+        const age = (now - p.t) / 300;
+        if (age >= 1) continue;
+        ctx.globalAlpha = 0.10 * (1 - age);
+        ctx.fillStyle   = "#7C3AED";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 4 * (1 - age * 0.5), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 5 * (1 - age * 0.6), 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
+      ctx.globalAlpha = 1;
       // limpiar puntos viejos
-      while (trail.length && Date.now() - trail[0].born > 300) trail.shift();
+      let i = 0;
+      while (i < trail.length && now - trail[i].t > 300) i++;
+      if (i > 0) trail.splice(0, i);
       rafId = requestAnimationFrame(drawTrail);
     }
     drawTrail();
 
-    /* Timeline GSAP */
+    /* Mapa de chars ya revelados */
+    const revealed = new Set<number>();
+
+    function revealChar(idx: number) {
+      if (revealed.has(idx)) return;
+      revealed.add(idx);
+      const el = document.getElementById(`cp-char-${idx}`);
+      if (!el) return;
+      gsap.to(el, { opacity: 1, filter: "blur(0px)", y: 0, duration: 0.35, ease: "power2.out",
+        overwrite: "auto" });
+    }
+
+    /* Timeline principal */
     const tl = gsap.timeline({
       onComplete: async () => {
         cancelAnimationFrame(rafId);
-        ctx?.clearRect(0, 0, canvas!.width, canvas!.height);
+        if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        /* FASE 4 — Barras del embudo */
-        setPhase("fusing");
-        setBars([true, false, false]);
-        await sleep(150); setBars([true, true, false]);
-        await sleep(150); setBars([true, true, true]);
-        await sleep(600);
+        /* Revelado simultáneo: flecha → opacity 0, embudo → opacity 1 */
+        if (arrowEl) gsap.to(arrowEl, { opacity: 0, duration: 0.2, ease: "power1.in" });
+        if (funnelEl) {
+          gsap.to(funnelEl, { opacity: 1, duration: 0.2, ease: "power1.out" });
 
-        /* Fade out del overlay */
-        setOverlayFade(true);
-        await sleep(700);
+          /* Revelar barras 2 → 3 → 4 via clip-path */
+          await sleep(200);
+          gsap.to(funnelEl, { clipPath: FUNNEL_CLIPS[1], duration: 0.28, ease: "power2.out" });
+          await sleep(165);
+          gsap.to(funnelEl, { clipPath: FUNNEL_CLIPS[2], duration: 0.28, ease: "power2.out" });
+          await sleep(165);
+          gsap.to(funnelEl, { clipPath: FUNNEL_CLIPS[3], duration: 0.28, ease: "power2.out",
+            onComplete: () => gsap.set(funnelEl, { clearProps: "clipPath" }) });
+        }
+
+        /* Revelar tagline */
+        await sleep(180);
+        const tagEl = document.getElementById("cp-tagline");
+        if (tagEl) gsap.to(tagEl, { opacity: 1, duration: 0.45, ease: "power2.out" });
+
+        /* Desvanecer overlay y llamar onComplete */
+        await sleep(500);
+        setOverlayOut(true);
+        await sleep(650);
         setPhase("done");
         onComplete();
       },
     });
-    tlRef.current = tl as any;
+    gsapTl.current = tl as any;
 
     /*
-     * Trayectoria de la flecha — curva Bézier cúbica a través de waypoints:
-     * A) centro → sube hacia borde superior
-     * B) avanza hacia derecha a lo largo del tope
-     * C) curva hacia esquina superior derecha
-     * D) desciende diagonal hacia hero (texto "Close Predict")
-     * E) continúa hacia posición del embudo
+     * Trayectoria de 6 waypoints (center de la flecha = xPercent:-50 yPercent:-50):
+     * P0 centro → P1 tope izquierdo → P2 tope derecho →
+     * P3 esquina superior derecha → P4 zona texto → P5 barra top del embudo
      */
     tl.to(arrowEl, {
-      duration: 2.7,
+      duration: 3.3,
       ease: "power2.inOut",
       motionPath: {
         path: [
-          { x: vw * 0.50 - 65, y: vh * 0.50 - 16 },  // centro
-          { x: vw * 0.50 - 65, y: vh * 0.05 - 16 },   // A: sube al tope
-          { x: vw * 0.75 - 65, y: vh * 0.06 - 16 },   // B: desliza a la derecha
-          { x: vw * 0.82 - 65, y: vh * 0.10 - 16 },   // C: curva esquina
-          { x: vw * 0.68 - 65, y: vh * 0.42 - 16 },   // D: baja hacia texto
-          { x: vw * 0.30 - 65, y: vh * 0.44 - 16 },   // E: viaja al embudo
+          { x: vw * 0.50, y: vh * 0.50 },
+          { x: vw * 0.18, y: 20 },
+          { x: vw * 0.78, y: 18 },
+          { x: vw * 0.84, y: vh * 0.12 },
+          { x: vw * 0.62, y: vh * 0.48 },
+          { x: funnelTargetX, y: funnelTargetY },
         ],
-        curviness: 1.4,
+        curviness: 1.5,
         autoRotate: true,
         type: "thru",
       },
       onUpdate() {
         /* Estela */
         const rect = arrowEl.getBoundingClientRect();
-        trail.push({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, born: Date.now() });
+        const ax = rect.left + rect.width  / 2;
+        const ay = rect.top  + rect.height / 2;
+        trail.push({ x: ax, y: ay, t: Date.now() });
 
-        /* Revelar letras según posición X de la flecha */
-        const ax = rect.left + rect.width / 2;
-        /* Zona del texto "Close Predict": 45%-70% del viewport */
-        const textZoneLeft  = vw * 0.45;
-        const textZoneRight = vw * 0.72;
-        if (ax > textZoneLeft && ax < textZoneRight) {
-          const progress = (ax - textZoneLeft) / (textZoneRight - textZoneLeft);
-          const lettersToShow = Math.floor(progress * CHARS.length);
-          setLetters(prev => {
-            if (prev[lettersToShow]) return prev;
-            const next = [...prev];
-            for (let i = 0; i <= lettersToShow && i < CHARS.length; i++) next[i] = true;
-            return next;
-          });
+        /* Revelar letras a medida que la flecha pasa sobre ellas */
+        for (let i = 0; i < CHAR_COUNT; i++) {
+          if (ax >= charXPositions[i] - 28) revealChar(i);
         }
       },
     });
   }, [reduced, onComplete]);
 
-  /* ── RENDER ── */
-
-  /* Overlay de transición */
+  /* ── OVERLAY DE TRANSICIÓN ── */
   if (phase !== "idle") {
     return (
       <div
         className="fixed inset-0 z-[200] overflow-hidden"
         style={{
           background: "#08030F",
-          opacity: overlayFade ? 0 : 1,
-          transition: overlayFade ? "opacity 0.7s ease" : "none",
-          pointerEvents: overlayFade ? "none" : "auto",
+          opacity: overlayOut ? 0 : 1,
+          transition: overlayOut ? "opacity 0.65s ease" : "none",
+          pointerEvents: overlayOut ? "none" : "auto",
         }}
       >
-        {/* Fondo violeta que se contrae hacia el centro */}
+        {/* Fondo violeta que se contrae con clip-path iris */}
         <motion.div
           aria-hidden
           initial={{ clipPath: "inset(0% 0% round 0%)" }}
           animate={{ clipPath: "inset(50% 50% round 50%)" }}
-          transition={{ duration: 1.5, ease: [0.7, 0, 0.84, 0] }}
+          transition={{ duration: 1.2, ease: [0.7, 0, 0.84, 0] }}
           style={{
             position: "absolute", inset: 0,
             background: "radial-gradient(ellipse at center, #3D1A7A 0%, #2B1142 50%, #1A0A2B 100%)",
@@ -278,195 +311,30 @@ export function SequenceIntro({ onComplete }: Props) {
         />
 
         {/* Canvas de estela */}
-        <canvas
-          ref={canvasRef}
-          aria-hidden
+        <canvas ref={canvasRef} aria-hidden
           style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
         />
 
-        {/* Texto "Close Predict" — revelado letra por letra */}
-        {(phase === "traveling" || phase === "fusing") && (
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: "53%",
-              top: "50%",
-              transform: "translateY(-50%)",
-            }}
-          >
-            <div style={{
-              fontFamily: "'Plus Jakarta Sans','Outfit','Manrope',system-ui,sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(46px, 5vw, 84px)",
-              lineHeight: 0.93,
-              letterSpacing: "-0.028em",
-            }}>
-              {/* "Close" */}
-              <div style={{ display: "flex" }}>
-                {"Close".split("").map((ch, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      background: "linear-gradient(180deg, #9B72E0 0%, #6C39B3 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      opacity: letters[i] ? 1 : 0,
-                      filter: letters[i] ? "blur(0px)" : "blur(8px)",
-                      transform: letters[i] ? "translateY(0)" : "translateY(6px)",
-                      transition: "opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease",
-                      display: "inline-block",
-                    }}
-                  >
-                    {ch}
-                  </span>
-                ))}
-              </div>
-              {/* "Predict" */}
-              <div style={{ display: "flex", marginTop: "0.04em" }}>
-                {"Predict".split("").map((ch, i) => {
-                  const gi = i + 6; // "Close " = 6 chars, but we skip space visually
-                  return (
-                    <span
-                      key={i}
-                      style={{
-                        background: "linear-gradient(180deg, #9B72E0 0%, #6C39B3 100%)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                        opacity: letters[gi] ? 1 : 0,
-                        filter: letters[gi] ? "blur(0px)" : "blur(8px)",
-                        transform: letters[gi] ? "translateY(0)" : "translateY(6px)",
-                        transition: "opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease",
-                        display: "inline-block",
-                      }}
-                    >
-                      {ch}
-                    </span>
-                  );
-                })}
-                <sup style={{
-                  fontSize: "0.40em", verticalAlign: "super",
-                  background: "linear-gradient(180deg, #9B72E0 0%, #6C39B3 100%)",
-                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                  backgroundClip: "text", fontWeight: 800,
-                  opacity: letters[12] ? 1 : 0,
-                  transition: "opacity 0.4s ease",
-                }}>®</sup>
-              </div>
-            </div>
-
-            {/* Tagline */}
-            <p style={{
-              margin: 0, marginTop: "1.4rem",
-              fontFamily: "'Montserrat','Inter',sans-serif",
-              fontSize: "clamp(9px, 0.9vw, 11px)", fontWeight: 700,
-              letterSpacing: "0.30em", textTransform: "uppercase",
-              color: "rgba(155,114,224,0.48)",
-              opacity: bars[0] ? 1 : 0,
-              transition: "opacity 0.5s ease 0.3s",
-            }}>
-              Sistema Comercial Predecible
-            </p>
-          </div>
-        )}
-
-        {/* Embudo — barras que aparecen en fase 4 */}
-        {(phase === "traveling" || phase === "fusing") && (
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              left: "12%",
-              top: "50%",
-              transform: "translateY(-52%)",
-              width: "min(34%, 320px)",
-            }}
-          >
-            <svg viewBox="-12 -24 366 290" style={{ width: "100%", height: "auto", overflow: "visible" }}>
-              <defs>
-                <linearGradient id="tFg" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%"   stopColor="#223B8F"/>
-                  <stop offset="20%"  stopColor="#6B1FD1"/>
-                  <stop offset="50%"  stopColor="#9D4EDD"/>
-                  <stop offset="78%"  stopColor="#C77DFF"/>
-                  <stop offset="100%" stopColor="#A869E8"/>
-                </linearGradient>
-                <linearGradient id="tGl" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="rgba(255,255,255,0.22)"/>
-                  <stop offset="100%" stopColor="rgba(255,255,255,0.00)"/>
-                </linearGradient>
-              </defs>
-
-              {/* Barra 1 — siempre visible en traveling (es la flecha que llegó) */}
-              <g style={{
-                opacity: phase === "fusing" || bars[0] ? 1 : 0.7,
-                transition: "opacity 0.4s ease",
-              }}>
-                <path d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z" fill="url(#tFg)"/>
-                <path d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z" fill="url(#tGl)" opacity={0.70}/>
-              </g>
-
-              {/* Barra 2 */}
-              <g style={{
-                opacity: bars[1] ? 1 : 0,
-                transform: bars[1] ? "scaleX(1)" : "scaleX(0)",
-                transformOrigin: "left center",
-                transformBox: "fill-box",
-                transition: "opacity 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1)",
-              }}>
-                <path d="M 0,93 L 0,133 Q 112,129 238,119 L 238,99 Q 112,100 0,93 Z" fill="url(#tFg)"/>
-                <path d="M 0,93 L 0,133 Q 112,129 238,119 L 238,99 Q 112,100 0,93 Z" fill="url(#tGl)" opacity={0.58}/>
-              </g>
-
-              {/* Barra 3 */}
-              <g style={{
-                opacity: bars[2] ? 1 : 0,
-                transform: bars[2] ? "scaleX(1)" : "scaleX(0)",
-                transformOrigin: "left center",
-                transformBox: "fill-box",
-                transition: "opacity 0.35s ease 0.15s, transform 0.35s cubic-bezier(0.16,1,0.3,1) 0.15s",
-              }}>
-                <path d="M 0,157 L 0,189 Q 84,186 182,177 L 182,163 Q 84,162 0,157 Z" fill="url(#tFg)"/>
-                <path d="M 0,157 L 0,189 Q 84,186 182,177 L 182,163 Q 84,162 0,157 Z" fill="url(#tGl)" opacity={0.50}/>
-              </g>
-
-              {/* Barra 4 */}
-              <g style={{
-                opacity: bars[2] ? 1 : 0,
-                transform: bars[2] ? "scaleX(1)" : "scaleX(0)",
-                transformOrigin: "left center",
-                transformBox: "fill-box",
-                transition: "opacity 0.35s ease 0.30s, transform 0.35s cubic-bezier(0.16,1,0.3,1) 0.30s",
-              }}>
-                <path d="M 0,213 L 0,237 Q 58,235 133,228 L 133,216 Q 58,214 0,213 Z" fill="url(#tFg)"/>
-                <path d="M 0,213 L 0,237 Q 58,235 133,228 L 133,216 Q 58,214 0,213 Z" fill="url(#tGl)" opacity={0.42}/>
-              </g>
-            </svg>
-          </div>
-        )}
-
-        {/* Flecha animada por GSAP */}
+        {/* Flecha — único elemento, existe durante todo el vuelo */}
         <div
           ref={arrowRef}
+          id="arrow-hero"
           aria-hidden
           style={{
-            position: "absolute",
-            top: 0, left: 0,
-            opacity: phase === "traveling" || phase === "fusing" ? 1 : 0,
-            transition: "opacity 0.3s ease",
+            position: "fixed", top: 0, left: 0,
+            opacity: 0,
             pointerEvents: "none",
             zIndex: 10,
+            willChange: "transform",
           }}
         >
-          <ArrowShape glow />
+          <ArrowSVG />
         </div>
       </div>
     );
   }
 
-  /* ── PANTALLAS INTRO (screen 0 y 1) ── */
+  /* ── PANTALLAS INTRO ── */
   return (
     <div
       className="fixed inset-0 z-[200] flex cursor-pointer select-none items-center justify-center overflow-hidden"
@@ -477,52 +345,48 @@ export function SequenceIntro({ onComplete }: Props) {
 
       <AnimatePresence mode="wait">
         {screen === 0 ? (
-          <motion.div
-            key="s0"
+          <motion.div key="s0"
             initial={reduced ? false : { opacity: 0, y: 28 }}
             animate={reduced ? undefined : { opacity: 1, y: 0 }}
             exit={reduced ? undefined : { opacity: 0, y: -28 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10 mx-auto max-w-3xl px-8 text-center"
           >
-            <h1
-              className="text-white"
-              style={{ fontSize: "clamp(44px, 6.5vw, 68px)", fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.02em" }}
-            >
+            <h1 className="text-white" style={{
+              fontSize: "clamp(44px, 6.5vw, 68px)", fontWeight: 900,
+              lineHeight: 1.08, letterSpacing: "-0.02em",
+            }}>
               ¿TUS VENTAS DEPENDEN<br />SOLO DE VOS?
             </h1>
-            <p
-              className="mt-6"
-              style={{ fontSize: "clamp(16px, 1.8vw, 21px)", color: "rgba(255,255,255,0.62)", lineHeight: 1.65 }}
-            >
+            <p className="mt-6" style={{
+              fontSize: "clamp(16px, 1.8vw, 21px)",
+              color: "rgba(255,255,255,0.62)", lineHeight: 1.65,
+            }}>
               Te llegan clientes, pero el proceso es un caos<br />y todo termina en tus manos.
             </p>
-            <p
-              className="mt-12 text-xs uppercase"
-              style={{ color: "rgba(255,255,255,0.22)", letterSpacing: "0.3em" }}
-            >
+            <p className="mt-12 text-xs uppercase"
+              style={{ color: "rgba(255,255,255,0.22)", letterSpacing: "0.3em" }}>
               Click para continuar
             </p>
           </motion.div>
         ) : (
-          <motion.div
-            key="s1"
+          <motion.div key="s1"
             initial={reduced ? false : { opacity: 0, y: 28 }}
             animate={reduced ? undefined : { opacity: 1, y: 0 }}
             exit={reduced ? undefined : { opacity: 0, y: -28 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10 mx-auto max-w-3xl px-8 text-center"
           >
-            <h1
-              className="text-white"
-              style={{ fontSize: "clamp(44px, 6.5vw, 68px)", fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.02em" }}
-            >
+            <h1 className="text-white" style={{
+              fontSize: "clamp(44px, 6.5vw, 68px)", fontWeight: 900,
+              lineHeight: 1.08, letterSpacing: "-0.02em",
+            }}>
               NO NECESITAS<br />TRABAJAR MÁS
             </h1>
-            <p
-              className="mt-6"
-              style={{ fontSize: "clamp(16px, 1.8vw, 20px)", color: "rgba(255,255,255,0.62)" }}
-            >
+            <p className="mt-6" style={{
+              fontSize: "clamp(16px, 1.8vw, 20px)",
+              color: "rgba(255,255,255,0.62)",
+            }}>
               Necesitas mejorar tu proceso.
             </p>
 
@@ -538,10 +402,9 @@ export function SequenceIntro({ onComplete }: Props) {
             >
               <span className="relative z-10">Entrá y mirá cómo cambia eso</span>
               {!reduced && (
-                <motion.span
-                  aria-hidden
+                <motion.span aria-hidden
                   className="pointer-events-none absolute inset-0 -skew-x-12"
-                  style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%)" }}
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.28) 50%, transparent)" }}
                   animate={{ x: ["-120%", "220%"] }}
                   transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 2.2, ease: "linear" }}
                 />

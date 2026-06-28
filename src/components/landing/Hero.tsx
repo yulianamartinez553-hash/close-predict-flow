@@ -17,16 +17,26 @@ const NAV_LINKS = [
 /* ─────────────────────────────────────────────────────────────────
    HERO
 ───────────────────────────────────────────────────────────────── */
-export function Hero() {
+/* "Close" = índices 0-4 · "Predict" = índices 5-11 · "®" = 12 */
+const CLOSE_CHARS   = ["C","l","o","s","e"];
+const PREDICT_CHARS = ["P","r","e","d","i","c","t"];
+
+export function Hero({ introComplete }: { introComplete?: boolean }) {
   const reduced    = useReducedMotion();
   const funnelRef  = useRef<HTMLDivElement>(null);
 
-  /* Respiración empieza cuando el embudo terminó de construirse */
+  /*
+   * Respiración: en modo intro espera a que la intro termine.
+   * En modo standalone arranca tras la animación de entrada (~1.18s).
+   */
   const [funnelDone, setFunnelDone] = useState(!!reduced);
   useEffect(() => {
     if (reduced) return;
-    /* última barra: delay 0.58 + duración 0.55 = 1.13 s */
-    const t = setTimeout(() => setFunnelDone(true), 1180);
+    /* Intro corriendo → esperamos a que introComplete sea true */
+    if (introComplete === false) return;
+    /* Intro ya terminó o no hay intro */
+    const delay = introComplete === true ? 120 : 1180;
+    const t = setTimeout(() => setFunnelDone(true), delay);
     return () => clearTimeout(t);
   }, [reduced]);
 
@@ -231,18 +241,19 @@ export function Hero() {
                   : undefined
                 }
               >
-                {/* Imagen real del embudo con fondo transparente */}
+                {/* Imagen real del embudo — GSAP la controla en modo intro */}
                 <motion.div
                   style={{ willChange: "transform" }}
-                  initial={reduced ? undefined : { opacity: 0, y: 22, scale: 0.93, filter: "blur(8px)" }}
-                  animate={reduced ? undefined : { opacity: 1, y: 0,  scale: 1,    filter: "blur(0px)" }}
-                  transition={reduced ? undefined : { delay: 0.10, duration: 0.65, ease: EXPO }}
-                  onAnimationComplete={() => setFunnelDone(true)}
+                  initial={reduced || introComplete === false ? false : { opacity: 0, y: 22, scale: 0.93, filter: "blur(8px)" }}
+                  animate={reduced || introComplete === false ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                  transition={reduced || introComplete === false ? undefined : { delay: 0.10, duration: 0.65, ease: EXPO }}
+                  onAnimationComplete={introComplete === false ? undefined : () => setFunnelDone(true)}
                 >
                   <picture>
                     <source srcSet="/images/embudo-close-predict.avif" type="image/avif" />
                     <source srcSet="/images/embudo-close-predict.webp" type="image/webp" />
                     <img
+                      id="cp-funnel-img"
                       src="/images/embudo-close-predict.png"
                       alt="Embudo Close Predict"
                       draggable={false}
@@ -253,6 +264,9 @@ export function Hero() {
                         height: "auto",
                         display: "block",
                         userSelect: "none",
+                        /* En modo intro: oculto + clip a barra 1; GSAP lo revela */
+                        opacity:  introComplete === false ? 0 : undefined,
+                        clipPath: introComplete === false ? "inset(0% 0% 69% 0%)" : undefined,
                       }}
                     />
                   </picture>
@@ -261,8 +275,8 @@ export function Hero() {
             </motion.div>
           </div>
 
-          {/* ══════════ TEXTO HTML/CSS ══════════ */}
-          <motion.div
+          {/* ══════════ TEXTO HTML/CSS — spans por carácter con IDs ══════════ */}
+          <div
             style={{
               display: "flex",
               flexDirection: "column",
@@ -270,25 +284,61 @@ export function Hero() {
               flexShrink: 0,
               minWidth: 200,
             }}
-            initial={reduced ? undefined : { opacity: 0, y: 18, filter: "blur(10px)" }}
-            animate={reduced ? undefined : { opacity: 1, y: 0,  filter: "blur(0px)"  }}
-            transition={reduced ? undefined : { delay: 0.90, duration: 0.60, ease: EXPO }}
           >
-            <span
-              className="cp-word"
-              style={{ fontSize: "clamp(46px, 5.0vw, 84px)" }}
-            >
-              Close
-            </span>
-            <span
-              className="cp-word"
-              style={{ fontSize: "clamp(46px, 5.0vw, 84px)", marginTop: "0.04em" }}
-            >
-              Predict<sup className="cp-sup">®</sup>
-            </span>
+            {/* "Close" — IDs cp-char-0 … cp-char-4 */}
+            <div style={{ display: "flex" }}>
+              {CLOSE_CHARS.map((ch, i) => (
+                <span
+                  key={i}
+                  id={`cp-char-${i}`}
+                  className="cp-word"
+                  style={{
+                    fontSize: "clamp(46px, 5.0vw, 84px)",
+                    display: "inline-block",
+                    /* En modo intro: GSAP los revela uno a uno */
+                    opacity:   introComplete === false ? 0      : undefined,
+                    filter:    introComplete === false ? "blur(6px)" : undefined,
+                    transform: introComplete === false ? "translateY(8px)" : undefined,
+                    transition: "none",
+                  }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </div>
+
+            {/* "Predict®" — IDs cp-char-5 … cp-char-11 + cp-char-12 */}
+            <div style={{ display: "flex", alignItems: "baseline", marginTop: "0.04em" }}>
+              {PREDICT_CHARS.map((ch, i) => (
+                <span
+                  key={i}
+                  id={`cp-char-${i + 5}`}
+                  className="cp-word"
+                  style={{
+                    fontSize: "clamp(46px, 5.0vw, 84px)",
+                    display: "inline-block",
+                    opacity:   introComplete === false ? 0      : undefined,
+                    filter:    introComplete === false ? "blur(6px)" : undefined,
+                    transform: introComplete === false ? "translateY(8px)" : undefined,
+                    transition: "none",
+                  }}
+                >
+                  {ch}
+                </span>
+              ))}
+              <sup
+                id="cp-char-12"
+                className="cp-sup"
+                style={{
+                  opacity:   introComplete === false ? 0 : undefined,
+                  transition: "none",
+                }}
+              >®</sup>
+            </div>
 
             {/* Tagline */}
-            <motion.p
+            <p
+              id="cp-tagline"
               style={{
                 margin: 0,
                 marginTop: "1.7rem",
@@ -298,14 +348,13 @@ export function Hero() {
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
                 color: "rgba(155,114,224,0.48)",
+                opacity: introComplete === false ? 0 : undefined,
+                transition: "none",
               }}
-              initial={reduced ? undefined : { opacity: 0, y: 10 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0  }}
-              transition={reduced ? undefined : { delay: 1.30, duration: 0.50, ease: EXPO }}
             >
               Sistema Comercial Predecible
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
 
         </div>
       </section>

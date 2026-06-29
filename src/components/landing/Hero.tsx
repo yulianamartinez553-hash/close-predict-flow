@@ -38,7 +38,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
     const delay = introComplete === true ? 120 : 1180;
     const t = setTimeout(() => setFunnelDone(true), delay);
     return () => clearTimeout(t);
-  }, [reduced]);
+  }, [reduced, introComplete]);
 
   /* ── Mouse → tilt del embudo ── */
   const rawX = useMotionValue(0);

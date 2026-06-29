@@ -6,11 +6,8 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
    TIPOS
 ───────────────────────────────────────────────────────────────── */
 interface Props { onComplete: () => void }
-type Phase = "idle" | "smoke-accel" | "contracting" | "traveling" | "done";
+type Phase = "idle" | "smoke-accel" | "contracting" | "done";
 
-/* ─────────────────────────────────────────────────────────────────
-   UTILIDADES
-───────────────────────────────────────────────────────────────── */
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
 const CHAR_COUNT = 13; // C l o s e P r e d i c t ®
@@ -22,32 +19,6 @@ const FUNNEL_CLIPS = [
   "inset(0% 0% 27% 0%)",
   "inset(0% 0% 0%  0%)",
 ];
-
-/* ─────────────────────────────────────────────────────────────────
-   FLECHA SVG — misma geometría que barra superior del embudo real
-───────────────────────────────────────────────────────────────── */
-function ArrowSVG() {
-  return (
-    <svg viewBox="0 0 342 65" xmlns="http://www.w3.org/2000/svg"
-      style={{ width: 110, height: "auto", display: "block", overflow: "visible" }}>
-      <defs>
-        <linearGradient id="aFg" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%"   stopColor="#2D0057"/>
-          <stop offset="45%"  stopColor="#6B00B6"/>
-          <stop offset="100%" stopColor="#A855F7"/>
-        </linearGradient>
-        <filter id="aGlow" x="-30%" y="-60%" width="160%" height="220%">
-          <feGaussianBlur stdDeviation="7" result="b" in="SourceGraphic"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <path d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
-        fill="url(#aFg)" filter="url(#aGlow)"/>
-      <path d="M 0,18 L 0,65 Q 150,61 300,47 L 342,8 L 300,23 Q 150,25 0,18 Z"
-        fill="rgba(255,255,255,0.13)"/>
-    </svg>
-  );
-}
 
 /* ─────────────────────────────────────────────────────────────────
    OPCIONES DE HUMO tsParticles
@@ -87,10 +58,8 @@ export function SequenceIntro({ onComplete }: Props) {
   const [phase,      setPhase]      = useState<Phase>("idle");
   const [overlayOut, setOverlayOut] = useState(false);
 
-  const particlesRef    = useRef<any>(null);
-  const titleRef        = useRef<HTMLHeadingElement>(null);
-  const arrowRef        = useRef<HTMLDivElement>(null);
-  const trailCanvasRef  = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<any>(null);
+  const titleRef     = useRef<HTMLHeadingElement>(null);
 
   /* Bloquear scroll */
   useEffect(() => {
@@ -98,7 +67,7 @@ export function SequenceIntro({ onComplete }: Props) {
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  /* ── Inicializar humo + revelar texto con Splitting.js ── */
+  /* ── Inicializar humo + revelar texto ── */
   useEffect(() => {
     if (reduced) return;
     let destroyed = false;
@@ -109,30 +78,26 @@ export function SequenceIntro({ onComplete }: Props) {
         const { tsParticles } = await import("@tsparticles/engine");
         const { loadSlim }    = await import("@tsparticles/slim");
         await loadSlim(tsParticles);
-
         if (!destroyed) {
           const pc = await tsParticles.load({ id: "cp-smoke", options: SMOKE_OPTIONS as any });
           particlesRef.current = pc;
         }
-      } catch (e) { /* humo no crítico */ }
+      } catch (_) {}
 
-      /* 2. Esperar 800ms → revelar texto letra a letra */
+      /* 2. 800 ms → revelar texto letra a letra con Splitting.js + GSAP */
       await sleep(800);
       if (destroyed) return;
 
       try {
         const [gsapMod, splitMod] = await Promise.all([
           import("gsap"),
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore — tipos de splitting no incluidos
+          // @ts-ignore
           import("splitting"),
         ]);
-
         const gsap      = (gsapMod as any).gsap ?? (gsapMod as any).default ?? gsapMod;
         const Splitting = (splitMod  as any).default ?? splitMod;
 
         if (titleRef.current && !destroyed) {
-          /* Splitting envuelve cada char en <span class="char"> */
           Splitting({ target: titleRef.current });
           const chars = Array.from(titleRef.current.querySelectorAll(".char"));
 
@@ -151,10 +116,10 @@ export function SequenceIntro({ onComplete }: Props) {
             }
           );
         }
-      } catch (e) {
-        /* Fallback: mostrar todo inmediatamente */
+      } catch (_) {
+        /* Fallback accesible: mostrar todo de inmediato */
         if (titleRef.current) (titleRef.current as HTMLElement).style.opacity = "1";
-        ["cp-subtitle","cp-btn"].forEach(id => {
+        ["cp-subtitle", "cp-btn"].forEach(id => {
           const el = document.getElementById(id);
           if (el) { el.style.opacity = "1"; el.style.transform = "none"; }
         });
@@ -173,188 +138,88 @@ export function SequenceIntro({ onComplete }: Props) {
   const startTransition = useCallback(async () => {
     if (phase !== "idle") return;
 
-    /* 3A — Acelerar humo 300ms */
+    /* 3A — Acelerar humo 320 ms */
     setPhase("smoke-accel");
     try {
       const pc = particlesRef.current;
       if (pc?.options?.particles?.move) {
         pc.options.particles.move.speed = { min: 3, max: 7 };
-        if (pc.options.emitters) {
-          pc.options.emitters.rate = { quantity: 5, delay: 0.08 };
-        }
+        if (pc.options.emitters) pc.options.emitters.rate = { quantity: 5, delay: 0.08 };
         await pc.refresh();
       }
     } catch (_) {}
-
     await sleep(320);
 
-    /* Destruir humo antes de contraer */
+    /* Destruir humo */
     try { particlesRef.current?.destroy?.(); } catch (_) {}
     particlesRef.current = null;
 
-    /* FASE 1 — Contracción del fondo (1.25s) */
+    /* FASE 1 — Fondo contrae (iris) 1.25 s */
     setPhase("contracting");
     await sleep(1280);
 
-    /* FASE 2 — Vuelo de la flecha */
-    setPhase("traveling");
-
+    /* ─── FASE 2 — Revelar elementos del Hero directamente con GSAP ─── */
     const gsapMod = await import("gsap");
     const gsap    = (gsapMod as any).gsap ?? (gsapMod as any).default ?? gsapMod;
-    const { MotionPathPlugin } = await import("gsap/MotionPathPlugin");
-    gsap.registerPlugin(MotionPathPlugin);
 
-    /* Canvas de estela */
-    const canvas = trailCanvasRef.current;
-    if (canvas) {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    const ctx = canvas?.getContext("2d") ?? null;
-
-    /* Posición real del embudo en el Hero */
-    const funnelEl   = document.getElementById("cp-funnel-img") as HTMLImageElement | null;
-    const funnelRect = funnelEl?.getBoundingClientRect();
-    const funnelTX   = funnelRect ? funnelRect.left + funnelRect.width  * 0.40 : window.innerWidth  * 0.22;
-    const funnelTY   = funnelRect ? funnelRect.top  + funnelRect.height * 0.12 : window.innerHeight * 0.45;
-
-    /* Posiciones X de cada carácter del Hero */
-    const charXPos: number[] = Array.from({ length: CHAR_COUNT }, (_, i) => {
+    /* Texto "Close Predict®": chars aparecen con stagger */
+    const chars: Element[] = [];
+    for (let i = 0; i < CHAR_COUNT; i++) {
       const el = document.getElementById(`cp-char-${i}`);
-      if (!el) return window.innerWidth * (0.55 + i * 0.015);
-      const r = el.getBoundingClientRect();
-      return r.left + r.width / 2;
-    });
-
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    const arrowEl = arrowRef.current;
-    if (!arrowEl) return;
-
-    gsap.set(arrowEl, {
-      xPercent: -50, yPercent: -50,
-      x: vw * 0.5, y: vh * 0.5,
-      opacity: 1, rotation: 0,
-    });
-
-    /* RAF de estela */
-    const trail: { x: number; y: number; t: number }[] = [];
-    let rafId = 0;
-
-    function drawTrail() {
-      if (!ctx || !canvas) return;
-      ctx.fillStyle = "rgba(8,3,15,0.35)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      const now = Date.now();
-      for (const p of trail) {
-        const age = (now - p.t) / 300;
-        if (age >= 1) continue;
-        ctx.globalAlpha = 0.10 * (1 - age);
-        ctx.fillStyle   = "#7C3AED";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 5 * (1 - age * 0.6), 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-      let i = 0;
-      while (i < trail.length && now - trail[i].t > 300) i++;
-      if (i > 0) trail.splice(0, i);
-      rafId = requestAnimationFrame(drawTrail);
+      if (el) chars.push(el);
     }
-    drawTrail();
-
-    /* Revelado de letras */
-    const revealed = new Set<number>();
-    function revealChar(idx: number) {
-      if (revealed.has(idx)) return;
-      revealed.add(idx);
-      const el = document.getElementById(`cp-char-${idx}`);
-      if (!el) return;
-      gsap.to(el, { opacity: 1, filter: "blur(0px)", y: 0, duration: 0.35, ease: "power2.out", overwrite: "auto" });
+    if (chars.length) {
+      gsap.fromTo(chars,
+        { opacity: 0, filter: "blur(8px)", y: 14 },
+        { opacity: 1, filter: "blur(0px)", y: 0,
+          duration: 0.42, stagger: 0.04, ease: "power3.out", delay: 0.15 }
+      );
     }
 
-    /* Timeline principal */
-    const tl = gsap.timeline({
-      async onComplete() {
-        cancelAnimationFrame(rafId);
-        if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    /* Embudo: opacidad y clip-path barra a barra */
+    const funnelEl = document.getElementById("cp-funnel-img");
+    if (funnelEl) {
+      gsap.to(funnelEl, { opacity: 1, duration: 0.4, ease: "power2.out" });
+      await sleep(250);
+      gsap.to(funnelEl, { clipPath: FUNNEL_CLIPS[1], duration: 0.28, ease: "power2.out" });
+      await sleep(170);
+      gsap.to(funnelEl, { clipPath: FUNNEL_CLIPS[2], duration: 0.28, ease: "power2.out" });
+      await sleep(170);
+      gsap.to(funnelEl, {
+        clipPath: FUNNEL_CLIPS[3], duration: 0.28, ease: "power2.out",
+        onComplete: () => gsap.set(funnelEl, { clearProps: "clipPath" }),
+      });
+    }
 
-        /* Fusión: flecha → 0, embudo → 1 (simultáneo 200ms) */
-        if (arrowEl) gsap.to(arrowEl, { opacity: 0, duration: 0.2, ease: "power1.in" });
-        if (funnelEl) {
-          gsap.to(funnelEl, { opacity: 1, duration: 0.2, ease: "power1.out" });
-          await sleep(210);
-          /* Revelar barras 2 → 3 → 4 via clip-path sobre la imagen real */
-          gsap.to(funnelEl, { clipPath: FUNNEL_CLIPS[1], duration: 0.28, ease: "power2.out" });
-          await sleep(165);
-          gsap.to(funnelEl, { clipPath: FUNNEL_CLIPS[2], duration: 0.28, ease: "power2.out" });
-          await sleep(165);
-          gsap.to(funnelEl, {
-            clipPath: FUNNEL_CLIPS[3], duration: 0.28, ease: "power2.out",
-            onComplete: () => gsap.set(funnelEl, { clearProps: "clipPath" }),
-          });
-        }
+    /* Tagline */
+    await sleep(200);
+    const tagEl = document.getElementById("cp-tagline");
+    if (tagEl) gsap.to(tagEl, { opacity: 1, duration: 0.45, ease: "power2.out" });
 
-        /* Tagline */
-        await sleep(190);
-        const tagEl = document.getElementById("cp-tagline");
-        if (tagEl) gsap.to(tagEl, { opacity: 1, duration: 0.45, ease: "power2.out" });
-
-        /* Disolver overlay */
-        await sleep(520);
-        setOverlayOut(true);
-        await sleep(700);
-        setPhase("done");
-        onComplete();
-      },
-    });
-
-    /* Trayectoria Bézier de 6 waypoints */
-    tl.to(arrowEl, {
-      duration: 3.3,
-      ease: "power2.inOut",
-      motionPath: {
-        path: [
-          { x: vw * 0.50, y: vh * 0.50 },
-          { x: vw * 0.18, y: 20         },
-          { x: vw * 0.78, y: 18         },
-          { x: vw * 0.84, y: vh * 0.12  },
-          { x: vw * 0.62, y: vh * 0.48  },
-          { x: funnelTX,  y: funnelTY   },
-        ],
-        curviness: 1.5,
-        autoRotate: true,
-        type: "thru",
-      },
-      onUpdate() {
-        const rect = arrowEl.getBoundingClientRect();
-        const ax = rect.left + rect.width  / 2;
-        const ay = rect.top  + rect.height / 2;
-        trail.push({ x: ax, y: ay, t: Date.now() });
-        for (let i = 0; i < CHAR_COUNT; i++) {
-          if (ax >= charXPos[i] - 28) revealChar(i);
-        }
-      },
-    });
+    /* Disolver overlay */
+    await sleep(450);
+    setOverlayOut(true);
+    await sleep(700);
+    setPhase("done");
+    onComplete();
   }, [phase, onComplete]);
 
   /* ── RENDER ── */
   if (phase === "done") return null;
 
-  const isIdle       = phase === "idle" || phase === "smoke-accel";
+  const isIdle        = phase === "idle" || phase === "smoke-accel";
   const isContracting = phase === "contracting";
 
   return (
     <div
       className="fixed inset-0 z-[200] overflow-hidden"
       style={{
-        opacity:    overlayOut ? 0 : 1,
-        transition: overlayOut ? "opacity 0.65s ease" : "none",
+        opacity:       overlayOut ? 0 : 1,
+        transition:    overlayOut ? "opacity 0.65s ease" : "none",
         pointerEvents: overlayOut ? "none" : "auto",
       }}
     >
-      {/* ── Fondo violeta — se contrae en FASE 1 ── */}
+      {/* Fondo violeta — se contrae en iris durante FASE 1 */}
       {(isIdle || isContracting) && (
         <motion.div
           aria-hidden
@@ -368,7 +233,7 @@ export function SequenceIntro({ onComplete }: Props) {
         />
       )}
 
-      {/* ── Humo tsParticles — siempre en DOM, opacity controla visibilidad ── */}
+      {/* Humo tsParticles — div siempre en DOM, opacity lo oculta al contraer */}
       <div
         id="cp-smoke"
         aria-hidden
@@ -381,7 +246,7 @@ export function SequenceIntro({ onComplete }: Props) {
         }}
       />
 
-      {/* ── Contenido de la intro ── */}
+      {/* Contenido de la intro */}
       <div
         style={{
           position: "absolute", inset: 0, zIndex: 2,
@@ -393,7 +258,6 @@ export function SequenceIntro({ onComplete }: Props) {
           pointerEvents: isIdle ? "auto" : "none",
         }}
       >
-        {/* Título — Splitting.js lo descompone en .char spans */}
         <h1
           ref={titleRef}
           id="intro-title"
@@ -402,7 +266,7 @@ export function SequenceIntro({ onComplete }: Props) {
             fontSize: "clamp(36px, 5.5vw, 66px)",
             fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.02em",
             maxWidth: 820,
-            opacity: 0, /* GSAP lo revela letra a letra */
+            opacity: 0, /* Splitting.js + GSAP lo revelan */
           }}
         >
           ¿TUS VENTAS DEPENDEN SOLO DE VOS?
@@ -414,7 +278,7 @@ export function SequenceIntro({ onComplete }: Props) {
             marginTop: "1.6rem",
             fontSize: "clamp(15px, 1.55vw, 20px)",
             color: "rgba(255,255,255,0.62)", lineHeight: 1.65, maxWidth: 560,
-            opacity: 0, transform: "translateY(12px)", /* GSAP revela */
+            opacity: 0, transform: "translateY(12px)",
           }}
         >
           Te llegan clientes, pero el proceso es un caos<br/>
@@ -433,38 +297,12 @@ export function SequenceIntro({ onComplete }: Props) {
             background: "linear-gradient(135deg, #6B00B6, #A855F7)",
             boxShadow: "0 0 28px rgba(124,58,237,0.55)",
             border: "none", cursor: "pointer",
-            opacity: 0, transform: "translateY(12px)", /* GSAP revela */
+            opacity: 0, transform: "translateY(12px)",
             position: "relative", overflow: "hidden",
           }}
         >
           Entrá y mirá cómo cambia eso
         </button>
-      </div>
-
-      {/* ── Canvas de estela ── */}
-      <canvas
-        ref={trailCanvasRef}
-        aria-hidden
-        style={{
-          position: "fixed", inset: 0,
-          pointerEvents: "none", zIndex: 3,
-          opacity: phase === "traveling" ? 1 : 0,
-          transition: "opacity 0.2s",
-        }}
-      />
-
-      {/* ── Flecha — único elemento, vive todo el viaje ── */}
-      <div
-        ref={arrowRef}
-        id="arrow-hero"
-        aria-hidden
-        style={{
-          position: "fixed", top: 0, left: 0,
-          opacity: 0, pointerEvents: "none",
-          zIndex: 4, willChange: "transform",
-        }}
-      >
-        <ArrowSVG />
       </div>
     </div>
   );

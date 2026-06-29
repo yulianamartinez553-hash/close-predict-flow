@@ -4,9 +4,10 @@ import { Hero } from "@/components/landing/Hero";
 import { SequenceIntro } from "@/components/landing/SequenceIntro";
 import { AboutMe } from "@/components/landing/AboutMe";
 import { PhasesDetail, PhasesSimpleList } from "@/components/landing/Phases";
+import { ClosingSection } from "@/components/landing/ClosingSection";
 import {
-  Sistema, Resultado, Garantia,
-  Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
+  Sistema, Resultado,
+  Testimonios, Footer, WhatsAppFloat,
 } from "@/components/landing/Sections";
 import { CursorFollower } from "@/components/animations/CursorFollower";
 import { useReducedMotionState } from "@/lib/use-reduced-motion";
@@ -50,12 +51,8 @@ function Landing() {
       <Testimonios />
       {/* 9. FASES — lista simple acordeón */}
       <PhasesSimpleList />
-      {/* 10. GARANTÍA */}
-      <Garantia />
-      {/* 11. ¿TODAVÍA NO ES TU MOMENTO? */}
-      <LeadCapture />
-      {/* 12. CTA FINAL (id="contacto") */}
-      <CtaFinal portrait={caroPortrait} />
+      {/* 10–12. GARANTÍA + COMUNIDAD + DIAGNÓSTICO — scroll snapping */}
+      <ClosingSection />
       <Footer />
       <WhatsAppFloat />
     </main>

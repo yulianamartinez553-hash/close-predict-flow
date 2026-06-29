@@ -3,8 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
 import { SequenceIntro } from "@/components/landing/SequenceIntro";
 import { AboutMe } from "@/components/landing/AboutMe";
-import { Phases } from "@/components/landing/Phases";
-import { InterludeParticles } from "@/components/landing/InterludeParticles";
+import { PhasesDetail, PhasesSimpleList } from "@/components/landing/Phases";
 import {
   Sistema, Resultado, Garantia,
   Testimonios, LeadCapture, CtaFinal, Footer, WhatsAppFloat,
@@ -37,15 +36,25 @@ function Landing() {
       {showIntro && (
         <SequenceIntro onComplete={() => setIntroComplete(true)} />
       )}
+      {/* 2. HERO */}
       <Hero introComplete={introComplete} />
-      <AboutMe />
-      <InterludeParticles />
-      <Phases />
+      {/* 4. DETALLE — tarjetas sticky de las 5 fases (id="detalle") */}
+      <PhasesDetail />
+      {/* 5. ENTREGABLES — CLOSE-PREDICT™ label + 14 tarjetas carousel (id="entregables") */}
       <Sistema />
+      {/* 6. RESULTADO FINAL */}
       <Resultado />
-      <Garantia />
+      {/* 7. SOBRE MÍ */}
+      <AboutMe />
+      {/* 8. TESTIMONIOS */}
       <Testimonios />
+      {/* 9. FASES — lista simple acordeón */}
+      <PhasesSimpleList />
+      {/* 10. GARANTÍA */}
+      <Garantia />
+      {/* 11. ¿TODAVÍA NO ES TU MOMENTO? */}
       <LeadCapture />
+      {/* 12. CTA FINAL (id="contacto") */}
       <CtaFinal portrait={caroPortrait} />
       <Footer />
       <WhatsAppFloat />

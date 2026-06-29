@@ -403,6 +403,7 @@ function PhaseCardsSection() {
       puede interactuar con las clases negativas de margin.
     */
     <section
+      id="detalle"
       ref={containerRef}
       style={{
         position: "relative",          /* ← obligatorio para z-index */
@@ -445,18 +446,41 @@ function PhaseCardsSection() {
   );
 }
 
-/* ── EXPORT ───────────────────────────────────────────────────── */
+/* ── EXPORTS ──────────────────────────────────────────────────── */
 export function Phases() {
+  return (
+    <>
+      <style>{GLOBAL_CSS}</style>
+      <div style={{ background: "#ffffff", overflowX: "clip" }}>
+        <PhasesAccordionSection />
+        <PhaseCardsSection />
+      </div>
+    </>
+  );
+}
+
+/* Lista simple del acordeón — se usa en posición 9 */
+export function PhasesSimpleList() {
+  return (
+    <>
+      <style>{GLOBAL_CSS}</style>
+      <div style={{ background: "#ffffff", overflowX: "clip" }}>
+        <PhasesAccordionSection />
+      </div>
+    </>
+  );
+}
+
+/* Tarjetas sticky con id="detalle" — se usa en posición 4 */
+export function PhasesDetail() {
   return (
     <>
       <style>{GLOBAL_CSS}</style>
       {/*
         overflowX: "clip" — CRÍTICO para que position: sticky funcione.
         "hidden" crea un nuevo contexto de formato que rompe el sticky.
-        "clip" recorta el overflow horizontal sin afectar el scroll vertical.
       */}
       <div style={{ background: "#ffffff", overflowX: "clip" }}>
-        <PhasesAccordionSection />
         <PhaseCardsSection />
       </div>
     </>

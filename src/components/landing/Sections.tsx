@@ -610,7 +610,7 @@ function EntregablesCarousel3D() {
 
 export function Sistema() {
   return (
-    <section id="sistema" className="relative overflow-hidden py-28" style={{ background: "#F5F3F7" }}>
+    <section id="entregables" className="relative overflow-hidden py-28" style={{ background: "#F5F3F7" }}>
       <div className="relative mx-auto max-w-7xl px-6">
         {/* Nuevo encabezado — eyebrow + h2 + subtítulo */}
         <div className="mx-auto mb-16 max-w-3xl text-center">
@@ -967,7 +967,7 @@ export function LeadCapture() {
   const reduced = useReducedMotion();
 
   return (
-    <section id="contacto" className="relative bg-cloud py-28">
+    <section id="no-momento" className="relative bg-cloud py-28">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="serif text-3xl text-ink text-balance sm:text-5xl">
@@ -1007,7 +1007,7 @@ export function CtaFinal({ portrait }: { portrait: string }) {
   const reduced = useReducedMotion();
 
   return (
-    <section id="cta" className="relative overflow-hidden aurora-bg py-28 text-white">
+    <section id="contacto" className="relative overflow-hidden aurora-bg py-28 text-white">
       {/* particles */}
       {!reduced && (
       <div className="pointer-events-none absolute inset-0">
@@ -1056,8 +1056,13 @@ export function Footer() {
     <footer className="relative bg-ink-deep py-16 text-white/80">
       <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-4">
         <div className="lg:col-span-2">
-          <div className="serif text-3xl text-white">Caro <em className="text-gold">Chaparro</em></div>
-          <p className="mt-3 max-w-sm text-sm text-white/60">
+          <a href="#" className="cp-logo" style={{ alignItems: "flex-start" }}>
+            <span className="cp-logo-name">Caro Chaparro</span>
+            <div className="cp-logo-sub">
+              <span>VENTAS</span>
+            </div>
+          </a>
+          <p className="mt-4 max-w-sm text-sm text-white/60">
             Caro Chaparro · Mentora & Estratega de ventas. Sistemas comerciales predecibles para infoproductores LATAM.
           </p>
         </div>

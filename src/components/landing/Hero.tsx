@@ -8,10 +8,10 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 const EXPO = [0.16, 1, 0.3, 1] as const;
 
 const NAV_LINKS = [
-  { label: "Sobre mí",      href: "#sobre-mi"   },
-  { label: "Close Predict", href: "#sistema"    },
-  { label: "Recursos",      href: "#no-momento" },
-  { label: "Contacto",      href: "#contacto"   },
+  { label: "Sobre mí",        href: "#sobre-mi"    },
+  { label: "Close Predict™",  href: "#detalle"     },
+  { label: "Herramientas",    href: "#entregables" },
+  { label: "Contáctame",      href: "#contacto"    },
 ];
 
 /* ─────────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Dancing+Script:wght@400&display=swap');
 
         .cp-nav-link {
           color: rgba(220,194,255,.68); font-size: 13px; font-weight: 500;
@@ -96,6 +96,38 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
         .cp-agendar:hover {
           border-color: rgba(199,125,255,.75);
           background: rgba(199,125,255,.15); color: #EDD6FF;
+        }
+
+        /* Logo Caro Chaparro */
+        .cp-logo { text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .cp-logo-name {
+          font-family: 'Dancing Script', cursive;
+          font-weight: 400;
+          font-size: 28px;
+          color: #D4AAFF;
+          line-height: 1;
+          letter-spacing: 0.01em;
+        }
+        .cp-logo-sub {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .cp-logo-sub::before,
+        .cp-logo-sub::after {
+          content: '';
+          display: block;
+          width: 26px;
+          height: 1px;
+          background: rgba(212,170,255,0.35);
+        }
+        .cp-logo-sub span {
+          font-family: 'Montserrat','Inter',sans-serif;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.4em;
+          color: rgba(212,170,255,0.6);
+          text-transform: uppercase;
         }
 
         /* Texto del logo — gradiente vertical de violeta claro a oscuro */
@@ -133,13 +165,11 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           borderBottom: "1px solid rgba(108,57,179,0.18)",
         }}
       >
-        <a href="#" style={{
-          fontFamily: "'Montserrat','Inter',sans-serif",
-          fontSize: "15px", fontWeight: 800,
-          letterSpacing: "0.12em", color: "#9B72E0",
-          textDecoration: "none",
-        }}>
-          CLOSE<span style={{ color: "rgba(155,114,224,.35)", margin: "0 3px", fontWeight: 300 }}>·</span>PREDICT
+        <a href="#" className="cp-logo">
+          <span className="cp-logo-name">Caro Chaparro</span>
+          <div className="cp-logo-sub">
+            <span>VENTAS</span>
+          </div>
         </a>
         <div className="hidden md:flex items-center gap-7">
           {NAV_LINKS.map(({ label, href }) => (

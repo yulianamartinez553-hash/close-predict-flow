@@ -36,15 +36,6 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
     return () => clearTimeout(t);
   }, [reduced, introComplete]);
 
-  /* Color del nav: blanco sobre fondo oscuro, morado original sobre fondo claro */
-  const [navOnDark, setNavOnDark] = useState(true);
-  useEffect(() => {
-    const update = () => setNavOnDark(window.scrollY < window.innerHeight * 0.60);
-    window.addEventListener("scroll", update, { passive: true });
-    update();
-    return () => window.removeEventListener("scroll", update);
-  }, []);
-
   /* Cerrar dropdown al hacer click fuera del nav */
   useEffect(() => {
     if (!menuOpen) return;
@@ -106,7 +97,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           line-height: 1;
           letter-spacing: 0.01em;
           white-space: nowrap;
-          transition: color 350ms ease;
+          color: #6C39B3;
         }
         .cp-logo-sub {
           display: flex;
@@ -119,7 +110,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           display: block;
           width: 20px;
           height: 1px;
-          transition: background 350ms ease;
+          background: rgba(108,57,179,0.28);
         }
         .cp-logo-sub span {
           font-family: 'Montserrat','Inter',sans-serif;
@@ -127,10 +118,10 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           font-weight: 600;
           letter-spacing: 0.42em;
           text-transform: uppercase;
-          transition: color 350ms ease;
+          color: rgba(70,50,117,0.62);
         }
 
-        /* ── Botón Agendar ── */
+        /* ── Botón Agendar — brillo diagonal en loop ── */
         .cp-agendar {
           position: relative;
           overflow: hidden;
@@ -142,7 +133,14 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           font-weight: 600;
           text-decoration: none;
           display: inline-block;
-          transition: color 350ms ease, border-color 350ms ease, background 350ms ease;
+          color: #6C39B3;
+          border-color: rgba(108,57,179,0.45);
+          background: rgba(108,57,179,0.10);
+          transition: border-color 350ms ease, background 350ms ease;
+        }
+        .cp-agendar:hover {
+          border-color: rgba(108,57,179,0.75);
+          background: rgba(108,57,179,0.16);
         }
         .cp-agendar::after {
           content: '';
@@ -154,15 +152,15 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           background: linear-gradient(
             to right,
             transparent 0%,
-            rgba(255,255,255,0.55) 50%,
+            rgba(255,255,255,0.80) 50%,
             transparent 100%
           );
           transform: skewX(-18deg);
           animation: cpShine 2.8s ease-in-out infinite;
         }
         @keyframes cpShine {
-          0%       { left: -120%; }
-          55%, 100% { left: 180%; }
+          0%        { left: -120%; }
+          55%, 100% { left: 180%;  }
         }
 
         /* ── Hamburger icon button ── */
@@ -183,42 +181,9 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           width: 20px;
           height: 2px;
           border-radius: 2px;
-          transition: background 350ms ease;
+          background: #6C39B3;
         }
-
-        /* ── Modo oscuro (fondo morado/oscuro) ── */
-        nav[data-on-dark="true"] .cp-logo-name { color: #ffffff; }
-        nav[data-on-dark="true"] .cp-logo-sub::before,
-        nav[data-on-dark="true"] .cp-logo-sub::after { background: rgba(255,255,255,0.40); }
-        nav[data-on-dark="true"] .cp-logo-sub span { color: rgba(255,255,255,0.72); }
-        nav[data-on-dark="true"] .cp-agendar {
-          color: #ffffff;
-          border-color: rgba(255,255,255,0.55);
-          background: rgba(255,255,255,0.10);
-        }
-        nav[data-on-dark="true"] .cp-agendar:hover {
-          border-color: rgba(255,255,255,0.85);
-          background: rgba(255,255,255,0.20);
-        }
-        nav[data-on-dark="true"] .cp-menu-btn span { background: #ffffff; }
-        nav[data-on-dark="true"] .cp-menu-btn:hover { background: rgba(255,255,255,0.14); }
-
-        /* ── Modo claro (fondo blanco/claro) ── */
-        nav[data-on-dark="false"] .cp-logo-name { color: #6C39B3; }
-        nav[data-on-dark="false"] .cp-logo-sub::before,
-        nav[data-on-dark="false"] .cp-logo-sub::after { background: rgba(108,57,179,0.28); }
-        nav[data-on-dark="false"] .cp-logo-sub span { color: rgba(70,50,117,0.62); }
-        nav[data-on-dark="false"] .cp-agendar {
-          color: #6C39B3;
-          border-color: rgba(108,57,179,0.45);
-          background: rgba(108,57,179,0.06);
-        }
-        nav[data-on-dark="false"] .cp-agendar:hover {
-          border-color: rgba(108,57,179,0.75);
-          background: rgba(108,57,179,0.12);
-        }
-        nav[data-on-dark="false"] .cp-menu-btn span { background: #6C39B3; }
-        nav[data-on-dark="false"] .cp-menu-btn:hover { background: rgba(108,57,179,0.08); }
+        .cp-menu-btn:hover { background: rgba(108,57,179,0.08); }
 
         /* ── Dropdown menú ── */
         .cp-dropdown {
@@ -250,14 +215,14 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           color: #6C39B3;
         }
 
-        /* ── Logo Close Predict® — degradé violeta original ── */
+        /* ── Logo Close Predict® — degradé gris claro → blanco ── */
         .cp-word {
           font-family: 'Plus Jakarta Sans', 'Outfit', 'Manrope', system-ui, sans-serif;
           font-weight: 800;
           line-height: 0.93;
           letter-spacing: -0.028em;
           display: block;
-          background: linear-gradient(180deg, #9B72E0 0%, #6C39B3 100%);
+          background: linear-gradient(180deg, #A8A4BC 0%, #FFFFFF 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -267,29 +232,34 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           font-size: 0.40em;
           vertical-align: super;
           letter-spacing: 0;
-          background: linear-gradient(180deg, #9B72E0 0%, #6C39B3 100%);
+          background: linear-gradient(180deg, #A8A4BC 0%, #FFFFFF 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
           font-weight: 800;
         }
 
-        /* ── Aurora keyframes ── */
+        /* ── Aurora keyframes — manchas moradas sobre blanco ── */
         @keyframes aurora1 {
-          0%, 100% { transform: translate(0, 0)    scale(1);    }
-          25%       { transform: translate(8%, -7%)  scale(1.09); }
-          50%       { transform: translate(-6%, 10%) scale(0.94); }
-          75%       { transform: translate(11%, 5%)  scale(1.05); }
+          0%, 100% { transform: translate(0,    0)    scale(1);    }
+          25%       { transform: translate(8%,  -7%)   scale(1.09); }
+          50%       { transform: translate(-6%,  10%)  scale(0.94); }
+          75%       { transform: translate(11%,  5%)   scale(1.05); }
         }
         @keyframes aurora2 {
-          0%, 100% { transform: translate(0, 0)    scale(1);    }
-          33%       { transform: translate(-10%, 9%) scale(1.12); }
-          66%       { transform: translate(7%, -11%) scale(0.91); }
+          0%, 100% { transform: translate(0,    0)    scale(1);    }
+          33%       { transform: translate(-10%, 9%)   scale(1.12); }
+          66%       { transform: translate(7%,  -11%)  scale(0.91); }
         }
         @keyframes aurora3 {
-          0%, 100% { transform: translate(0, 0)   scale(1);    }
-          40%       { transform: translate(9%, 13%) scale(1.07); }
-          80%       { transform: translate(-7%, -5%) scale(0.97); }
+          0%, 100% { transform: translate(0,    0)    scale(1);    }
+          40%       { transform: translate(9%,   13%)  scale(1.07); }
+          80%       { transform: translate(-7%, -5%)   scale(0.97); }
+        }
+        @keyframes aurora4 {
+          0%, 100% { transform: translate(0,    0)    scale(1);    }
+          45%       { transform: translate(-5%,  8%)   scale(1.08); }
+          70%       { transform: translate(9%,  -6%)   scale(0.95); }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -297,12 +267,14 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
         }
       `}</style>
 
-      {/* ── NAV — transparente, colores adaptativos por scroll ── */}
+      {/* ── NAV — fondo blanco fijo ── */}
       <nav
         ref={navRef}
-        data-on-dark={navOnDark}
         className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
-        style={{ background: "transparent" }}
+        style={{
+          background: "#FFFFFF",
+          boxShadow: "0 1px 0 rgba(108,57,179,0.08)",
+        }}
       >
         {/* ── Logo personal — izquierda ── */}
         <a href="#" className="cp-logo">
@@ -342,14 +314,44 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
         )}
       </nav>
 
-      {/* ── HERO — degradé morado arriba → blanco abajo ── */}
+      {/* ── HERO — fondo blanco con manchas aurora moradas ── */}
       <section
         className="relative flex items-center justify-center overflow-hidden"
-        style={{
-          minHeight: "100vh",
-          background: "linear-gradient(180deg, #281a52 0%, #6C39B3 28%, #5a2e9e 60%, #281a52 100%)",
-        }}
+        style={{ minHeight: "100vh", background: "#FFFFFF" }}
       >
+        {/* ── Manchas aurora moradas (puntuales, difuminadas, en movimiento) ── */}
+        <div aria-hidden style={{
+          position: "absolute", top: "-12%", left: "-10%",
+          width: "46vw", height: "46vw",
+          background: "#463275", borderRadius: "50%",
+          filter: "blur(130px)", opacity: 0.13,
+          animation: "aurora1 20s ease-in-out infinite",
+          pointerEvents: "none",
+        }} />
+        <div aria-hidden style={{
+          position: "absolute", top: "20%", right: "-8%",
+          width: "34vw", height: "34vw",
+          background: "#463275", borderRadius: "50%",
+          filter: "blur(110px)", opacity: 0.10,
+          animation: "aurora2 26s ease-in-out infinite",
+          pointerEvents: "none",
+        }} />
+        <div aria-hidden style={{
+          position: "absolute", bottom: "-10%", left: "22%",
+          width: "38vw", height: "38vw",
+          background: "#463275", borderRadius: "50%",
+          filter: "blur(120px)", opacity: 0.11,
+          animation: "aurora3 22s ease-in-out infinite",
+          pointerEvents: "none",
+        }} />
+        <div aria-hidden style={{
+          position: "absolute", top: "40%", left: "40%",
+          width: "20vw", height: "20vw",
+          background: "#6B2BB5", borderRadius: "50%",
+          filter: "blur(90px)", opacity: 0.07,
+          animation: "aurora4 30s ease-in-out infinite",
+          pointerEvents: "none",
+        }} />
 
         {/* Textura noise sutil */}
         <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden>
@@ -360,7 +362,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
         </svg>
         <div aria-hidden style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          filter: "url(#cp-noise)", opacity: 0.028,
+          filter: "url(#cp-noise)", opacity: 0.022,
         }}/>
 
         {/* ── Composición principal ── */}
@@ -383,7 +385,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             <div aria-hidden style={{
               position: "absolute",
               top: "-28%", left: "-22%", right: "-22%", bottom: "-28%",
-              background: "radial-gradient(circle at 42% 52%, rgba(108,57,179,0.13) 0%, transparent 60%)",
+              background: "radial-gradient(circle at 42% 52%, rgba(70,50,117,0.10) 0%, transparent 60%)",
               pointerEvents: "none",
             }}/>
 
@@ -397,7 +399,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
               }}
             >
               <motion.div
-                style={{ filter: "drop-shadow(0 0 24px rgba(108,57,179,0.45))", willChange: "transform" }}
+                style={{ filter: "drop-shadow(0 0 24px rgba(108,57,179,0.30))", willChange: "transform" }}
                 animate={funnelDone ? { scale: [1, 1.012, 1] } : undefined}
                 transition={funnelDone
                   ? { duration: 6.5, repeat: Infinity, ease: "easeInOut" }
@@ -436,7 +438,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             </motion.div>
           </div>
 
-          {/* ══════════ TEXTO — Close Predict® (gradiente gris → blanco, levemente más grande) ══════════ */}
+          {/* ══════════ TEXTO — Close Predict® (degradé gris claro → blanco, levemente más grande) ══════════ */}
           <div
             translate="no"
             style={{
@@ -455,7 +457,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                   id={`cp-char-${i}`}
                   className="cp-word"
                   style={{
-                    fontSize: "clamp(50px, 5.5vw, 90px)",
+                    fontSize: "clamp(54px, 6vw, 96px)",
                     display: "inline-block",
                     opacity:   introComplete === false ? 0      : undefined,
                     filter:    introComplete === false ? "blur(6px)" : undefined,
@@ -476,7 +478,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                   id={`cp-char-${i + 5}`}
                   className="cp-word"
                   style={{
-                    fontSize: "clamp(50px, 5.5vw, 90px)",
+                    fontSize: "clamp(54px, 6vw, 96px)",
                     display: "inline-block",
                     opacity:   introComplete === false ? 0      : undefined,
                     filter:    introComplete === false ? "blur(6px)" : undefined,
@@ -508,7 +510,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                 fontWeight: 700,
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
-                color: "rgba(155,114,224,0.55)",
+                color: "rgba(70,50,117,0.50)",
                 opacity: introComplete === false ? 0 : undefined,
                 transition: "none",
               }}

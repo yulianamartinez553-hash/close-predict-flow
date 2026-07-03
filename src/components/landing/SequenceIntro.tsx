@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
@@ -6,7 +6,7 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
    TIPOS
 ───────────────────────────────────────────────────────────────── */
 interface Props { onComplete: () => void }
-type Phase = "idle" | "smoke-accel" | "contracting" | "done";
+type Phase = "idle" | "contracting" | "done";
 
 const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
@@ -19,154 +19,221 @@ const FUNNEL_CLIPS = [
   "inset(0% 0% 0%  0%)",
 ];
 
-/* ─────────────────────────────────────────────────────────────────
-   OPCIONES DE HUMO
-───────────────────────────────────────────────────────────────── */
-const SMOKE_OPTIONS = {
-  fullScreen: false,
-  background: { color: { value: "transparent" } },
-  particles: {
-    number: { value: 0 },
-    color: { value: ["#7C3AED", "#A855F7", "#6D28D9", "#4C1080"] },
-    shape: { type: "circle" },
-    opacity: {
-      value: { min: 0.04, max: 0.45 },
-      animation: { enable: true, speed: 0.5, sync: false },
-    },
-    size: { value: { min: 45, max: 125 } },
-    move: {
-      enable: true,
-      speed: { min: 0.4, max: 1.6 },
-      direction: "top" as const,
-      outModes: { default: "destroy" as const, top: "destroy" as const },
-      random: true,
-    },
-  },
-  emitters: { position: { x: 50, y: 90 }, rate: { quantity: 2, delay: 0.35 } },
-  detectRetina: true,
-};
+const HLS_SRC =
+  "https://stream.mux.com/kimF2ha9zLrX64H00UgLGPflCzNtl1T0215MlAmeOztv8.m3u8";
 
 /* ─────────────────────────────────────────────────────────────────
-   COMPONENTE
+   VIDEO DE FONDO
+───────────────────────────────────────────────────────────────── */
+function BackgroundVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let hls: any = null;
+
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = HLS_SRC;
+    } else {
+      import("hls.js").then(({ default: Hls }) => {
+        if ((Hls as any).isSupported()) {
+          hls = new (Hls as any)();
+          hls.loadSource(HLS_SRC);
+          hls.attachMedia(video);
+        }
+      });
+    }
+
+    return () => { hls?.destroy?.(); };
+  }, []);
+
+  return (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
+      {/* Overlay #1A1038 al 72% para legibilidad sobre el video */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute", inset: 0,
+          backgroundColor: "#1A1038",
+          opacity: 0.72,
+          zIndex: 1,
+        }}
+      />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   TYPEWRITER DEL SUBTÍTULO
+───────────────────────────────────────────────────────────────── */
+function TypewriterText({
+  text, startDelay = 0, speed = 52, style,
+}: {
+  text: string; startDelay?: number; speed?: number; style?: React.CSSProperties;
+}) {
+  const [displayed, setDisplayed] = useState("");
+  const [done,      setDone]      = useState(false);
+  const idxRef   = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    idxRef.current = 0;
+    setDisplayed("");
+    setDone(false);
+
+    const tick = () => {
+      idxRef.current++;
+      setDisplayed(text.slice(0, idxRef.current));
+      if (idxRef.current < text.length) {
+        timerRef.current = setTimeout(tick, speed);
+      } else {
+        setDone(true);
+      }
+    };
+
+    timerRef.current = setTimeout(tick, startDelay);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [text, startDelay, speed]);
+
+  return (
+    <p style={style}>
+      {displayed}
+      {!done && (
+        <span
+          className="cursor-blink"
+          style={{
+            display: "inline-block", width: "2px", height: "1.1em",
+            background: "rgba(255,255,255,0.75)",
+            marginLeft: "3px", verticalAlign: "text-bottom",
+          }}
+        />
+      )}
+    </p>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   GLASS PILL CTA — typewriter "CONOCER CLOSE PREDICT"
+───────────────────────────────────────────────────────────────── */
+const PILL_TEXT = "CONOCER CLOSE PREDICT";
+
+function GlassPill({
+  onClick, reduced,
+}: {
+  onClick: () => void; reduced: boolean;
+}) {
+  const [displayed, setDisplayed] = useState(reduced ? PILL_TEXT : "");
+  const [done,      setDone]      = useState(reduced);
+  const idxRef   = useRef(reduced ? PILL_TEXT.length : 0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (reduced) return;
+    idxRef.current = 0;
+    setDisplayed("");
+    setDone(false);
+
+    const tick = () => {
+      idxRef.current++;
+      setDisplayed(PILL_TEXT.slice(0, idxRef.current));
+      if (idxRef.current < PILL_TEXT.length) {
+        timerRef.current = setTimeout(tick, 60);
+      } else {
+        setDone(true);
+      }
+    };
+
+    timerRef.current = setTimeout(tick, 2200);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [reduced]);
+
+  return (
+    <motion.button
+      onClick={onClick}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.5, duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ borderColor: "rgba(155,114,224,0.60)", background: "rgba(255,255,255,0.07)" }}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "16px 36px",
+        borderRadius: "9999px",
+        background: "rgba(255,255,255,0.04)",
+        backdropFilter: "blur(16px) saturate(180%)",
+        WebkitBackdropFilter: "blur(16px) saturate(180%)",
+        border: "1px solid rgba(255,255,255,0.13)",
+        cursor: "pointer",
+        minWidth: "280px",
+        justifyContent: "center",
+        marginTop: "3rem",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'Montserrat','Inter',sans-serif",
+          fontWeight: 700,
+          fontSize: "13px",
+          letterSpacing: "0.22em",
+          color: "rgba(255,255,255,0.88)",
+        }}
+      >
+        {displayed}
+        {!done && (
+          <span
+            className="cursor-blink"
+            style={{
+              display: "inline-block", width: "2px", height: "1em",
+              background: "rgba(255,255,255,0.72)",
+              marginLeft: "3px", verticalAlign: "middle",
+            }}
+          />
+        )}
+      </span>
+
+      {done && (
+        <motion.span
+          initial={{ opacity: 0, x: -5 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.28 }}
+          style={{ color: "rgba(155,114,224,0.85)", fontSize: "16px", lineHeight: 1 }}
+        >
+          →
+        </motion.span>
+      )}
+    </motion.button>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   COMPONENTE PRINCIPAL
 ───────────────────────────────────────────────────────────────── */
 export function SequenceIntro({ onComplete }: Props) {
   const reduced = useReducedMotion();
-  const [screen,     setScreen]     = useState<0 | 1>(0);
   const [phase,      setPhase]      = useState<Phase>("idle");
   const [overlayOut, setOverlayOut] = useState(false);
 
-  const particlesRef = useRef<any>(null);
-  const titleRef     = useRef<HTMLHeadingElement>(null);
-
-  /* Bloquear scroll */
+  /* Bloquear scroll mientras corre */
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  /* ── Humo tsParticles + reveal Splitting.js en pantalla 0 ── */
-  useEffect(() => {
-    if (reduced) return;
-    let destroyed = false;
-
-    const run = async () => {
-      /* Humo */
-      try {
-        const { tsParticles } = await import("@tsparticles/engine");
-        const { loadSlim }    = await import("@tsparticles/slim");
-        await loadSlim(tsParticles);
-        if (!destroyed) {
-          const pc = await tsParticles.load({ id: "cp-smoke", options: SMOKE_OPTIONS as any });
-          particlesRef.current = pc;
-        }
-      } catch (_) {}
-
-      /* 800ms → revelar título letra a letra */
-      await sleep(800);
-      if (destroyed) return;
-
-      try {
-        const [gsapMod, splitMod] = await Promise.all([
-          import("gsap"),
-          // @ts-ignore
-          import("splitting"),
-        ]);
-        const gsap      = (gsapMod as any).gsap ?? (gsapMod as any).default ?? gsapMod;
-        const Splitting = (splitMod  as any).default ?? splitMod;
-
-        if (titleRef.current && !destroyed) {
-          Splitting({ target: titleRef.current });
-          const chars = Array.from(titleRef.current.querySelectorAll(".char"));
-          gsap.fromTo(chars,
-            { opacity: 0, filter: "blur(10px)", y: 16 },
-            {
-              opacity: 1, filter: "blur(0px)", y: 0,
-              duration: 0.38, stagger: 0.028, ease: "power3.out",
-              onComplete() {
-                const sub  = document.getElementById("s0-subtitle");
-                const hint = document.getElementById("s0-hint");
-                if (sub)  gsap.to(sub,  { opacity: 1, y: 0, duration: 0.5,        ease: "power2.out" });
-                if (hint) gsap.to(hint, { opacity: 1,       duration: 0.5, delay: 0.2, ease: "power2.out" });
-              },
-            }
-          );
-        }
-      } catch (_) {
-        /* Fallback sin librerías */
-        if (titleRef.current) (titleRef.current as HTMLElement).style.opacity = "1";
-        ["s0-subtitle","s0-hint"].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) { el.style.opacity = "1"; el.style.transform = "none"; }
-        });
-      }
-    };
-
-    run();
-    return () => {
-      destroyed = true;
-      try { particlesRef.current?.destroy?.(); } catch (_) {}
-      particlesRef.current = null;
-    };
-  }, [reduced]);
-
-  /* ── Avanzar: pantalla 0 → 1 → transición ── */
-  const advance = useCallback(() => {
-    if (phase !== "idle") return;
-    if (screen === 0) { setScreen(1); return; }
-    startTransition();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, phase]);
-
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => {
-      if (["Enter"," ","ArrowDown","ArrowRight"].includes(e.key)) { e.preventDefault(); advance(); }
-    };
-    const w = (e: WheelEvent) => { if (e.deltaY > 20) advance(); };
-    window.addEventListener("keydown", k);
-    window.addEventListener("wheel", w, { passive: true });
-    return () => { window.removeEventListener("keydown", k); window.removeEventListener("wheel", w); };
-  }, [advance]);
-
-  /* ── Transición al Hero ── */
+  /* ── Transición al Hero (iris + reveal de chars GSAP) ── */
   const startTransition = useCallback(async () => {
     if (phase !== "idle") return;
 
-    /* Acelerar humo 320ms */
-    setPhase("smoke-accel");
-    try {
-      const pc = particlesRef.current;
-      if (pc?.options?.particles?.move) {
-        pc.options.particles.move.speed = { min: 3, max: 7 };
-        if (pc.options.emitters) pc.options.emitters.rate = { quantity: 5, delay: 0.08 };
-        await pc.refresh();
-      }
-    } catch (_) {}
-    await sleep(320);
-
-    try { particlesRef.current?.destroy?.(); } catch (_) {}
-    particlesRef.current = null;
-
-    /* Contracción iris 1.25s */
+    /* Contracción iris */
     setPhase("contracting");
     await sleep(1280);
 
@@ -187,7 +254,7 @@ export function SequenceIntro({ onComplete }: Props) {
       );
     }
 
-    /* Embudo: opacidad + clip-path barra a barra */
+    /* Embudo: clip-path barra a barra */
     const funnelEl = document.getElementById("cp-funnel-img");
     if (funnelEl) {
       gsap.to(funnelEl, { opacity: 1, duration: 0.4, ease: "power2.out" });
@@ -215,175 +282,96 @@ export function SequenceIntro({ onComplete }: Props) {
     onComplete();
   }, [phase, onComplete]);
 
+  /* Teclas de acceso rápido */
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => {
+      if (["Enter", " ", "ArrowDown", "ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+        startTransition();
+      }
+    };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [startTransition]);
+
   /* ── RENDER ── */
   if (phase === "done") return null;
 
-  const isIdle        = phase === "idle" || phase === "smoke-accel";
   const isContracting = phase === "contracting";
-  const EASE          = [0.22, 1, 0.36, 1] as const;
 
   return (
     <div
-      className="fixed inset-0 z-[200] overflow-hidden cursor-pointer select-none"
+      className="fixed inset-0 z-[200] overflow-hidden select-none"
       style={{
         opacity:       overlayOut ? 0 : 1,
         transition:    overlayOut ? "opacity 0.65s ease" : "none",
         pointerEvents: overlayOut ? "none" : "auto",
       }}
-      onClick={() => { if (isIdle) advance(); }}
     >
-      {/* ── Fondo violeta — contrae en iris al transicionar ── */}
-      {(isIdle || isContracting) && (
+      {/* ── Video de fondo ── */}
+      <BackgroundVideo />
+
+      {/* ── Iris contraction al transicionar ── */}
+      {isContracting && (
         <motion.div
           aria-hidden
           style={{
-            position: "absolute", inset: 0, zIndex: 1,
-            background: "linear-gradient(160deg, #2B1142 0%, #1E0A33 100%)",
+            position: "absolute", inset: 0, zIndex: 10,
+            background: "#08030F",
           }}
           initial={{ clipPath: "inset(0% 0% round 0%)" }}
-          animate={isContracting ? { clipPath: "inset(50% 50% round 50%)" } : undefined}
-          transition={isContracting ? { duration: 1.2, ease: [0.7, 0, 0.84, 0] } : undefined}
+          animate={{ clipPath: "inset(50% 50% round 50%)" }}
+          transition={{ duration: 1.2, ease: [0.7, 0, 0.84, 0] }}
         />
       )}
 
-      {/* ── Humo tsParticles ── */}
-      <div
-        id="cp-smoke"
-        aria-hidden
-        style={{
-          position: "absolute", inset: 0, zIndex: 0,
-          filter: "blur(28px)",
-          opacity: isIdle ? 0.75 : 0,
-          transition: "opacity 0.45s ease",
-          pointerEvents: "none",
-        }}
-      />
+      {/* ── Contenido ── */}
+      {!isContracting && (
+        <div
+          style={{
+            position: "absolute", inset: 0, zIndex: 2,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            textAlign: "center", padding: "0 2rem",
+          }}
+        >
+          {/* Título — misma tipografía que antes */}
+          <motion.h1
+            initial={reduced ? false : { opacity: 0, filter: "blur(10px)", y: 16 }}
+            animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            transition={{ duration: 0.7, delay: reduced ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              color: "#fff",
+              fontSize: "clamp(36px, 5.5vw, 66px)",
+              fontWeight: 900,
+              lineHeight: 1.08,
+              letterSpacing: "-0.02em",
+              maxWidth: 820,
+              textTransform: "uppercase",
+              margin: 0,
+            }}
+          >
+            Los dueños que escalan no venden.
+          </motion.h1>
 
-      {/* ── Pantallas — AnimatePresence para transición suave ── */}
-      {isIdle && (
-        <AnimatePresence mode="wait">
+          {/* Subtítulo typewriter */}
+          <TypewriterText
+            text="Tienen sistemas que venden por ellos."
+            startDelay={reduced ? 0 : 1100}
+            speed={reduced ? 0 : 52}
+            style={{
+              marginTop: "1.6rem",
+              fontSize: "clamp(15px, 1.55vw, 20px)",
+              color: "rgba(255,255,255,0.62)",
+              lineHeight: 1.65,
+              maxWidth: 560,
+              minHeight: "1.65em",
+            }}
+          />
 
-          {/* PANTALLA 0 */}
-          {screen === 0 && (
-            <motion.div
-              key="s0"
-              initial={reduced ? false : { opacity: 0, y: 28 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -28 }}
-              transition={{ duration: 0.65, ease: EASE }}
-              style={{
-                position: "absolute", inset: 0, zIndex: 2,
-                display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center",
-                textAlign: "center", padding: "0 2rem",
-              }}
-            >
-              <h1
-                ref={titleRef}
-                style={{
-                  color: "#fff",
-                  fontSize: "clamp(36px, 5.5vw, 66px)",
-                  fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.02em",
-                  maxWidth: 820,
-                  opacity: 0, /* Splitting.js + GSAP revelan */
-                }}
-              >
-                ¿TUS VENTAS DEPENDEN SOLO DE VOS?
-              </h1>
-
-              <p
-                id="s0-subtitle"
-                style={{
-                  marginTop: "1.6rem",
-                  fontSize: "clamp(15px, 1.55vw, 20px)",
-                  color: "rgba(255,255,255,0.62)", lineHeight: 1.65, maxWidth: 560,
-                  opacity: 0, transform: "translateY(12px)",
-                }}
-              >
-                Te llegan clientes, pero el proceso es un caos<br/>
-                y todo termina en tus manos.
-              </p>
-
-              <p
-                id="s0-hint"
-                style={{
-                  marginTop: "3rem",
-                  fontSize: "11px", letterSpacing: "0.3em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.22)",
-                  opacity: 0,
-                }}
-              >
-                Click para continuar
-              </p>
-            </motion.div>
-          )}
-
-          {/* PANTALLA 1 */}
-          {screen === 1 && (
-            <motion.div
-              key="s1"
-              initial={reduced ? false : { opacity: 0, y: 28 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -28 }}
-              transition={{ duration: 0.65, ease: EASE }}
-              style={{
-                position: "absolute", inset: 0, zIndex: 2,
-                display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center",
-                textAlign: "center", padding: "0 2rem",
-              }}
-            >
-              <h1 style={{
-                color: "#fff",
-                fontSize: "clamp(36px, 5.5vw, 66px)",
-                fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.02em",
-              }}>
-                NO NECESITAS<br/>TRABAJAR MÁS
-              </h1>
-
-              <p style={{
-                marginTop: "1.6rem",
-                fontSize: "clamp(15px, 1.55vw, 20px)",
-                color: "rgba(255,255,255,0.62)",
-              }}>
-                Necesitas mejorar tu proceso.
-              </p>
-
-              <button
-                onClick={e => { e.stopPropagation(); startTransition(); }}
-                style={{
-                  marginTop: "2.8rem",
-                  padding: "16px 44px", borderRadius: "100px",
-                  fontFamily: "'Montserrat','Inter',sans-serif",
-                  fontWeight: 900, fontSize: "15px",
-                  letterSpacing: "0.06em", textTransform: "uppercase", color: "#fff",
-                  background: "linear-gradient(135deg, #6B00B6, #A855F7)",
-                  boxShadow: "0 0 28px rgba(124,58,237,0.55)",
-                  border: "none", cursor: "pointer",
-                  position: "relative", overflow: "hidden",
-                }}
-              >
-                <span style={{ position: "relative", zIndex: 1 }}>
-                  Entrá y mirá cómo cambia eso
-                </span>
-                {!reduced && (
-                  <motion.span
-                    aria-hidden
-                    style={{
-                      position: "absolute", inset: 0,
-                      background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.26) 50%, transparent)",
-                      transform: "skewX(-12deg)",
-                    }}
-                    animate={{ x: ["-120%", "220%"] }}
-                    transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 2.2, ease: "linear" }}
-                  />
-                )}
-              </button>
-            </motion.div>
-          )}
-
-        </AnimatePresence>
+          {/* Glass pill CTA */}
+          <GlassPill onClick={startTransition} reduced={reduced} />
+        </div>
       )}
     </div>
   );

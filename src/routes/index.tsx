@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
-import { SequenceIntro } from "@/components/landing/SequenceIntro";
+import { IntroPortada } from "@/components/landing/IntroPortada";
 import { AboutMe } from "@/components/landing/AboutMe";
-import { PhasesDetail, PhasesSimpleList } from "@/components/landing/Phases";
+import { PhasesDetail, FAQ } from "@/components/landing/Phases";
 import { ClosingSection } from "@/components/landing/ClosingSection";
+import { QualificationSections } from "@/components/landing/QualificationSection";
 import {
   Sistema, Resultado,
   Testimonios, Footer, WhatsAppFloat,
@@ -32,10 +33,10 @@ function Landing() {
   const showIntro = ready && !reduced && !introComplete;
 
   return (
-    <main className="bg-surface-soft text-foreground" style={{ overflowX: "clip" }}>
+    <main style={{ overflowX: "clip", color: "var(--color-foreground)" }}>
       {ready && !reduced && <CursorFollower />}
       {showIntro && (
-        <SequenceIntro onComplete={() => setIntroComplete(true)} />
+        <IntroPortada onComplete={() => setIntroComplete(true)} />
       )}
       {/* 2. HERO */}
       <Hero introComplete={introComplete} />
@@ -43,14 +44,16 @@ function Landing() {
       <PhasesDetail />
       {/* 5. ENTREGABLES — CLOSE-PREDICT™ label + 14 tarjetas carousel (id="entregables") */}
       <Sistema />
-      {/* 6. RESULTADO FINAL */}
+      {/* 6. CALIFICACIÓN — Para quién no es / para quién sí es */}
+      <QualificationSections />
+      {/* 7. RESULTADO FINAL */}
       <Resultado />
       {/* 7. SOBRE MÍ */}
       <AboutMe />
       {/* 8. TESTIMONIOS */}
       <Testimonios />
-      {/* 9. FASES — lista simple acordeón */}
-      <PhasesSimpleList />
+      {/* 9. PREGUNTAS FRECUENTES */}
+      <FAQ />
       {/* 10–12. GARANTÍA + COMUNIDAD + DIAGNÓSTICO — scroll snapping */}
       <ClosingSection />
       <Footer />

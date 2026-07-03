@@ -1,17 +1,9 @@
-import { useState, useRef, useEffect, useCallback, type RefObject } from "react";
-import { ShieldCheck, Stethoscope, Users, Download, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ShiningButton } from "@/components/animations/ShiningButton";
 
 /* ─────────────────────────────────────────────────────────────────
    TIPOS
 ───────────────────────────────────────────────────────────────── */
-type CardItem = {
-  icon: "stethoscope" | "users" | "download";
-  title: string;
-  desc: string;
-  cta: string;
-  href: string;
-};
-
 type SlideData = {
   id: string;
   bg: string;
@@ -20,9 +12,9 @@ type SlideData = {
   ghostText: string;
   badge: string;
   title: string;
+  subtitle?: string;
   body: string;
-  visual?: "shield" | "arrow";
-  cards?: CardItem[];
+  visual?: "ticker" | "particles";
   cta: null | { label: string; href: string };
 };
 
@@ -32,89 +24,65 @@ type SlideData = {
 const SLIDES: SlideData[] = [
   {
     id: "garantia",
-    bg: "#dee2e6",
-    textColor: "#1A0533",
-    accentColor: "#7B5EA7",
-    ghostText: "GARANTÍA",
+    bg: "#55108C",
+    textColor: "#FFFFFF",
+    accentColor: "#C084FC",
+    ghostText: "GARANTIA",
     badge: "Nuestro compromiso",
-    title: "Tu resultado es\nnuestra responsabilidad.",
-    body: "Si al terminar el programa tu sistema de ventas todavía no está funcionando como debe, seguimos trabajando contigo hasta dejarlo 100% listo.",
-    visual: "shield",
+    title: "SI NO FUNCIONA,\nNO PAGAS MÁS",
+    subtitle: "SEGUIMOS HASTA QUE FUNCIONE.",
+    body: "Al terminar las 12 semanas, si no tienes un sistema comercial documentado, delegable y funcionando en tu negocio, continuamos el acompañamiento sin costo adicional hasta que lo tengas.",
+    visual: "ticker",
     cta: null,
   },
   {
     id: "sala-flows",
-    bg: "#5d2e8c",
+    bg: "#2C0A5A",
     textColor: "#FFFFFF",
     accentColor: "#F5C842",
-    ghostText: "COMUNIDAD",
-    badge: "Sala Flows · Gratis",
-    title: "¿Todavía no estás\nlisto/a para el sistema completo?",
-    body: "Tres formas de empezar a organizar tus ventas desde hoy, sin compromiso.",
-    cards: [
-      {
-        icon: "stethoscope",
-        title: "Diagnóstico gratuito",
-        desc: "Responde unas preguntas y te digo exactamente en qué parte de tu proceso se están perdiendo tus ventas.",
-        cta: "Empezar diagnóstico",
-        href: "/diagnostico.html",
-      },
-      {
-        icon: "users",
-        title: 'Comunidad gratuita "Sala Flows"',
-        desc: "Cada 15 días te comparto contenido práctico sobre ventas y marketing que puedes aplicar de una.",
-        cta: "Unirme",
-        href: "https://wa.me/573229172709",
-      },
-      {
-        icon: "download",
-        title: "Herramientas y recursos",
-        desc: "Guías y herramientas prácticas para que empieces a organizar tus ventas desde ya.",
-        cta: "Descargar",
-        href: "https://wa.me/573229172709",
-      },
-    ],
-    cta: null,
+    ghostText: "SALA FLOW",
+    badge: "¿Todavía no estás listo/a para el sistema completo?",
+    title: "Organicemos tus ventas\ndesde hoy, sin compromiso",
+    body: "Cada 15 días te comparto contenido práctico sobre ventas y marketing que puedes ir aplicando.",
+    visual: undefined,
+    cta: {
+      label: "Solicitar",
+      href: "https://wa.me/573229172709?text=Holaaa%2C%20me%20gustaria%20unirme%20a%20las%20salas%20flows",
+    },
   },
   {
     id: "diagnostico",
-    bg: "#541388",
+    bg: "#1E0A33",
     textColor: "#FFFFFF",
     accentColor: "#F5C842",
     ghostText: "DIAGNÓSTICO",
     badge: "Tu próximo paso",
     title: "¿Listo/a para tener un sistema\nde ventas que trabaje por ti?",
-    body: "Agenda tu Diagnóstico Comercial y descubre en qué parte de tu proceso se están escapando tus ventas — y cómo convertirlas en crecimiento real.",
-    visual: "arrow",
-    cta: { label: "Solicita tu diagnóstico", href: "/diagnostico.html" },
+    body: "Agenda tu Diagnóstico Comercial y descubre en qué parte de tu proceso se están escapando tus ventas.",
+    visual: "particles",
+    cta: { label: "Diagnóstico Comercial", href: "/diagnostico.html" },
   },
 ];
 
-/* Partículas deterministas para slide 2 (SSR-safe) */
+/* Partículas deterministas para slide diagnóstico (SSR-safe) */
 const PARTICLES = Array.from({ length: 12 }, (_, i) => ({
   left: `${((i * 7 + 13) % 90) + 5}%`,
-  top:  `${((i * 11 + 17) % 80) + 10}%`,
+  top: `${((i * 11 + 17) % 80) + 10}%`,
   size: 4 + (i % 5) * 2,
   duration: 3 + (i % 5),
   delay: i * 0.4,
 }));
 
-const ICON_MAP = { stethoscope: Stethoscope, users: Users, download: Download } as const;
-
 /* ─────────────────────────────────────────────────────────────────
    COMPONENTE SLIDE
 ───────────────────────────────────────────────────────────────── */
 function Slide({
-  slide, index, isActive, scrollRef,
+  slide, index, isActive,
 }: {
   slide: SlideData;
   index: number;
   isActive: boolean;
-  scrollRef: RefObject<HTMLDivElement | null>;
 }) {
-  const isLast = index === SLIDES.length - 1;
-
-  /* Helper: animación de entrada con delay */
   const anim = (delay: number): React.CSSProperties => ({
     opacity: 0,
     animation: isActive
@@ -122,18 +90,13 @@ function Slide({
       : "none",
   });
 
-  const scrollToNext = () => {
-    const slides = scrollRef.current?.querySelectorAll("[data-slide]");
-    slides?.[index + 1]?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <div
       data-slide={index}
       aria-label={`Sección ${slide.badge}`}
       style={{ height: "100vh", scrollSnapAlign: "start", position: "relative", overflow: "hidden" }}
     >
-      {/* Ghost text */}
+      {/* Ghost text de fondo */}
       <div
         aria-hidden
         style={{
@@ -154,8 +117,8 @@ function Slide({
         </span>
       </div>
 
-      {/* Partículas (solo slide 2) */}
-      {slide.visual === "arrow" && (
+      {/* Partículas — solo slide diagnóstico, solo cuando activo */}
+      {slide.visual === "particles" && isActive && (
         <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1 }}>
           {PARTICLES.map((p, i) => (
             <div key={i} style={{
@@ -187,20 +150,36 @@ function Slide({
           </span>
         </div>
 
-        {/* Título */}
+        {/* Título principal */}
         <div style={anim(120)}>
           <h2 style={{
             fontFamily: "'Montserrat', sans-serif", fontWeight: 700,
             fontSize: "clamp(22px, 4vw, 52px)",
             color: slide.textColor, lineHeight: 1.15,
-            whiteSpace: "pre-line", marginBottom: "1.25rem", maxWidth: 780,
+            whiteSpace: "pre-line",
+            marginBottom: slide.subtitle ? "0.6rem" : "1.25rem",
+            maxWidth: 780,
           }}>
             {slide.title}
           </h2>
         </div>
 
+        {/* Subtítulo (solo slide garantia) */}
+        {slide.subtitle && (
+          <div style={anim(210)}>
+            <p style={{
+              fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
+              fontSize: "clamp(13px, 1.8vw, 20px)",
+              color: slide.accentColor, letterSpacing: "0.06em",
+              marginBottom: "1.25rem", textTransform: "uppercase",
+            }}>
+              {slide.subtitle}
+            </p>
+          </div>
+        )}
+
         {/* Body */}
-        <div style={anim(240)}>
+        <div style={anim(slide.subtitle ? 310 : 240)}>
           <p style={{
             fontSize: "clamp(14px, 1.6vw, 19px)", lineHeight: 1.65,
             color: slide.textColor, opacity: 0.85,
@@ -210,153 +189,63 @@ function Slide({
           </p>
         </div>
 
-        {/* Visual / Tarjetas / CTA */}
-        <div style={{ ...anim(360), width: "100%", display: "flex", justifyContent: "center" }}>
-
-          {/* Slide 0 — Shield */}
-          {slide.visual === "shield" && (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <ShieldCheck
-                size={80} color={slide.accentColor}
-                aria-label="Garantía"
-                style={{ animation: "csShieldPulse 2.8s ease-in-out infinite" }}
-              />
-              <div style={{
-                width: 60, height: 2, margin: "1.5rem auto",
-                background: `linear-gradient(90deg, transparent, ${slide.accentColor}, transparent)`,
-              }} />
-            </div>
-          )}
-
-          {/* Slide 1 — Tarjetas */}
-          {slide.cards && (
-            <div style={{
-              display: "flex", flexWrap: "wrap", gap: "1.25rem",
-              justifyContent: "center", maxWidth: 960, margin: "0 auto",
-            }}>
-              {slide.cards.map((card) => {
-                const Icon = ICON_MAP[card.icon];
-                return (
-                  <div
-                    key={card.title}
-                    style={{
-                      background: "rgba(255,255,255,0.10)",
-                      backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-                      border: "1px solid rgba(255,255,255,0.18)",
-                      borderRadius: 16, padding: "1.5rem",
-                      maxWidth: 280, flex: "1 1 220px", textAlign: "left",
-                      transition: "transform 250ms ease, box-shadow 250ms ease",
-                    }}
-                    onMouseEnter={e => {
-                      const el = e.currentTarget as HTMLDivElement;
-                      el.style.transform = "translateY(-6px)";
-                      el.style.boxShadow = "0 16px 40px rgba(0,0,0,0.25)";
-                    }}
-                    onMouseLeave={e => {
-                      const el = e.currentTarget as HTMLDivElement;
-                      el.style.transform = "translateY(0)";
-                      el.style.boxShadow = "none";
-                    }}
-                  >
-                    <Icon size={32} color={slide.accentColor} aria-hidden />
-                    <h3 style={{
-                      fontFamily: "'Montserrat', sans-serif", fontWeight: 700,
-                      fontSize: "15px", color: "#FFFFFF",
-                      marginTop: "0.75rem", marginBottom: "0.5rem",
-                    }}>
-                      {card.title}
-                    </h3>
-                    <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.75)", lineHeight: 1.6 }}>
-                      {card.desc}
-                    </p>
-                    <a
-                      href={card.href}
-                      target={card.href.startsWith("http") ? "_blank" : undefined}
-                      rel={card.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                      aria-label={`${card.cta} — ${card.title}`}
-                      style={{
-                        display: "inline-block", marginTop: "1rem",
-                        fontSize: "12px", fontWeight: 600, letterSpacing: "0.12em",
-                        textTransform: "uppercase", color: slide.accentColor,
-                        borderBottom: `1px solid ${slide.accentColor}`,
-                        paddingBottom: "2px", textDecoration: "none",
-                        transition: "opacity 150ms",
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.opacity = "0.7")}
-                      onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-                    >
-                      {card.cta}
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Slide 2 — CTA + indicador subir */}
-          {slide.visual === "arrow" && slide.cta && (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <a
-                href={slide.cta.href}
-                aria-label={`${slide.cta.label} — Diagnóstico Comercial Estratégico`}
-                style={{
-                  background: slide.accentColor, color: "#541388",
-                  fontFamily: "'Montserrat', sans-serif", fontWeight: 700,
-                  fontSize: "clamp(14px, 1.8vw, 18px)",
-                  letterSpacing: "0.06em", textTransform: "uppercase",
-                  padding: "1rem 2.5rem", borderRadius: 9999,
-                  border: "none", cursor: "pointer", textDecoration: "none",
-                  display: "inline-block",
-                  transition: "transform 180ms ease, box-shadow 180ms ease",
-                }}
-                onMouseEnter={e => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.transform = "scale(1.04)";
-                  el.style.boxShadow = `0 0 0 6px ${slide.accentColor}40`;
-                }}
-                onMouseLeave={e => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.transform = "scale(1)";
-                  el.style.boxShadow = "none";
-                }}
-              >
-                {slide.cta.label}
-              </a>
-              <div style={{
-                fontSize: "11px", letterSpacing: "0.15em", textTransform: "uppercase",
-                color: "white", opacity: 0.5, marginTop: "1.5rem",
-                animation: "csBounceUp 1.8s ease-in-out infinite",
-              }}>
-                ↑ Subir
-              </div>
-            </div>
-          )}
-        </div>
+        {/* CTA */}
+        {slide.cta && (
+          <div style={anim(slide.subtitle ? 420 : 360)}>
+            <ShiningButton
+              text={slide.cta.label}
+              href={slide.cta.href}
+              target={slide.cta.href.startsWith("http") ? "_blank" : undefined}
+              rel={slide.cta.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              variant="gold"
+              size="lg"
+            />
+          </div>
+        )}
       </div>
 
-      {/* Indicador scroll (no en el último slide) */}
-      {!isLast && (
-        <button
-          onClick={scrollToNext}
-          aria-label="Siguiente sección"
-          style={{
-            position: "absolute", bottom: "2rem", left: "50%",
-            transform: "translateX(-50%)", zIndex: 20,
-            display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
-            background: "none", border: "none", cursor: "pointer", padding: 0,
-          }}
-        >
-          <ChevronDown
-            size={20} color={slide.accentColor}
-            style={{ animation: "csBounceDown 1.6s ease-in-out infinite" }}
-          />
-          <span style={{
-            fontSize: "10px", letterSpacing: "0.2em",
-            color: slide.textColor, opacity: 0.5, textTransform: "uppercase",
+      {/* Ticker horizontal infinito — solo slide garantia */}
+      {slide.visual === "ticker" && (
+        <div style={{
+          position: "absolute", bottom: "10%", left: 0, right: 0, zIndex: 15,
+          overflow: "hidden",
+          background: "rgba(255,255,255,0.05)",
+          borderTop: "1px solid rgba(192,132,252,0.18)",
+          borderBottom: "1px solid rgba(192,132,252,0.18)",
+          padding: "0.8rem 0",
+          pointerEvents: "none",
+        }}>
+          <div style={{
+            display: "flex", whiteSpace: "nowrap",
+            animation: "csTicker 22s linear infinite",
+            willChange: "transform",
           }}>
-            SCROLL
-          </span>
-        </button>
+            {[0, 1].map(n => (
+              <span key={n} style={{
+                display: "inline-flex", alignItems: "center",
+                gap: "2.5rem", paddingRight: "6rem", flexShrink: 0,
+              }}>
+                <span style={{
+                  fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
+                  fontSize: "clamp(11px, 1.3vw, 14px)", letterSpacing: "0.22em",
+                  textTransform: "uppercase", color: "#C084FC",
+                }}>Sin letra pequeña.</span>
+                <span style={{ color: "rgba(192,132,252,0.3)", fontSize: "14px" }}>·</span>
+                <span style={{
+                  fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
+                  fontSize: "clamp(11px, 1.3vw, 14px)", letterSpacing: "0.22em",
+                  textTransform: "uppercase", color: "#C084FC",
+                }}>Sin excusas.</span>
+                <span style={{ color: "rgba(192,132,252,0.3)", fontSize: "14px" }}>·</span>
+                <span style={{
+                  fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
+                  fontSize: "clamp(11px, 1.3vw, 14px)", letterSpacing: "0.22em",
+                  textTransform: "uppercase", color: "#C084FC",
+                }}>Sin «depende».</span>
+              </span>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -367,17 +256,32 @@ function Slide({
 ───────────────────────────────────────────────────────────────── */
 export function ClosingSection() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [flash,       setFlash]       = useState(false);
+  const [flash, setFlash] = useState(false);
+  const [sectionInView, setSectionInView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const lastIdxRef   = useRef(0);
+  const lastIdxRef = useRef(0);
+  /* Refs para el handler de wheel (sin stale closures) */
+  const activeIndexRef = useRef(0);
+  const isTransitioningRef = useRef(false);
 
-  /* IntersectionObserver — root = scroll container */
+  /* Muestra dots solo cuando la sección está completamente en vista */
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setSectionInView(entry.isIntersecting),
+      { threshold: 0.8 }
+    );
+    obs.observe(section);
+    return () => obs.disconnect();
+  }, []);
+
+  /* Detecta el slide activo dentro del scroll container */
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const slides = container.querySelectorAll("[data-slide]");
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -385,6 +289,7 @@ export function ClosingSection() {
             const idx = Number(entry.target.getAttribute("data-slide"));
             if (idx !== lastIdxRef.current) {
               lastIdxRef.current = idx;
+              activeIndexRef.current = idx;
               setFlash(true);
               setTimeout(() => setFlash(false), 400);
               setActiveIndex(idx);
@@ -394,7 +299,6 @@ export function ClosingSection() {
       },
       { root: container, threshold: 0.6 }
     );
-
     slides.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
   }, []);
@@ -404,12 +308,46 @@ export function ClosingSection() {
     slides?.[idx]?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  /* Bloqueo de scroll de la página principal mientras la sección está activa */
+  useEffect(() => {
+    const sectionEl = sectionRef.current;
+    if (!sectionEl) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const rect = sectionEl.getBoundingClientRect();
+      /* Solo actuar cuando la sección cubre sustancialmente el viewport */
+      const fullyInView = rect.top < window.innerHeight * 0.35 && rect.bottom > window.innerHeight * 0.65;
+      if (!fullyInView) return;
+
+      const isDown = e.deltaY > 0;
+      const curIdx = activeIndexRef.current;
+
+      /* En los límites dejamos pasar el scroll de la página */
+      if (isDown && curIdx >= SLIDES.length - 1) return;
+      if (!isDown && curIdx <= 0) return;
+
+      /* Entre slides intermedios: bloquear página y navegar internamente */
+      e.preventDefault();
+
+      if (isTransitioningRef.current) return;
+      isTransitioningRef.current = true;
+      setTimeout(() => { isTransitioningRef.current = false; }, 950);
+
+      scrollToSlide(isDown ? curIdx + 1 : curIdx - 1);
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [scrollToSlide]);
+
   const current = SLIDES[activeIndex];
 
   return (
     <section
       id="contacto"
+      ref={sectionRef}
       aria-label="Sección de garantía, comunidad y diagnóstico"
+      style={{ height: "100vh", position: "relative" }}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
@@ -423,33 +361,25 @@ export function ClosingSection() {
             from { opacity: 0; transform: translateY(32px); }
             to   { opacity: 1; transform: translateY(0);    }
           }
-          @keyframes csShieldPulse {
-            0%   { transform: scale(1);    filter: drop-shadow(0 0  0px #7B5EA7);   }
-            50%  { transform: scale(1.08); filter: drop-shadow(0 0 18px #7B5EA780); }
-            100% { transform: scale(1);    filter: drop-shadow(0 0  0px #7B5EA7);   }
-          }
           @keyframes csFloatParticle {
             0%   { transform: translateY(0px)   scale(1);   opacity: 0.4; }
             50%  { transform: translateY(-20px) scale(1.2); opacity: 0.7; }
             100% { transform: translateY(0px)   scale(1);   opacity: 0.4; }
           }
-          @keyframes csBounceDown {
-            0%, 100% { transform: translateY(0);  }
-            50%       { transform: translateY(5px); }
-          }
-          @keyframes csBounceUp {
-            0%, 100% { transform: translateY(0);   }
-            50%       { transform: translateY(-4px); }
-          }
           @keyframes csFlashIn {
             0%   { opacity: 0.18; }
             100% { opacity: 0;    }
+          }
+          @keyframes csTicker {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
           }
         }
       `}</style>
 
       <div
         style={{
+          height: "100vh",
           backgroundColor: current.bg,
           transition: "background-color 700ms cubic-bezier(0.4, 0, 0.2, 1)",
           position: "relative", width: "100%",
@@ -480,32 +410,34 @@ export function ClosingSection() {
           />
         )}
 
-        {/* Dots de navegación lateral */}
-        <nav
-          aria-label="Navegación entre secciones"
-          style={{
-            position: "fixed", right: "1.5rem", top: "50%",
-            transform: "translateY(-50%)", zIndex: 100,
-            display: "flex", flexDirection: "column", gap: "10px",
-          }}
-        >
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => scrollToSlide(i)}
-              aria-label={`Ir a ${s.badge}`}
-              aria-current={activeIndex === i ? "true" : undefined}
-              style={{
-                width: activeIndex === i ? 10 : 8,
-                height: activeIndex === i ? 10 : 8,
-                background: activeIndex === i ? current.accentColor : "rgba(255,255,255,0.4)",
-                borderRadius: "50%", border: "none", cursor: "pointer",
-                padding: 0, display: "block",
-                transition: "all 300ms ease",
-              }}
-            />
-          ))}
-        </nav>
+        {/* Dots — solo visibles cuando la sección está completamente en vista */}
+        {sectionInView && (
+          <nav
+            aria-label="Navegación entre secciones"
+            style={{
+              position: "fixed", right: "1.5rem", top: "50%",
+              transform: "translateY(-50%)", zIndex: 100,
+              display: "flex", flexDirection: "column", gap: "10px",
+            }}
+          >
+            {SLIDES.map((s, i) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSlide(i)}
+                aria-label={`Ir a ${s.id}`}
+                aria-current={activeIndex === i ? "true" : undefined}
+                style={{
+                  width: activeIndex === i ? 10 : 8,
+                  height: activeIndex === i ? 10 : 8,
+                  background: activeIndex === i ? current.accentColor : "rgba(255,255,255,0.4)",
+                  borderRadius: "50%", border: "none", cursor: "pointer",
+                  padding: 0, display: "block",
+                  transition: "all 300ms ease",
+                }}
+              />
+            ))}
+          </nav>
+        )}
 
         {/* Scroll container con snap */}
         <div
@@ -520,7 +452,6 @@ export function ClosingSection() {
               slide={slide}
               index={i}
               isActive={activeIndex === i}
-              scrollRef={containerRef}
             />
           ))}
         </div>

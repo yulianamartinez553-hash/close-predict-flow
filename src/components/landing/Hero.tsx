@@ -14,33 +14,50 @@ const NAV_LINKS = [
   { label: "Contáctame",      href: "#contacto"    },
 ];
 
-/* ─────────────────────────────────────────────────────────────────
-   HERO
-───────────────────────────────────────────────────────────────── */
 /* "Close" = índices 0-4 · "Predict" = índices 5-11 · "®" = 12 */
 const CLOSE_CHARS   = ["C","l","o","s","e"];
 const PREDICT_CHARS = ["P","r","e","d","i","c","t"];
 
+/* ─────────────────────────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────────────────────────── */
 export function Hero({ introComplete }: { introComplete?: boolean }) {
-  const reduced    = useReducedMotion();
-  const funnelRef  = useRef<HTMLDivElement>(null);
+  const reduced   = useReducedMotion();
+  const funnelRef = useRef<HTMLDivElement>(null);
+  const navRef    = useRef<HTMLElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  /*
-   * Respiración: en modo intro espera a que la intro termine.
-   * En modo standalone arranca tras la animación de entrada (~1.18s).
-   */
   const [funnelDone, setFunnelDone] = useState(!!reduced);
   useEffect(() => {
     if (reduced) return;
-    /* Intro corriendo → esperamos a que introComplete sea true */
     if (introComplete === false) return;
-    /* Intro ya terminó o no hay intro */
     const delay = introComplete === true ? 120 : 1180;
     const t = setTimeout(() => setFunnelDone(true), delay);
     return () => clearTimeout(t);
   }, [reduced, introComplete]);
 
-  /* ── Mouse → tilt del embudo ── */
+  /* Color del nav: blanco sobre fondo oscuro, morado original sobre fondo claro */
+  const [navOnDark, setNavOnDark] = useState(true);
+  useEffect(() => {
+    const update = () => setNavOnDark(window.scrollY < window.innerHeight * 0.60);
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
+  /* Cerrar dropdown al hacer click fuera del nav */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: Event) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  /* Mouse → tilt del embudo */
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const sx   = useSpring(rawX, { stiffness: 110, damping: 22 });
@@ -64,6 +81,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
 
   const scrollTo = (e: { preventDefault(): void }, id: string) => {
     e.preventDefault();
+    setMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
   };
 
@@ -72,65 +90,167 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Dancing+Script:wght@400&display=swap');
 
-        .cp-nav-link {
-          color: rgba(220,194,255,.68); font-size: 13px; font-weight: 500;
-          text-decoration: none; position: relative; padding-bottom: 2px;
-          transition: color 220ms;
+        /* ── Logo personal Caro Chaparro ── */
+        .cp-logo {
+          text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2px;
+          line-height: 1;
         }
-        .cp-nav-link:hover { color: #DCC2FF; }
-        .cp-nav-link::after {
-          content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
-          height: 1px; background: #C77DFF;
-          transform: scaleX(0); transform-origin: left;
-          transition: transform 260ms ease;
-        }
-        .cp-nav-link:hover::after { transform: scaleX(1); }
-
-        .cp-agendar {
-          padding: 8px 24px; border: 1.5px solid rgba(199,125,255,.42);
-          border-radius: 100px; font-size: 13px; font-weight: 600;
-          color: #C77DFF; text-decoration: none; background: rgba(199,125,255,.07);
-          transition: border-color 220ms, background 220ms, color 220ms;
-          display: inline-block;
-        }
-        .cp-agendar:hover {
-          border-color: rgba(199,125,255,.75);
-          background: rgba(199,125,255,.15); color: #EDD6FF;
-        }
-
-        /* Logo Caro Chaparro */
-        .cp-logo { text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .cp-logo-name {
           font-family: 'Dancing Script', cursive;
           font-weight: 400;
           font-size: 28px;
-          color: #D4AAFF;
           line-height: 1;
           letter-spacing: 0.01em;
+          white-space: nowrap;
+          transition: color 350ms ease;
         }
         .cp-logo-sub {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 7px;
         }
         .cp-logo-sub::before,
         .cp-logo-sub::after {
           content: '';
           display: block;
-          width: 26px;
+          width: 20px;
           height: 1px;
-          background: rgba(212,170,255,0.35);
+          transition: background 350ms ease;
         }
         .cp-logo-sub span {
           font-family: 'Montserrat','Inter',sans-serif;
-          font-size: 10px;
+          font-size: 9.5px;
           font-weight: 600;
-          letter-spacing: 0.4em;
-          color: rgba(212,170,255,0.6);
+          letter-spacing: 0.42em;
           text-transform: uppercase;
+          transition: color 350ms ease;
         }
 
-        /* Texto del logo — gradiente vertical de violeta claro a oscuro */
+        /* ── Botón Agendar ── */
+        .cp-agendar {
+          position: relative;
+          overflow: hidden;
+          padding: 8px 22px;
+          border-width: 1.5px;
+          border-style: solid;
+          border-radius: 100px;
+          font-size: 13px;
+          font-weight: 600;
+          text-decoration: none;
+          display: inline-block;
+          transition: color 350ms ease, border-color 350ms ease, background 350ms ease;
+        }
+        .cp-agendar::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -120%;
+          width: 55%;
+          height: 200%;
+          background: linear-gradient(
+            to right,
+            transparent 0%,
+            rgba(255,255,255,0.55) 50%,
+            transparent 100%
+          );
+          transform: skewX(-18deg);
+          animation: cpShine 2.8s ease-in-out infinite;
+        }
+        @keyframes cpShine {
+          0%       { left: -120%; }
+          55%, 100% { left: 180%; }
+        }
+
+        /* ── Hamburger icon button ── */
+        .cp-menu-btn {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 4.5px;
+          padding: 7px 8px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          border-radius: 8px;
+          transition: background 200ms;
+        }
+        .cp-menu-btn span {
+          display: block;
+          width: 20px;
+          height: 2px;
+          border-radius: 2px;
+          transition: background 350ms ease;
+        }
+
+        /* ── Modo oscuro (fondo morado/oscuro) ── */
+        nav[data-on-dark="true"] .cp-logo-name { color: #ffffff; }
+        nav[data-on-dark="true"] .cp-logo-sub::before,
+        nav[data-on-dark="true"] .cp-logo-sub::after { background: rgba(255,255,255,0.40); }
+        nav[data-on-dark="true"] .cp-logo-sub span { color: rgba(255,255,255,0.72); }
+        nav[data-on-dark="true"] .cp-agendar {
+          color: #ffffff;
+          border-color: rgba(255,255,255,0.55);
+          background: rgba(255,255,255,0.10);
+        }
+        nav[data-on-dark="true"] .cp-agendar:hover {
+          border-color: rgba(255,255,255,0.85);
+          background: rgba(255,255,255,0.20);
+        }
+        nav[data-on-dark="true"] .cp-menu-btn span { background: #ffffff; }
+        nav[data-on-dark="true"] .cp-menu-btn:hover { background: rgba(255,255,255,0.14); }
+
+        /* ── Modo claro (fondo blanco/claro) ── */
+        nav[data-on-dark="false"] .cp-logo-name { color: #6C39B3; }
+        nav[data-on-dark="false"] .cp-logo-sub::before,
+        nav[data-on-dark="false"] .cp-logo-sub::after { background: rgba(108,57,179,0.28); }
+        nav[data-on-dark="false"] .cp-logo-sub span { color: rgba(70,50,117,0.62); }
+        nav[data-on-dark="false"] .cp-agendar {
+          color: #6C39B3;
+          border-color: rgba(108,57,179,0.45);
+          background: rgba(108,57,179,0.06);
+        }
+        nav[data-on-dark="false"] .cp-agendar:hover {
+          border-color: rgba(108,57,179,0.75);
+          background: rgba(108,57,179,0.12);
+        }
+        nav[data-on-dark="false"] .cp-menu-btn span { background: #6C39B3; }
+        nav[data-on-dark="false"] .cp-menu-btn:hover { background: rgba(108,57,179,0.08); }
+
+        /* ── Dropdown menú ── */
+        .cp-dropdown {
+          position: absolute;
+          top: calc(100% + 10px);
+          right: 1rem;
+          background: #ffffff;
+          border: 1px solid rgba(108,57,179,0.14);
+          border-radius: 14px;
+          box-shadow: 0 8px 32px rgba(70,50,117,0.14), 0 2px 8px rgba(0,0,0,0.06);
+          min-width: 210px;
+          overflow: hidden;
+          z-index: 200;
+        }
+        .cp-dropdown a {
+          display: block;
+          padding: 13px 20px;
+          color: #3d2470;
+          font-family: 'Poppins','Inter',system-ui,sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          text-decoration: none;
+          transition: background 180ms, color 180ms;
+          border-bottom: 1px solid rgba(108,57,179,0.07);
+        }
+        .cp-dropdown a:last-child { border-bottom: none; }
+        .cp-dropdown a:hover {
+          background: rgba(108,57,179,0.06);
+          color: #6C39B3;
+        }
+
+        /* ── Logo Close Predict® — degradé violeta original ── */
         .cp-word {
           font-family: 'Plus Jakarta Sans', 'Outfit', 'Manrope', system-ui, sans-serif;
           font-weight: 800;
@@ -153,31 +273,45 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           background-clip: text;
           font-weight: 800;
         }
+
+        /* ── Aurora keyframes ── */
+        @keyframes aurora1 {
+          0%, 100% { transform: translate(0, 0)    scale(1);    }
+          25%       { transform: translate(8%, -7%)  scale(1.09); }
+          50%       { transform: translate(-6%, 10%) scale(0.94); }
+          75%       { transform: translate(11%, 5%)  scale(1.05); }
+        }
+        @keyframes aurora2 {
+          0%, 100% { transform: translate(0, 0)    scale(1);    }
+          33%       { transform: translate(-10%, 9%) scale(1.12); }
+          66%       { transform: translate(7%, -11%) scale(0.91); }
+        }
+        @keyframes aurora3 {
+          0%, 100% { transform: translate(0, 0)   scale(1);    }
+          40%       { transform: translate(9%, 13%) scale(1.07); }
+          80%       { transform: translate(-7%, -5%) scale(0.97); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .cp-agendar::after { animation: none !important; }
+        }
       `}</style>
 
-      {/* ── NAV ── */}
+      {/* ── NAV — transparente, colores adaptativos por scroll ── */}
       <nav
+        ref={navRef}
+        data-on-dark={navOnDark}
         className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
-        style={{
-          background: "rgba(10,4,28,0.90)",
-          backdropFilter: "blur(18px)",
-          WebkitBackdropFilter: "blur(18px)",
-          borderBottom: "1px solid rgba(108,57,179,0.18)",
-        }}
+        style={{ background: "transparent" }}
       >
+        {/* ── Logo personal — izquierda ── */}
         <a href="#" className="cp-logo">
           <span className="cp-logo-name">Caro Chaparro</span>
-          <div className="cp-logo-sub">
-            <span>VENTAS</span>
-          </div>
+          <div className="cp-logo-sub"><span>Ventas</span></div>
         </a>
-        <div className="hidden md:flex items-center gap-7">
-          {NAV_LINKS.map(({ label, href }) => (
-            <a key={href} href={href} className="cp-nav-link"
-               onClick={e => scrollTo(e, href.slice(1))}>
-              {label}
-            </a>
-          ))}
+
+        {/* ── Derecha: botón Agendar + ícono hamburger ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <a
             href="https://calendly.com/caroventascoach/30min?month=2026-06"
             target="_blank" rel="noopener noreferrer"
@@ -185,20 +319,38 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           >
             Agendar
           </a>
+
+          <button
+            className="cp-menu-btn"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={menuOpen}
+          >
+            <span /><span /><span />
+          </button>
         </div>
+
+        {/* ── Dropdown de navegación ── */}
+        {menuOpen && (
+          <div className="cp-dropdown">
+            {NAV_LINKS.map(({ label, href }) => (
+              <a key={href} href={href} onClick={e => scrollTo(e, href.slice(1))}>
+                {label}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
 
-      {/* ── HERO ── */}
+      {/* ── HERO — degradé morado arriba → blanco abajo ── */}
       <section
         className="relative flex items-center justify-center overflow-hidden"
         style={{
           minHeight: "100vh",
-          background: `
-            radial-gradient(circle at center, rgba(155,90,255,.22) 0%, rgba(110,55,210,.14) 18%, rgba(70,30,130,.08) 35%, transparent 60%),
-            radial-gradient(ellipse at center, #6C39B3 0%, #572996 15%, #431C73 35%, #2F124D 58%, #1A0A2B 82%, #08030F 100%)
-          `,
+          background: "linear-gradient(180deg, #281a52 0%, #6C39B3 28%, #5a2e9e 60%, #281a52 100%)",
         }}
       >
+
         {/* Textura noise sutil */}
         <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden>
           <filter id="cp-noise">
@@ -211,26 +363,10 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
           filter: "url(#cp-noise)", opacity: 0.028,
         }}/>
 
-        {/* Halos de profundidad */}
-        <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-          <div style={{
-            position: "absolute", left: "4%", top: "12%",
-            width: 500, height: 500, borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(108,57,179,0.20) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}/>
-          <div style={{
-            position: "absolute", right: "6%", bottom: "12%",
-            width: 360, height: 360, borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(155,90,255,0.12) 0%, transparent 70%)",
-            filter: "blur(65px)",
-          }}/>
-        </div>
-
         {/* ── Composición principal ── */}
         <div style={{
           position: "relative", zIndex: 10,
-          width: "88%", maxWidth: 1020,
+          width: "88%", maxWidth: 1060,
           display: "flex", alignItems: "center",
           justifyContent: "center",
           gap: "clamp(2rem, 5vw, 5.5rem)",
@@ -244,7 +380,6 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             onMouseLeave={onMouseLeave}
             style={{ position: "relative", width: "min(44%, 400px)", flexShrink: 0 }}
           >
-            {/* Glow radial detrás del embudo */}
             <div aria-hidden style={{
               position: "absolute",
               top: "-28%", left: "-22%", right: "-22%", bottom: "-28%",
@@ -252,7 +387,6 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
               pointerEvents: "none",
             }}/>
 
-            {/* Tilt con mouse — perspectiva 3D */}
             <motion.div
               style={{
                 rotateX,
@@ -262,7 +396,6 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                 transformStyle: "preserve-3d",
               }}
             >
-              {/* Respiración suave — solo activa tras aparecer el embudo */}
               <motion.div
                 style={{ filter: "drop-shadow(0 0 24px rgba(108,57,179,0.45))", willChange: "transform" }}
                 animate={funnelDone ? { scale: [1, 1.012, 1] } : undefined}
@@ -271,7 +404,6 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                   : undefined
                 }
               >
-                {/* Imagen real del embudo — GSAP la controla en modo intro */}
                 <motion.div
                   style={{ willChange: "transform" }}
                   initial={reduced || introComplete === false ? false : { opacity: 0, y: 22, scale: 0.93, filter: "blur(8px)" }}
@@ -294,7 +426,6 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                         height: "auto",
                         display: "block",
                         userSelect: "none",
-                        /* En modo intro: oculto + clip a barra 1; GSAP lo revela */
                         opacity:  introComplete === false ? 0 : undefined,
                         clipPath: introComplete === false ? "inset(0% 0% 69% 0%)" : undefined,
                       }}
@@ -305,8 +436,9 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             </motion.div>
           </div>
 
-          {/* ══════════ TEXTO HTML/CSS — spans por carácter con IDs ══════════ */}
+          {/* ══════════ TEXTO — Close Predict® (gradiente gris → blanco, levemente más grande) ══════════ */}
           <div
+            translate="no"
             style={{
               display: "flex",
               flexDirection: "column",
@@ -315,7 +447,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
               minWidth: 200,
             }}
           >
-            {/* "Close" — IDs cp-char-0 … cp-char-4 */}
+            {/* "Close" */}
             <div style={{ display: "flex" }}>
               {CLOSE_CHARS.map((ch, i) => (
                 <span
@@ -323,9 +455,8 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                   id={`cp-char-${i}`}
                   className="cp-word"
                   style={{
-                    fontSize: "clamp(46px, 5.0vw, 84px)",
+                    fontSize: "clamp(50px, 5.5vw, 90px)",
                     display: "inline-block",
-                    /* En modo intro: GSAP los revela uno a uno */
                     opacity:   introComplete === false ? 0      : undefined,
                     filter:    introComplete === false ? "blur(6px)" : undefined,
                     transform: introComplete === false ? "translateY(8px)" : undefined,
@@ -337,7 +468,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
               ))}
             </div>
 
-            {/* "Predict®" — IDs cp-char-5 … cp-char-11 + cp-char-12 */}
+            {/* "Predict®" */}
             <div style={{ display: "flex", alignItems: "baseline", marginTop: "0.04em" }}>
               {PREDICT_CHARS.map((ch, i) => (
                 <span
@@ -345,7 +476,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                   id={`cp-char-${i + 5}`}
                   className="cp-word"
                   style={{
-                    fontSize: "clamp(46px, 5.0vw, 84px)",
+                    fontSize: "clamp(50px, 5.5vw, 90px)",
                     display: "inline-block",
                     opacity:   introComplete === false ? 0      : undefined,
                     filter:    introComplete === false ? "blur(6px)" : undefined,
@@ -377,7 +508,7 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                 fontWeight: 700,
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
-                color: "rgba(155,114,224,0.48)",
+                color: "rgba(155,114,224,0.55)",
                 opacity: introComplete === false ? 0 : undefined,
                 transition: "none",
               }}

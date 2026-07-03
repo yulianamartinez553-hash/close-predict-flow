@@ -610,23 +610,23 @@ function EntregablesCarousel3D() {
 
 export function Sistema() {
   return (
-    <section id="entregables" className="relative overflow-hidden py-28" style={{ background: "#F5F3F7" }}>
+    <section id="entregables" className="relative overflow-hidden py-28" style={{ background: "#281a52" }}>
       <div className="relative mx-auto max-w-7xl px-6">
         {/* Nuevo encabezado — eyebrow + h2 + subtítulo */}
         <div className="mx-auto mb-16 max-w-3xl text-center">
           <div
             className="display mb-4 text-xs uppercase tracking-[0.3em]"
-            style={{ color: "#8B3FD6" }}
+            style={{ color: "#c084fc" }}
           >
             CLOSE-PREDICT™
           </div>
           <h2
             className="serif text-4xl text-balance sm:text-5xl lg:text-6xl"
-            style={{ color: "#2B1142" }}
+            style={{ color: "#f0ecff" }}
           >
             Entregables
           </h2>
-          <p className="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <p className="mt-6 text-base leading-relaxed sm:text-lg" style={{ color: "rgba(240,236,255,0.65)" }}>
             Cada fase tiene criterios claros, guiones documentados y métricas de control
             para que tu equipo ejecute sin depender de ti.
           </p>
@@ -766,12 +766,12 @@ export function Resultado() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="relative bg-white py-28">
+    <section className="relative py-28" style={{ background: "transparent" }}>
       <div className="mx-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-2">
         <div>
-          <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-violet">Resultado final</div>
-          <h2 className="serif text-4xl text-ink text-balance sm:text-5xl">
-            Al finalizar, tienes un <em className="text-violet">sistema comercial</em> funcionando y escalando.
+          <div className="display mb-4 text-xs uppercase tracking-[0.3em]" style={{ color: "#c084fc" }}>Resultado final</div>
+          <h2 className="serif text-4xl text-balance sm:text-5xl" style={{ color: "#f0ecff" }}>
+            Al finalizar, tienes un <em style={{ color: "#c084fc" }}>sistema comercial</em> funcionando y escalando.
           </h2>
           <ul className="mt-10 space-y-4">
             {CHECKS.map((c, i) => (
@@ -783,10 +783,10 @@ export function Resultado() {
                 transition={viewTransition(reduced, { duration: 0.5, delay: i * 0.08 })}
                 className="flex items-start gap-3"
               >
-                <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet/10 text-violet">
+                <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(192,132,252,0.15)", color: "#c084fc" }}>
                   <Check className="h-3.5 w-3.5" />
                 </span>
-                <span className="text-base text-ink">{c}</span>
+                <span className="text-base" style={{ color: "rgba(240,236,255,0.85)" }}>{c}</span>
               </motion.li>
             ))}
           </ul>
@@ -798,12 +798,12 @@ export function Resultado() {
           whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={viewTransition(reduced, { duration: 0.8 })}
-          className="glass-card relative rounded-3xl p-7"
+          className="glass-dark relative rounded-3xl p-7"
         >
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <div className="display text-[10px] uppercase tracking-[0.25em] text-violet">Pipeline · Q actual</div>
-              <div className="serif mt-1 text-xl text-ink">Dashboard Comercial</div>
+              <div className="display text-[10px] uppercase tracking-[0.25em]" style={{ color: "#c084fc" }}>Pipeline · Q actual</div>
+              <div className="serif mt-1 text-xl" style={{ color: "#f0ecff" }}>Dashboard Comercial</div>
             </div>
             <div className="flex gap-1.5">
               <span className="h-2 w-2 rounded-full bg-violet/30" />
@@ -821,9 +821,9 @@ export function Resultado() {
               { k: "Conversión", v: "13.1%", g: "+4.2 pts" },
               { k: "Ticket prom.", v: "$4.9K", g: "+6%" },
             ].map((m) => (
-              <div key={m.k} className="rounded-2xl border border-violet/15 bg-white/70 p-3">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{m.k}</div>
-                <div className="serif mt-1 text-2xl text-ink">{m.v}</div>
+              <div key={m.k} className="rounded-2xl border border-violet/20 p-3" style={{ background: "rgba(255,255,255,0.07)" }}>
+                <div className="text-[10px] uppercase tracking-wider" style={{ color: "rgba(240,236,255,0.50)" }}>{m.k}</div>
+                <div className="serif mt-1 text-2xl" style={{ color: "#f0ecff" }}>{m.v}</div>
                 <div className="text-[10px] text-emerald-600">{m.g}</div>
               </div>
             ))}
@@ -838,7 +838,7 @@ export function Resultado() {
             <div className="space-y-2">
               {[{ l: "Leads", w: 100 }, { l: "Calificados", w: 62 }, { l: "Reuniones", w: 38 }, { l: "Cotizaciones", w: 22 }, { l: "Cierres", w: 13 }].map((b) => (
                 <div key={b.l} className="flex items-center gap-3 text-xs">
-                  <span className="w-24 text-muted-foreground">{b.l}</span>
+                  <span className="w-24" style={{ color: "rgba(240,236,255,0.55)" }}>{b.l}</span>
                   <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <motion.div
                       initial={reduced ? false : { width: 0 }}
@@ -849,7 +849,7 @@ export function Resultado() {
                       style={{ background: "var(--gradient-violet)" }}
                     />
                   </div>
-                  <span className="w-8 text-right tabular-nums text-ink">{b.w}%</span>
+                  <span className="w-8 text-right tabular-nums" style={{ color: "#f0ecff" }}>{b.w}%</span>
                 </div>
               ))}
             </div>
@@ -900,12 +900,12 @@ export function Testimonios() {
   const reduced = useReducedMotion();
 
   return (
-    <section id="testimonios" className="relative bg-white py-28">
+    <section id="testimonios" className="relative py-28" style={{ background: "transparent" }}>
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="display mb-4 text-xs uppercase tracking-[0.3em] text-violet">Prueba social</div>
-          <h2 className="serif text-4xl text-ink text-balance sm:text-5xl">
-            Lo que dicen quienes ya <em className="text-violet">ordenaron sus ventas</em>.
+          <div className="display mb-4 text-xs uppercase tracking-[0.3em]" style={{ color: "#c084fc" }}>Prueba social</div>
+          <h2 className="serif text-4xl text-balance sm:text-5xl" style={{ color: "#f0ecff" }}>
+            Lo que dicen quienes ya <em style={{ color: "#c084fc" }}>ordenaron sus ventas</em>.
           </h2>
         </div>
 
@@ -934,16 +934,16 @@ export function Testimonios() {
                 whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={viewTransition(reduced, { duration: 0.5, delay: i * 0.1 })}
-                className="relative rounded-2xl border border-violet/15 bg-cloud p-6"
+                className="relative rounded-2xl border border-violet/20 p-6 glass-dark"
               >
                 <Quote className="absolute right-4 top-4 h-5 w-5 text-violet/30" />
                 <div className="mb-2 flex gap-0.5">
                   {[...Array(5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-gold text-gold" />)}
                 </div>
-                <p className="serif text-lg leading-snug text-ink">"{t.text}"</p>
+                <p className="serif text-lg leading-snug" style={{ color: "#f0ecff" }}>"{t.text}"</p>
                 <div className="mt-3 text-xs">
-                  <span className="font-semibold text-ink">{t.name}</span>
-                  <span className="text-muted-foreground"> · {t.role}</span>
+                  <span className="font-semibold" style={{ color: "#f0ecff" }}>{t.name}</span>
+                  <span style={{ color: "rgba(240,236,255,0.55)" }}> · {t.role}</span>
                 </div>
               </motion.div>
             ))}
@@ -954,7 +954,7 @@ export function Testimonios() {
         <div className="mt-16 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-50">
           <div className="display text-xs uppercase tracking-[0.3em] text-muted-foreground">Mencionada en</div>
           {["Forbes·LATAM", "Entrepreneur", "PODCAST PRO", "INFOPRO MAG", "VENTAS HOY"].map((m) => (
-            <div key={m} className="display text-sm uppercase tracking-[0.25em] text-ink">{m}</div>
+            <div key={m} className="display text-sm uppercase tracking-[0.25em]" style={{ color: "rgba(240,236,255,0.60)" }}>{m}</div>
           ))}
         </div>
       </div>
@@ -1109,11 +1109,26 @@ export function WhatsAppFloat() {
       aria-label="WhatsApp Caro Chaparro"
       className="group fixed bottom-6 right-6 z-50 grid h-14 w-14 place-items-center rounded-full border-2 border-gold/60 transition hover:scale-110"
       style={{
-        background: "linear-gradient(135deg, #2B1142, #1E0A33)",
-        boxShadow: "0 10px 40px -10px rgba(244,196,48,0.5), 0 0 0 8px rgba(139,63,214,0.15)",
+        background: "linear-gradient(135deg, #49215F, #5A13B1)",
+        boxShadow: "0 10px 40px -10px rgba(90,19,177,0.5), 0 0 0 8px rgba(73,33,95,0.20)",
+        overflow: "hidden",
       }}
     >
-      <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white" aria-hidden>
+      <motion.span
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "-60%",
+          width: "45%",
+          height: "220%",
+          background: "linear-gradient(105deg, transparent 35%, rgba(255,248,200,0.70) 50%, rgba(255,255,255,0.50) 55%, transparent 65%)",
+          transform: "skewX(-22deg)",
+          pointerEvents: "none",
+        }}
+        animate={{ left: ["-45%", "135%"] }}
+        transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 2.4, ease: "easeInOut" }}
+      />
+      <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white relative z-10" aria-hidden>
         <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z" />
       </svg>
     </a>

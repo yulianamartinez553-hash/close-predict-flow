@@ -28,7 +28,7 @@
 | T-015 | Copy `AboutMe`                                | blocked  | —           | 2026-06-26  |
 | T-016 | Plazo 12 vs 7 semanas                         | blocked  | —           | 2026-06-26  |
 | T-017 | Propuesta de valor                            | blocked  | —           | 2026-06-26  |
-| T-018 | Sección "Para quién NO es"                    | blocked  | —           | 2026-06-26  |
+| T-018 | Sección "Para quién NO es / SÍ es"           | done     | Claude      | 2026-07-02  |
 | T-019 | FAQ + CTA doble                               | blocked  | —           | 2026-06-26  |
 | T-020 | Garantía real                                 | blocked  | —           | 2026-06-26  |
 | T-021 | Testimonios reales                            | blocked  | —           | 2026-06-26  |
@@ -72,3 +72,4 @@
 - 2026-06-26 · Auto · T-004,T-005 · LeadCapture: 3 tarjetas con CTA (diagnóstico, WhatsApp Sala Flows/recursos); reduced-motion global (hook, CSS, intro/cursor/carousel/partículas) → T-007 Calendly o T-011 paleta.
 - 2026-06-26 · Auto · T-004,T-005 · Refinamiento post-revisión: ReducedMotionProvider + `ready` (sin flash intro), Hero canvas estático sin RAF, CSS hovers `motion-reduce:`, diagnóstico misma pestaña, guards legacy (Problema, Entregables, CaosToSistema) → T-007 Calendly o T-011 paleta.
 - 2026-06-26 · Auto · T-011,T-014 · Token `surface-soft` (#F9F8FF) en hero/AboutMe/main; voseo → español colombiano en intro, CTAs y secciones activas → T-006 decisión lead magnets o T-012 amarillo.
+- 2026-07-02 · Claude · T-018 · Sección "Para quién no es / sí es" creada en `QualificationSection.tsx` — scroll parallax GSAP, frases con fade+blur scrub, halo difuso #A78BEA, encabezado pineado. Insertada en index.tsx entre `Sistema` y `Resultado` → revisar heights en mobile si hay lag.

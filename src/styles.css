@@ -43,15 +43,15 @@
   --color-surface-soft: var(--surface-soft);
 
   --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
-  --font-sans: "Inter", "Montserrat", system-ui, sans-serif;
-  --font-display: "Montserrat", "Inter", system-ui, sans-serif;
+  --font-sans: "Poppins", "Inter", "Montserrat", system-ui, sans-serif;
+  --font-display: "Montserrat", "Poppins", system-ui, sans-serif;
 }
 
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.18 0.07 300);
+  --background: #1a1030;
+  --foreground: #f0ecff;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.07 300);
   --popover: oklch(1 0 0);
@@ -60,8 +60,8 @@
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.97 0.01 300);
   --secondary-foreground: oklch(0.25 0.10 300);
-  --muted: oklch(0.97 0.01 300);
-  --muted-foreground: oklch(0.50 0.04 290);
+  --muted: oklch(0.22 0.06 300);
+  --muted-foreground: oklch(0.72 0.05 290);
   --accent: oklch(0.55 0.22 305);
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.60 0.22 25);
@@ -78,25 +78,42 @@
   --gold: #F4C430;
   --gold-soft: #E8C547;
   --mist: #C9C5D1;
-  --cloud: #F5F3F7;
-  --surface-soft: #F9F8FF;
+  --cloud: rgba(42,29,72,0.55);
+  --surface-soft: #1a1030;
 
   --gradient-aurora: radial-gradient(60% 80% at 20% 20%, #4B1E7A 0%, transparent 60%),
                      radial-gradient(50% 70% at 80% 30%, #6B2BB5 0%, transparent 60%),
                      radial-gradient(70% 90% at 50% 90%, #2B1142 0%, transparent 65%),
                      linear-gradient(135deg, #1E0A33 0%, #2B1142 100%);
-  --gradient-violet: linear-gradient(135deg, #8B3FD6 0%, #9D4EDD 100%);
-  --gradient-gold: linear-gradient(135deg, #F4C430 0%, #E8C547 100%);
-  --shadow-violet: 0 20px 60px -20px color-mix(in oklab, #8B3FD6 45%, transparent);
-  --shadow-gold: 0 16px 50px -16px color-mix(in oklab, #F4C430 50%, transparent);
+  --gradient-violet: linear-gradient(135deg, #49215F 0%, #5A13B1 100%);
+  --gradient-gold: linear-gradient(135deg, #49215F 0%, #5A13B1 100%);
+  --shadow-violet: 0 20px 60px -20px color-mix(in oklab, #5A13B1 45%, transparent);
+  --shadow-gold: 0 16px 50px -16px color-mix(in oklab, #5A13B1 50%, transparent);
   --shadow-elegant: 0 24px 80px -24px color-mix(in oklab, #1E0A33 35%, transparent);
 }
 
 @layer base {
   * { border-color: var(--color-border); }
   html { scroll-behavior: smooth; }
+
+  /* Gradiente diagonal fijo que cubre toda la página */
+  html::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      135deg,
+      #2a1d48 0%,
+      #1e1538 28%,
+      #3a2464 58%,
+      #936ce3 100%
+    );
+    pointer-events: none;
+  }
+
   body {
-    background-color: var(--color-background);
+    background: transparent;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -131,7 +148,7 @@
 
 @utility btn-gold {
   background: var(--gradient-gold);
-  color: var(--ink-deep);
+  color: white;
   box-shadow: var(--shadow-gold);
   transition: transform 200ms ease, box-shadow 300ms ease, filter 200ms ease;
 }

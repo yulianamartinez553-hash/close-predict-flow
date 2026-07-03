@@ -49,7 +49,7 @@ export function AboutMe() {
         }
       `}</style>
 
-      <section id="sobre-mi" className="relative overflow-hidden bg-surface-soft py-28">
+      <section id="sobre-mi" className="relative overflow-hidden py-28" style={{ background: "transparent" }}>
         {/* Halos de ambiente */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           <div className="absolute -left-32 top-1/4 h-[460px] w-[460px] rounded-full"
@@ -133,7 +133,7 @@ export function AboutMe() {
                   style={{
                     fontSize: "clamp(28px,3.2vw,44px)",
                     fontWeight: 700,
-                    color: "#1E0A33",
+                    color: "#f0ecff",
                   }}
                 >
                   No te habla la teoría.
@@ -146,7 +146,7 @@ export function AboutMe() {
                     fontSize: "clamp(28px,3.2vw,44px)",
                     fontStyle: "italic",
                     fontWeight: 600,
-                    color: "#8B3FD6",
+                    color: "#c084fc",
                     letterSpacing: ".01em",
                   }}
                 >
@@ -163,13 +163,13 @@ export function AboutMe() {
                 transition={{ delay: 0.15 }}
                 style={{
                   fontSize: "15.5px", lineHeight: 1.92,
-                  color: "#4B5563", maxWidth: "520px",
+                  color: "rgba(240,236,255,0.72)", maxWidth: "520px",
                 }}
               >
                 Durante más de 10 años fui dueña de negocio. Sentí en carne propia el dolor de sacar
                 plata de donde no había, de contratar un closer que aprendía y se iba, de tener todo
                 en la cabeza y nada documentado. Por eso construí{" "}
-                <strong style={{ color: "#1E0A33", fontWeight: 700 }}>CLOSE-PREDICT™</strong>:{" "}
+                <strong style={{ color: "#DCC2FF", fontWeight: 700 }}>CLOSE-PREDICT™</strong>:{" "}
                 el sistema que ordena lo que a la mayoría de los dueños los tiene apagando incendios.
               </motion.p>
 
@@ -187,9 +187,9 @@ export function AboutMe() {
                     variants={fadeUp}
                     className="rounded-[18px] border py-[22px] px-3 text-center"
                     style={{
-                      borderColor: "rgba(139,63,214,.13)",
-                      background: "#fff",
-                      boxShadow: "0 4px 24px rgba(139,63,214,.07)",
+                      borderColor: "rgba(192,132,252,.22)",
+                      background: "rgba(255,255,255,0.07)",
+                      boxShadow: "0 4px 24px rgba(139,63,214,.12)",
                     }}
                   >
                     <MetricCounter value={s.value} label={s.label} suffix={s.suffix} />
@@ -207,7 +207,7 @@ export function AboutMe() {
                 ].map((b) => (
                   <span
                     key={b}
-                    className="inline-block rounded-full border border-violet/20 bg-violet/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-violet"
+                    className="inline-block rounded-full border border-violet/30 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide" style={{ background: "rgba(192,132,252,0.12)", color: "#c084fc" }}
                   >
                     {b}
                   </span>

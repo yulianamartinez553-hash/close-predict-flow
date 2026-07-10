@@ -136,6 +136,10 @@ respetar dependencias (`depende de:`).
   - **Done cuando:** preguntas frecuentes renderizadas + dos CTAs de diagnóstico verificables.
 - [ ] **T-020** — Garantía con texto real · _media_ · depende de: C-03
   - **Done cuando:** `Garantia` muestra el copy aprobado (no placeholder genérico).
+  - **Nota (2026-07-10):** el slide "Garantía" de `ClosingSection.tsx` ya no tiene copy
+    placeholder (ver T-031: titular partido, loop de compromisos, tarjeta de condiciones,
+    párrafo de cierre). Queda en `review` — falta confirmación explícita de Caro vía C-03
+    antes de marcar `[x]`.
 - [ ] **T-021** — Testimonios reales (video + escritos) · _media_ · depende de: C-11, C-12
   - **Done cuando:** al menos 2 testimonios reales integrados; genéricos removidos o relegados.
 - [ ] **T-022** — Dashboard de métricas con KPIs reales o simplificado · _media_ · depende de: C-02
@@ -164,4 +168,47 @@ respetar dependencias (`depende de:`).
 - [ ] **T-030** — DNS: apuntar dominio al servidor · _alta_ · depende de: T-029
   - **Done cuando:** `carochaparro.co` resuelve a la landing en producción.
 
-> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-031`+) y reflejalas en PROGRESS.
+### Nuevas tareas
+
+- [x] **T-031** — Rediseño del bloque final Garantía → Diagnóstico → Llamada (`ClosingSection.tsx`) · _alta_ · depende de: —
+  - **Contexto:** slide 1 (Garantía) recibe titular partido ("si no funciona," pequeño/minúscula +
+    "NO PAGAS MÁS" grande), ghost text en `--violet-soft`, tira horizontal reemplazada por
+    `GuaranteeLoop` (loop vertical de compromisos) + `ConditionsCard` (tarjeta interactiva con las
+    3 condiciones reales) + párrafo de cierre. Slide 2 pasa a ser Diagnóstico (contenido que antes
+    vivía en el slide 3, mismo botón "Diagnóstico Comercial" → `/diagnostico.html`). Slide 3 pasa a
+    ser Llamada, contenido nuevo con CTA "Agendar" → Calendly (misma URL que el botón del navbar en
+    `Hero.tsx`). Reemplaza el contenido de la extinta sección "Sala Flows".
+  - **Done cuando:** los 3 slides mantienen scroll-snap fullscreen y el sistema de
+    partículas/flash existente intacto; solo tokens de marca (`--violet`, `--violet-soft`,
+    `--gold`, `--ink`, `--ink-deep`); tipografías Montserrat/Poppins sin cambios;
+    `styled-components` agregado como dependencia (`ConditionsCard.tsx`); responsive verificado a
+    375px. — **Hecho 2026-07-10; pendiente que Yuli corra `bun install` (sin runtime JS disponible
+    en el entorno donde se implementó) y verifique visualmente en `bun run dev`.**
+
+- [x] **T-032** — Transición IntroPortada → Hero ligada a scroll real (reemplaza wipe circular) · _alta_ · depende de: —
+  - **Contexto:** `IntroPortada.tsx` dejó de ser overlay `fixed` con máquina de estados
+    click-driven (círculo creciendo/achicándose + bloque `#6C39B3` con fondo propio).
+    Ahora es una sección normal de `100vh` en el flujo del documento; el body ya no
+    bloquea el scroll. Encima del video hay una capa de degradé (`useScroll` +
+    `useTransform` + `useMotionTemplate`) que arranca en `#1E0A33` (tono oscuro del
+    video) y aclara hacia `#F0ECFF` a medida que esa pantalla scrollea fuera de vista,
+    cubriendo solo la parte inferior del video. `Hero.tsx` ganó su propio
+    `useScroll({target: sectionRef, offset:["start end","start start"]})`: embudo,
+    texto "Close Predict" y navbar (ahora `motion.nav`) entran de forma independiente
+    con `opacity`+`y`, escalonados (0→0.6 / 0.1→0.65 / 0.3→0.8), sin caja/fondo propio.
+    El fondo del `<section>` del Hero pasa de blanco plano a
+    `linear-gradient(180deg, #F0ECFF 0%, #FFFFFF 600px)` para que no haya corte con el
+    degradé del video ni con la sección Fases (blanca). Se eliminó el prop
+    `introComplete`/`onComplete` (y la lógica GSAP vestigial de `SequenceIntro.tsx`
+    —ids `cp-char-*`, `cp-funnel-img`, `cp-tagline`— que había quedado mezclada en
+    `Hero.tsx` sin uso real, ya que el proyecto usa `IntroPortada`, no `SequenceIntro`).
+    El botón "Conocer Close Predict" suma su propia animación de entrada
+    (`opacity`+`y`) y, en vez de disparar el wipe, hace `scrollTo` de un viewport para
+    llevar al visitante al Hero (conserva la intención de "ir a la siguiente sección").
+  - **Done cuando:** scroll real dispara la entrada escalonada de embudo/texto/navbar
+    sin fondo propio; degradé continuo sin línea de corte entre video → Hero → Fases;
+    navbar visible en todo el sitio salvo la preportada; tipografías sin cambios.
+    — **Hecho 2026-07-10; pendiente verificación visual en `bun run dev`** (mismo
+    entorno sin runtime JS que T-031, ver nota ahí).
+
+> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-033`+) y reflejalas en PROGRESS.

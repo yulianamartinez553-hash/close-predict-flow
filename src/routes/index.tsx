@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Hero } from "@/components/landing/Hero";
 import { IntroPortada } from "@/components/landing/IntroPortada";
@@ -28,18 +27,13 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const { reduced, ready } = useReducedMotionState();
-  const [introComplete, setIntroComplete] = useState(false);
-
-  const showIntro = ready && !reduced && !introComplete;
 
   return (
     <main style={{ overflowX: "clip", color: "var(--color-foreground)" }}>
       {ready && !reduced && <CursorFollower />}
-      {showIntro && (
-        <IntroPortada onComplete={() => setIntroComplete(true)} />
-      )}
+      {ready && !reduced && <IntroPortada />}
       {/* 2. HERO */}
-      <Hero introComplete={introComplete} />
+      <Hero />
       {/* 4. DETALLE — tarjetas sticky de las 5 fases (id="detalle") */}
       <PhasesDetail />
       {/* 5. ENTREGABLES — CLOSE-PREDICT™ label + 14 tarjetas carousel (id="entregables") */}

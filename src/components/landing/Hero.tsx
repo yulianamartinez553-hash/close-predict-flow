@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect, type MouseEvent } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, useScroll } from "framer-motion";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 /* ─────────────────────────────────────────────────────────────────
@@ -21,20 +21,26 @@ const PREDICT_CHARS = ["P","r","e","d","i","c","t"];
 /* ─────────────────────────────────────────────────────────────────
    HERO
 ───────────────────────────────────────────────────────────────── */
-export function Hero({ introComplete }: { introComplete?: boolean }) {
-  const reduced   = useReducedMotion();
-  const funnelRef = useRef<HTMLDivElement>(null);
-  const navRef    = useRef<HTMLElement>(null);
+export function Hero() {
+  const reduced      = useReducedMotion();
+  const funnelRef     = useRef<HTMLDivElement>(null);
+  const navRef        = useRef<HTMLElement>(null);
+  const sectionRef     = useRef<HTMLElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const [funnelDone, setFunnelDone] = useState(!!reduced);
-  useEffect(() => {
-    if (reduced) return;
-    if (introComplete === false) return;
-    const delay = introComplete === true ? 120 : 1180;
-    const t = setTimeout(() => setFunnelDone(true), delay);
-    return () => clearTimeout(t);
-  }, [reduced, introComplete]);
+  /* Entrada de embudo/texto/navbar ligada al scroll — cada elemento
+     "sube" de forma independiente hacia su posición final, escalonado. */
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "start start"],
+  });
+
+  const logoOpacity = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
+  const logoY       = useTransform(scrollYProgress, [0, 0.6], [40, 0]);
+  const textOpacity = useTransform(scrollYProgress, [0.1, 0.65], [0, 1]);
+  const textY       = useTransform(scrollYProgress, [0.1, 0.65], [32, 0]);
+  const navOpacity  = useTransform(scrollYProgress, [0.3, 0.8], [0, 1]);
+  const navY        = useTransform(scrollYProgress, [0.3, 0.8], [24, 0]);
 
   /* Cerrar dropdown al hacer click fuera del nav */
   useEffect(() => {
@@ -267,13 +273,15 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
         }
       `}</style>
 
-      {/* ── NAV — fondo blanco fijo ── */}
-      <nav
+      {/* ── NAV — fondo blanco fijo, presente en todo el sitio salvo la preportada ── */}
+      <motion.nav
         ref={navRef}
         className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
         style={{
           background: "#FFFFFF",
           boxShadow: "0 1px 0 rgba(108,57,179,0.08)",
+          opacity: reduced ? 1 : navOpacity,
+          y: reduced ? 0 : navY,
         }}
       >
         {/* ── Logo personal — izquierda ── */}
@@ -312,12 +320,16 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             ))}
           </div>
         )}
-      </nav>
+      </motion.nav>
 
-      {/* ── HERO — fondo blanco con manchas aurora moradas ── */}
+      {/* ── HERO — degradé violeta clarísimo → blanco (continúa el fondo del video) con manchas aurora ── */}
       <section
+        ref={sectionRef}
         className="relative flex items-center justify-center overflow-hidden"
-        style={{ minHeight: "100vh", background: "#FFFFFF" }}
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(180deg, #F0ECFF 0%, #FFFFFF 600px)",
+        }}
       >
         {/* ── Manchas aurora moradas (puntuales, difuminadas, en movimiento) ── */}
         <div aria-hidden style={{
@@ -400,37 +412,27 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             >
               <motion.div
                 style={{ filter: "drop-shadow(0 0 24px rgba(108,57,179,0.30))", willChange: "transform" }}
-                animate={funnelDone ? { scale: [1, 1.012, 1] } : undefined}
-                transition={funnelDone
-                  ? { duration: 6.5, repeat: Infinity, ease: "easeInOut" }
-                  : undefined
-                }
+                animate={reduced ? undefined : { scale: [1, 1.012, 1] }}
+                transition={reduced ? undefined : { duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
               >
+                {/* Embudo — sube de forma independiente, sin fondo/caja propia */}
                 <motion.div
-                  style={{ willChange: "transform" }}
-                  initial={reduced || introComplete === false ? false : { opacity: 0, y: 22, scale: 0.93, filter: "blur(8px)" }}
-                  animate={reduced || introComplete === false ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                  transition={reduced || introComplete === false ? undefined : { delay: 0.10, duration: 0.65, ease: EXPO }}
-                  onAnimationComplete={introComplete === false ? undefined : () => setFunnelDone(true)}
+                  style={{
+                    willChange: "transform",
+                    opacity: reduced ? 1 : logoOpacity,
+                    y: reduced ? 0 : logoY,
+                  }}
                 >
                   <picture>
                     <source srcSet="/images/embudo-close-predict.avif" type="image/avif" />
                     <source srcSet="/images/embudo-close-predict.webp" type="image/webp" />
                     <img
-                      id="cp-funnel-img"
                       src="/images/embudo-close-predict.png"
                       alt="Embudo Close Predict"
                       draggable={false}
                       width={532}
                       height={552}
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        display: "block",
-                        userSelect: "none",
-                        opacity:  introComplete === false ? 0 : undefined,
-                        clipPath: introComplete === false ? "inset(0% 0% 69% 0%)" : undefined,
-                      }}
+                      style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
                     />
                   </picture>
                 </motion.div>
@@ -438,8 +440,8 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             </motion.div>
           </div>
 
-          {/* ══════════ TEXTO — Close Predict® (degradé gris claro → blanco, levemente más grande) ══════════ */}
-          <div
+          {/* ══════════ TEXTO — Close Predict® (sube como pieza suelta, sin fondo/caja propia) ══════════ */}
+          <motion.div
             translate="no"
             style={{
               display: "flex",
@@ -447,24 +449,14 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
               alignItems: "flex-start",
               flexShrink: 0,
               minWidth: 200,
+              opacity: reduced ? 1 : textOpacity,
+              y: reduced ? 0 : textY,
             }}
           >
             {/* "Close" */}
             <div style={{ display: "flex" }}>
               {CLOSE_CHARS.map((ch, i) => (
-                <span
-                  key={i}
-                  id={`cp-char-${i}`}
-                  className="cp-word"
-                  style={{
-                    fontSize: "clamp(54px, 6vw, 96px)",
-                    display: "inline-block",
-                    opacity:   introComplete === false ? 0      : undefined,
-                    filter:    introComplete === false ? "blur(6px)" : undefined,
-                    transform: introComplete === false ? "translateY(8px)" : undefined,
-                    transition: "none",
-                  }}
-                >
+                <span key={i} className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)", display: "inline-block" }}>
                   {ch}
                 </span>
               ))}
@@ -473,35 +465,15 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
             {/* "Predict®" */}
             <div style={{ display: "flex", alignItems: "baseline", marginTop: "0.04em" }}>
               {PREDICT_CHARS.map((ch, i) => (
-                <span
-                  key={i}
-                  id={`cp-char-${i + 5}`}
-                  className="cp-word"
-                  style={{
-                    fontSize: "clamp(54px, 6vw, 96px)",
-                    display: "inline-block",
-                    opacity:   introComplete === false ? 0      : undefined,
-                    filter:    introComplete === false ? "blur(6px)" : undefined,
-                    transform: introComplete === false ? "translateY(8px)" : undefined,
-                    transition: "none",
-                  }}
-                >
+                <span key={i} className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)", display: "inline-block" }}>
                   {ch}
                 </span>
               ))}
-              <sup
-                id="cp-char-12"
-                className="cp-sup"
-                style={{
-                  opacity:   introComplete === false ? 0 : undefined,
-                  transition: "none",
-                }}
-              >®</sup>
+              <sup className="cp-sup">®</sup>
             </div>
 
             {/* Tagline */}
             <p
-              id="cp-tagline"
               style={{
                 margin: 0,
                 marginTop: "1.7rem",
@@ -511,13 +483,11 @@ export function Hero({ introComplete }: { introComplete?: boolean }) {
                 letterSpacing: "0.32em",
                 textTransform: "uppercase",
                 color: "rgba(70,50,117,0.50)",
-                opacity: introComplete === false ? 0 : undefined,
-                transition: "none",
               }}
             >
               Sistema Comercial Predecible
             </p>
-          </div>
+          </motion.div>
 
         </div>
       </section>

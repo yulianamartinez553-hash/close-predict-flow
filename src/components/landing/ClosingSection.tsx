@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ShiningButton } from "@/components/animations/ShiningButton";
+import { GuaranteeLoop } from "@/components/animations/GuaranteeLoop";
+import { ConditionsCard } from "@/components/landing/ConditionsCard";
 
 /* ─────────────────────────────────────────────────────────────────
    TIPOS
@@ -10,11 +12,14 @@ type SlideData = {
   textColor: string;
   accentColor: string;
   ghostText: string;
-  badge: string;
+  ghostColor?: string;
+  ghostOpacity?: number;
+  badge?: string;
+  titleLead?: string;
   title: string;
   subtitle?: string;
   body: string;
-  visual?: "ticker" | "particles";
+  visual?: "guarantee" | "particles";
   cta: null | { label: string; href: string };
 };
 
@@ -28,39 +33,41 @@ const SLIDES: SlideData[] = [
     textColor: "#FFFFFF",
     accentColor: "#C084FC",
     ghostText: "GARANTIA",
+    ghostColor: "var(--violet-soft)",
+    ghostOpacity: 0.1,
     badge: "Nuestro compromiso",
-    title: "SI NO FUNCIONA,\nNO PAGAS MÁS",
+    titleLead: "si no funciona,",
+    title: "NO PAGAS MÁS",
     subtitle: "SEGUIMOS HASTA QUE FUNCIONE.",
     body: "Al terminar las 12 semanas, si no tienes un sistema comercial documentado, delegable y funcionando en tu negocio, continuamos el acompañamiento sin costo adicional hasta que lo tengas.",
-    visual: "ticker",
+    visual: "guarantee",
     cta: null,
   },
   {
-    id: "sala-flows",
-    bg: "#2C0A5A",
-    textColor: "#FFFFFF",
-    accentColor: "#F5C842",
-    ghostText: "SALA FLOW",
-    badge: "¿Todavía no estás listo/a para el sistema completo?",
-    title: "Organicemos tus ventas\ndesde hoy, sin compromiso",
-    body: "Cada 15 días te comparto contenido práctico sobre ventas y marketing que puedes ir aplicando.",
-    visual: undefined,
-    cta: {
-      label: "Solicitar",
-      href: "https://wa.me/573229172709?text=Holaaa%2C%20me%20gustaria%20unirme%20a%20las%20salas%20flows",
-    },
-  },
-  {
     id: "diagnostico",
-    bg: "#1E0A33",
+    bg: "#2C0A5A",
     textColor: "#FFFFFF",
     accentColor: "#F5C842",
     ghostText: "DIAGNÓSTICO",
     badge: "Tu próximo paso",
-    title: "¿Listo/a para tener un sistema\nde ventas que trabaje por ti?",
-    body: "Agenda tu Diagnóstico Comercial y descubre en qué parte de tu proceso se están escapando tus ventas.",
-    visual: "particles",
+    title: "Agenda tu Diagnóstico Comercial",
+    body: "Descubre en qué parte de tu proceso se están escapando tus ventas.",
+    visual: undefined,
     cta: { label: "Diagnóstico Comercial", href: "/diagnostico.html" },
+  },
+  {
+    id: "llamada",
+    bg: "#1E0A33",
+    textColor: "#FFFFFF",
+    accentColor: "#F5C842",
+    ghostText: "LLAMADA",
+    title: "¿Listo/a para tener un sistema\nde ventas que trabaje por ti?",
+    body: "Organicemos tus ventas desde hoy, sin compromiso.",
+    visual: "particles",
+    cta: {
+      label: "Agendar",
+      href: "https://calendly.com/caroventascoach/30min?month=2026-06",
+    },
   },
 ];
 
@@ -93,7 +100,7 @@ function Slide({
   return (
     <div
       data-slide={index}
-      aria-label={`Sección ${slide.badge}`}
+      aria-label={`Sección ${slide.badge ?? slide.ghostText}`}
       style={{ height: "100vh", scrollSnapAlign: "start", position: "relative", overflow: "hidden" }}
     >
       {/* Ghost text de fondo */}
@@ -110,7 +117,9 @@ function Slide({
         <span style={{
           fontFamily: "'Montserrat', sans-serif", fontWeight: 900,
           fontSize: "clamp(60px, 20vw, 320px)",
-          color: "white", lineHeight: 1, letterSpacing: "-0.02em",
+          color: slide.ghostColor ?? "white",
+          opacity: slide.ghostOpacity ?? 0.07,
+          lineHeight: 1, letterSpacing: "-0.02em",
           whiteSpace: "nowrap", textTransform: "uppercase",
         }}>
           {slide.ghostText}
@@ -140,20 +149,36 @@ function Slide({
         overflowY: "auto",
       }}>
         {/* Badge */}
-        <div style={anim(0)}>
-          <span style={{
-            fontSize: "11px", fontWeight: 600, letterSpacing: "0.22em",
-            textTransform: "uppercase", color: slide.accentColor,
-            opacity: 0.9, display: "block", marginBottom: "1rem",
-          }}>
-            {slide.badge}
-          </span>
-        </div>
+        {slide.badge && (
+          <div style={anim(0)}>
+            <span style={{
+              fontSize: "11px", fontWeight: 600, letterSpacing: "0.22em",
+              textTransform: "uppercase", color: slide.accentColor,
+              opacity: 0.9, display: "block", marginBottom: "1rem",
+            }}>
+              {slide.badge}
+            </span>
+          </div>
+        )}
+
+        {/* Titular pequeño (ej. "si no funciona,") — solo slide garantia */}
+        {slide.titleLead && (
+          <div style={anim(90)}>
+            <p style={{
+              fontFamily: "'Montserrat', sans-serif", fontWeight: 800,
+              fontSize: "clamp(14px, 2vw, 26px)",
+              color: slide.textColor, lineHeight: 1.2,
+              marginBottom: "0.35rem", maxWidth: 780,
+            }}>
+              {slide.titleLead}
+            </p>
+          </div>
+        )}
 
         {/* Título principal */}
-        <div style={anim(120)}>
+        <div style={anim(150)}>
           <h2 style={{
-            fontFamily: "'Montserrat', sans-serif", fontWeight: 700,
+            fontFamily: "'Montserrat', sans-serif", fontWeight: 800,
             fontSize: "clamp(22px, 4vw, 52px)",
             color: slide.textColor, lineHeight: 1.15,
             whiteSpace: "pre-line",
@@ -166,7 +191,7 @@ function Slide({
 
         {/* Subtítulo (solo slide garantia) */}
         {slide.subtitle && (
-          <div style={anim(210)}>
+          <div style={anim(240)}>
             <p style={{
               fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
               fontSize: "clamp(13px, 1.8vw, 20px)",
@@ -179,7 +204,7 @@ function Slide({
         )}
 
         {/* Body */}
-        <div style={anim(slide.subtitle ? 310 : 240)}>
+        <div style={anim(slide.subtitle ? 330 : 240)}>
           <p style={{
             fontSize: "clamp(14px, 1.6vw, 19px)", lineHeight: 1.65,
             color: slide.textColor, opacity: 0.85,
@@ -188,6 +213,40 @@ function Slide({
             {slide.body}
           </p>
         </div>
+
+        {/* Loop de garantía + tarjeta de condiciones — solo slide garantia */}
+        {slide.visual === "guarantee" && (
+          <div style={{
+            ...anim(420),
+            position: "relative",
+            display: "flex", flexDirection: "column", alignItems: "center",
+            width: "100%",
+          }}>
+            <div style={{ marginBottom: "1.75rem" }}>
+              <GuaranteeLoop />
+            </div>
+
+            <div style={{ position: "relative" }}>
+              <ConditionsCard />
+            </div>
+
+            <p
+              className="conditions-followup"
+              style={{
+                position: "relative",
+                marginTop: "300px",
+                fontFamily: "'Poppins', sans-serif",
+                fontSize: "clamp(14px, 1.6vw, 19px)",
+                lineHeight: 1.65,
+                color: slide.textColor,
+                opacity: 0.85,
+                maxWidth: 600,
+              }}
+            >
+              Si cumpliste con eso y el sistema NO está funcionando, el problema es mío. Y lo resuelvo yo.
+            </p>
+          </div>
+        )}
 
         {/* CTA */}
         {slide.cta && (
@@ -203,50 +262,6 @@ function Slide({
           </div>
         )}
       </div>
-
-      {/* Ticker horizontal infinito — solo slide garantia */}
-      {slide.visual === "ticker" && (
-        <div style={{
-          position: "absolute", bottom: "10%", left: 0, right: 0, zIndex: 15,
-          overflow: "hidden",
-          background: "rgba(255,255,255,0.05)",
-          borderTop: "1px solid rgba(192,132,252,0.18)",
-          borderBottom: "1px solid rgba(192,132,252,0.18)",
-          padding: "0.8rem 0",
-          pointerEvents: "none",
-        }}>
-          <div style={{
-            display: "flex", whiteSpace: "nowrap",
-            animation: "csTicker 22s linear infinite",
-            willChange: "transform",
-          }}>
-            {[0, 1].map(n => (
-              <span key={n} style={{
-                display: "inline-flex", alignItems: "center",
-                gap: "2.5rem", paddingRight: "6rem", flexShrink: 0,
-              }}>
-                <span style={{
-                  fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
-                  fontSize: "clamp(11px, 1.3vw, 14px)", letterSpacing: "0.22em",
-                  textTransform: "uppercase", color: "#C084FC",
-                }}>Sin letra pequeña.</span>
-                <span style={{ color: "rgba(192,132,252,0.3)", fontSize: "14px" }}>·</span>
-                <span style={{
-                  fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
-                  fontSize: "clamp(11px, 1.3vw, 14px)", letterSpacing: "0.22em",
-                  textTransform: "uppercase", color: "#C084FC",
-                }}>Sin excusas.</span>
-                <span style={{ color: "rgba(192,132,252,0.3)", fontSize: "14px" }}>·</span>
-                <span style={{
-                  fontFamily: "'Montserrat', sans-serif", fontWeight: 600,
-                  fontSize: "clamp(11px, 1.3vw, 14px)", letterSpacing: "0.22em",
-                  textTransform: "uppercase", color: "#C084FC",
-                }}>Sin «depende».</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -346,7 +361,7 @@ export function ClosingSection() {
     <section
       id="contacto"
       ref={sectionRef}
-      aria-label="Sección de garantía, comunidad y diagnóstico"
+      aria-label="Sección de garantía, diagnóstico y llamada"
       style={{ height: "100vh", position: "relative" }}
     >
       <style>{`
@@ -354,8 +369,8 @@ export function ClosingSection() {
 
         @media (prefers-reduced-motion: no-preference) {
           @keyframes csGhostReveal {
-            from { opacity: 0;    transform: scale(1.08); }
-            to   { opacity: 0.07; transform: scale(1);    }
+            from { opacity: 0; transform: scale(1.08); }
+            to   { opacity: 1; transform: scale(1);    }
           }
           @keyframes csSlideUp {
             from { opacity: 0; transform: translateY(32px); }
@@ -369,10 +384,6 @@ export function ClosingSection() {
           @keyframes csFlashIn {
             0%   { opacity: 0.18; }
             100% { opacity: 0;    }
-          }
-          @keyframes csTicker {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-50%); }
           }
         }
       `}</style>
@@ -443,7 +454,7 @@ export function ClosingSection() {
         <div
           ref={containerRef}
           role="region"
-          aria-label="Sección de garantía, comunidad y diagnóstico"
+          aria-label="Sección de garantía, diagnóstico y llamada"
           style={{ overflowY: "scroll", scrollSnapType: "y mandatory", height: "100vh" }}
         >
           {SLIDES.map((slide, i) => (

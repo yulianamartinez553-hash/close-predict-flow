@@ -36,6 +36,7 @@
   --color-ink-deep: var(--ink-deep);
   --color-violet: var(--violet);
   --color-violet-bright: var(--violet-bright);
+  --color-violet-soft: var(--violet-soft);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
   --color-mist: var(--mist);
@@ -75,6 +76,7 @@
   --ink-deep: #1E0A33;
   --violet: #8B3FD6;
   --violet-bright: #9D4EDD;
+  --violet-soft: #A78BEA;
   --gold: #F4C430;
   --gold-soft: #E8C547;
   --mist: #C9C5D1;

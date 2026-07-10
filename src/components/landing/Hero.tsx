@@ -14,10 +14,6 @@ const NAV_LINKS = [
   { label: "Contáctame",      href: "#contacto"    },
 ];
 
-/* "Close" = índices 0-4 · "Predict" = índices 5-11 · "®" = 12 */
-const CLOSE_CHARS   = ["C","l","o","s","e"];
-const PREDICT_CHARS = ["P","r","e","d","i","c","t"];
-
 /* ─────────────────────────────────────────────────────────────────
    HERO
 ───────────────────────────────────────────────────────────────── */
@@ -221,28 +217,50 @@ export function Hero() {
           color: #6C39B3;
         }
 
-        /* ── Logo Close Predict® — degradé gris claro → blanco ── */
+        /* ── Logo Close Predict® — morado sólido con brillo diagonal interno en loop ── */
         .cp-word {
           font-family: 'Plus Jakarta Sans', 'Outfit', 'Manrope', system-ui, sans-serif;
           font-weight: 800;
           line-height: 0.93;
           letter-spacing: -0.028em;
-          display: block;
-          background: linear-gradient(180deg, #A8A4BC 0%, #FFFFFF 100%);
+          display: inline-block;
+          color: #1A1038;
+          background-image: linear-gradient(
+            115deg,
+            #1A1038 0%, #1A1038 42%,
+            #FFFFFF 50%,
+            #1A1038 58%, #1A1038 100%
+          );
+          background-size: 260% 260%;
+          background-repeat: no-repeat;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          will-change: transform;
+          animation: cpWordShine 3.6s linear infinite;
+          will-change: background-position;
         }
         .cp-sup {
           font-size: 0.40em;
           vertical-align: super;
           letter-spacing: 0;
-          background: linear-gradient(180deg, #A8A4BC 0%, #FFFFFF 100%);
+          font-weight: 800;
+          color: #1A1038;
+          background-image: linear-gradient(
+            115deg,
+            #1A1038 0%, #1A1038 42%,
+            #FFFFFF 50%,
+            #1A1038 58%, #1A1038 100%
+          );
+          background-size: 260% 260%;
+          background-repeat: no-repeat;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          font-weight: 800;
+          animation: cpWordShine 3.6s linear infinite;
+        }
+        @keyframes cpWordShine {
+          0%   { background-position: 100% 100%; }
+          100% { background-position: 0% 0%; }
         }
 
         /* ── Aurora keyframes — manchas moradas sobre blanco ── */
@@ -270,6 +288,7 @@ export function Hero() {
 
         @media (prefers-reduced-motion: reduce) {
           .cp-agendar::after { animation: none !important; }
+          .cp-word, .cp-sup { animation: none !important; background-position: 50% 50%; }
         }
       `}</style>
 
@@ -455,20 +474,12 @@ export function Hero() {
           >
             {/* "Close" */}
             <div style={{ display: "flex" }}>
-              {CLOSE_CHARS.map((ch, i) => (
-                <span key={i} className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)", display: "inline-block" }}>
-                  {ch}
-                </span>
-              ))}
+              <span className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)" }}>Close</span>
             </div>
 
             {/* "Predict®" */}
             <div style={{ display: "flex", alignItems: "baseline", marginTop: "0.04em" }}>
-              {PREDICT_CHARS.map((ch, i) => (
-                <span key={i} className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)", display: "inline-block" }}>
-                  {ch}
-                </span>
-              ))}
+              <span className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)" }}>Predict</span>
               <sup className="cp-sup">®</sup>
             </div>
 

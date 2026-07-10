@@ -6,7 +6,7 @@ import { PhasesDetail, FAQ } from "@/components/landing/Phases";
 import { ClosingSection } from "@/components/landing/ClosingSection";
 import { QualificationSections } from "@/components/landing/QualificationSection";
 import {
-  Sistema, Resultado,
+  Sistema,
   Testimonios, Footer, WhatsAppFloat,
 } from "@/components/landing/Sections";
 import { CursorFollower } from "@/components/animations/CursorFollower";
@@ -40,8 +40,6 @@ function Landing() {
       <Sistema />
       {/* 6. CALIFICACIÓN — Para quién no es / para quién sí es */}
       <QualificationSections />
-      {/* 7. RESULTADO FINAL */}
-      <Resultado />
       {/* 7. SOBRE MÍ */}
       <AboutMe />
       {/* 8. TESTIMONIOS */}

@@ -142,9 +142,12 @@ respetar dependencias (`depende de:`).
     antes de marcar `[x]`.
 - [ ] **T-021** — Testimonios reales (video + escritos) · _media_ · depende de: C-11, C-12
   - **Done cuando:** al menos 2 testimonios reales integrados; genéricos removidos o relegados.
-- [ ] **T-022** — Dashboard de métricas con KPIs reales o simplificado · _media_ · depende de: C-02
+- [x] **T-022** — Dashboard de métricas con KPIs reales o simplificado · _media_ · depende de: C-02
   - **Contexto:** quitar datos inventados (158k, 205k, ticket 4,9%) hasta tener caps reales (D-003).
   - **Done cuando:** solo métricas aprobadas por Caro, o UI demo sin cifras falsas.
+  - **Resuelto (2026-07-10):** Yuli pidió eliminar directamente la sección "Resultado final"
+    (`Resultado()` en `Sections.tsx`, con el dashboard de métricas inventadas) en vez de
+    esperar cifras reales de Caro. Sección borrada por completo de la landing.
 - [ ] **T-023** — Revisar copy de fases (Q&A) · _media_ · depende de: C-01
   - **Done cuando:** texto de `Phases` es veraz (marketing sí, pero sin afirmaciones falsas).
 - [ ] **T-024** — Reemplazar slogan heredado (Sales Summit / Close Break) · _media_ · depende de: C-13
@@ -211,4 +214,26 @@ respetar dependencias (`depende de:`).
     — **Hecho 2026-07-10; pendiente verificación visual en `bun run dev`** (mismo
     entorno sin runtime JS que T-031, ver nota ahí).
 
-> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-033`+) y reflejalas en PROGRESS.
+- [x] **T-033** — Accent "es para ti si..." en Cormorant Garamond blanco + eliminar sección "Resultado final" · _media_ · depende de: —
+  - **Contexto:** en `QualificationSection.tsx`, el texto grande "No es para ti si..." /
+    "Sí es para ti si..." pasa de Dancing Script violeta a Cormorant Garamond blanco
+    (solo esas dos líneas; eyebrow, prefijo y lista de frases sin cambios). Se elimina
+    por completo `Resultado()` de `Sections.tsx` (título "Resultado final", checklist y
+    el dashboard con métricas inventadas — la misma sección que D-003/T-022 marcaban
+    como pendiente de reemplazo) junto a su import/uso en `index.tsx`.
+  - **Done cuando:** las dos líneas accent se ven en serif blanco sin tocar el resto del
+    bloque; la sección "Resultado final" ya no existe en la landing ni en el código.
+    — **Hecho 2026-07-10.**
+
+- [x] **T-034** — Wordmark "Close Predict®" del Hero: morado sólido + brillo diagonal en loop · _media_ · depende de: —
+  - **Contexto:** `.cp-word`/`.cp-sup` en `Hero.tsx` pasan del degradé gris→blanco a color
+    sólido `#1A1038` con un barrido diagonal blanco animado (`background-position` +
+    gradiente 115deg, `cpWordShine` 3.6s linear infinite) simulando brillo/lujo dentro
+    de las letras. Se simplificó el JSX de "Close"/"Predict®": ya no se parte letra por
+    letra (`CLOSE_CHARS`/`PREDICT_CHARS` eliminados) — era vestigial de la animación GSAP
+    de `SequenceIntro.tsx`, no utilizada. Respeta `prefers-reduced-motion` (animación
+    desactivada, posición estática).
+  - **Done cuando:** el wordmark se ve morado `#1A1038` con el brillo diagonal en loop
+    constante. — **Hecho 2026-07-10.**
+
+> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-035`+) y reflejalas en PROGRESS.

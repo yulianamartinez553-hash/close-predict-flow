@@ -32,9 +32,7 @@ const FOR_YOU: string[] = [
 ───────────────────────────────────────────────────────────────── */
 const BG      = "#281a52";
 const POPPINS  = "'Poppins', 'Inter', system-ui, sans-serif";
-/* Dancing Script — caligrafía fluida del wordmark (Coca-Cola / Instagram / Pinterest style) */
-const SCRIPT   = "'Dancing Script', cursive";
-const ACCENT   = "#936ce3";
+const ACCENT_SERIF = "'Cormorant Garamond', 'Playfair Display', Georgia, serif";
 const BULLET   = "#7209B7";
 const VIDEO_URL =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_105406_16f4600d-7a92-4292-b96e-b19156c7830a.mp4";
@@ -211,17 +209,17 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
             {prefix}
           </motion.p>
 
-          {/* Script — Dancing Script caligráfica fluida, NO italic CSS */}
+          {/* Accent — Cormorant Garamond, blanco */}
           <motion.p
             variants={titleLine}
             style={{
               margin:     "10px 0 0",
-              fontFamily: SCRIPT,
+              fontFamily: ACCENT_SERIF,
               fontStyle:  "normal",
               fontWeight: 400,
               fontSize:   "clamp(44px, 4.6vw, 68px)",
               lineHeight: 1.0,
-              color:      ACCENT,
+              color:      "#FFFFFF",
               whiteSpace: "nowrap",
             }}
           >

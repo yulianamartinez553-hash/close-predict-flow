@@ -175,7 +175,7 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
           animate={reduced || titleInView ? "visible" : "hidden"}
           variants={titleContainer}
         >
-          {/* Eyebrow — "ANTES DE AVANZAR" */}
+          {/* Eyebrow — "ANTES DE EMPEZAR" */}
           <motion.p
             variants={titleLine}
             style={{
@@ -185,31 +185,31 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
               fontSize:      "clamp(9px, 0.68vw, 11px)",
               letterSpacing: "0.35em",
               textTransform: "uppercase",
-              color:         "rgba(147,108,227,0.72)",
+              color:         "#FFFFFF",
               lineHeight:    1.4,
             }}
           >
             {eyebrow}
           </motion.p>
 
-          {/* Prefix — "ESTE PROGRAMA" (mismo estilo que eyebrow) */}
+          {/* Prefix — "Este programa", serif editorial */}
           <motion.p
             variants={titleLine}
             style={{
-              margin:        "3px 0 0",
-              fontFamily:    POPPINS,
-              fontWeight:    600,
-              fontSize:      "clamp(9px, 0.68vw, 11px)",
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
-              color:         "rgba(147,108,227,0.72)",
-              lineHeight:    1.4,
+              margin:     "8px 0 0",
+              fontFamily: ACCENT_SERIF,
+              fontWeight: 500,
+              fontStyle:  "italic",
+              fontSize:   "clamp(16px, 1.8vw, 22px)",
+              letterSpacing: "0.01em",
+              color:      "rgba(255,255,255,0.82)",
+              lineHeight: 1.4,
             }}
           >
             {prefix}
           </motion.p>
 
-          {/* Accent — Cormorant Garamond, blanco */}
+          {/* Título — "No"/"Sí" en degradé violeta/lila, resto en blanco marfil */}
           <motion.p
             variants={titleLine}
             style={{
@@ -219,11 +219,22 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
               fontWeight: 400,
               fontSize:   "clamp(44px, 4.6vw, 68px)",
               lineHeight: 1.0,
-              color:      "#FFFFFF",
               whiteSpace: "nowrap",
             }}
           >
-            {accent}
+            <span
+              style={{
+                background: "linear-gradient(135deg, #8B3FD6 0%, #C9A7F0 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              {accent.split(" ")[0]}
+            </span>
+            <span style={{ color: "#F5F3EF" }}>
+              {" " + accent.split(" ").slice(1).join(" ")}
+            </span>
           </motion.p>
         </motion.div>
 
@@ -287,15 +298,15 @@ export function QualificationSections() {
     <div data-qs-wrapper="" style={{ position: "relative", background: BG }}>
       <VideoBridge />
       <Block
-        eyebrow="ANTES DE AVANZAR"
-        prefix="ESTE PROGRAMA"
+        eyebrow="ANTES DE EMPEZAR"
+        prefix="Este programa"
         accent="No es para ti si..."
         phrases={NOT_FOR_YOU}
         listSide="right"
       />
       <Block
-        eyebrow="ANTES DE AVANZAR"
-        prefix="ESTE PROGRAMA"
+        eyebrow="ANTES DE EMPEZAR"
+        prefix="Este programa"
         accent="Sí es para ti si..."
         phrases={FOR_YOU}
         listSide="left"
@@ -308,8 +319,8 @@ export function QualificationSections() {
 export function NotForYouSection() {
   return (
     <Block
-      eyebrow="ANTES DE AVANZAR"
-      prefix="ESTE PROGRAMA"
+      eyebrow="ANTES DE EMPEZAR"
+      prefix="Este programa"
       accent="No es para ti si..."
       phrases={NOT_FOR_YOU}
       listSide="right"
@@ -319,8 +330,8 @@ export function NotForYouSection() {
 export function ForYouSection() {
   return (
     <Block
-      eyebrow="ANTES DE AVANZAR"
-      prefix="ESTE PROGRAMA"
+      eyebrow="ANTES DE EMPEZAR"
+      prefix="Este programa"
       accent="Sí es para ti si..."
       phrases={FOR_YOU}
       listSide="left"

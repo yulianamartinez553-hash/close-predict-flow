@@ -236,4 +236,16 @@ respetar dependencias (`depende de:`).
   - **Done cuando:** el wordmark se ve morado `#1A1038` con el brillo diagonal en loop
     constante. — **Hecho 2026-07-10.**
 
-> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-035`+) y reflejalas en PROGRESS.
+- [x] **T-035** — Recrear bloque de título (izq/der) de `QualificationSection.tsx` · _media_ · depende de: —
+  - **Contexto:** eyebrow pasa de "ANTES DE AVANZAR" violeta a "ANTES DE EMPEZAR" blanco
+    (mismo sans-serif, mismo tracking). Debajo, "ESTE PROGRAMA" (Poppins uppercase) pasa
+    a "Este programa" en Cormorant Garamond itálica, blanco 82% opacidad — nuevo nivel
+    de jerarquía "serif editorial". El título grande ("No es para ti si..." / "Sí es para
+    ti si...") ahora divide la primera palabra ("No"/"Sí") con degradé violeta→lila
+    (`#8B3FD6`→`#C9A7F0`, background-clip:text) y el resto en blanco marfil `#F5F3EF`.
+    Tamaño, alineación, espaciados y fondo `#281a52` original sin cambios. Aplicado a
+    ambos bloques (`NOT_FOR_YOU` y `FOR_YOU`) y a los exports de compatibilidad
+    `NotForYouSection`/`ForYouSection`.
+  - **Done cuando:** ambos bloques reflejan la jerarquía descrita. — **Hecho 2026-07-10.**
+
+> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-036`+) y reflejalas en PROGRESS.

@@ -214,27 +214,19 @@ function Slide({
           </p>
         </div>
 
-        {/* Loop de garantía + tarjeta de condiciones — solo slide garantia */}
+        {/* Loop de garantía — sin caja propia, debajo del body — solo slide garantia */}
         {slide.visual === "guarantee" && (
           <div style={{
-            ...anim(420),
-            position: "relative",
+            ...anim(390),
             display: "flex", flexDirection: "column", alignItems: "center",
             width: "100%",
           }}>
-            <div style={{ marginBottom: "1.75rem" }}>
-              <GuaranteeLoop />
-            </div>
-
-            <div style={{ position: "relative" }}>
-              <ConditionsCard />
-            </div>
+            <GuaranteeLoop bg={slide.bg} />
 
             <p
               className="conditions-followup"
               style={{
-                position: "relative",
-                marginTop: "300px",
+                marginTop: "1.5rem",
                 fontFamily: "'Poppins', sans-serif",
                 fontSize: "clamp(14px, 1.6vw, 19px)",
                 lineHeight: 1.65,
@@ -245,6 +237,11 @@ function Slide({
             >
               Si cumpliste con eso y el sistema NO está funcionando, el problema es mío. Y lo resuelvo yo.
             </p>
+
+            {/* Tarjeta de condiciones — versión mobile, en flujo normal (la de desktop va a la izquierda, ver garantia-card-slot) */}
+            <div className="garantia-card-slot-mobile">
+              <ConditionsCard />
+            </div>
           </div>
         )}
 
@@ -262,6 +259,13 @@ function Slide({
           </div>
         )}
       </div>
+
+      {/* Tarjeta de condiciones — a la izquierda, a la altura del body (no del título) — solo slide garantia */}
+      {slide.visual === "guarantee" && (
+        <div className="garantia-card-slot" style={anim(420)}>
+          <ConditionsCard />
+        </div>
+      )}
     </div>
   );
 }
@@ -384,6 +388,24 @@ export function ClosingSection() {
           @keyframes csFlashIn {
             0%   { opacity: 0.18; }
             100% { opacity: 0;    }
+          }
+        }
+
+        .garantia-card-slot {
+          position: absolute;
+          left: clamp(1rem, 5vw, 4.5rem);
+          top: 62%;
+          transform: translateY(-50%);
+          z-index: 12;
+        }
+        .garantia-card-slot-mobile { display: none; }
+        @media (max-width: 860px) {
+          .garantia-card-slot { display: none; }
+          .garantia-card-slot-mobile {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 1.5rem;
           }
         }
       `}</style>

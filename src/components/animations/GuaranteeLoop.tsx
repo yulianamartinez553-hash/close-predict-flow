@@ -1,14 +1,14 @@
-/* Loop vertical de compromisos — adaptado de Uiverse.io by kennyotsu a los tokens de marca */
-export function GuaranteeLoop() {
+/* Loop vertical de compromisos — adaptado de Uiverse.io by kennyotsu a los tokens de marca.
+   Sin caja/fondo propio: el mask del loop necesita el color de fondo real detrás
+   (por defecto el violeta de la diapositiva de garantía) para que el fundido sea invisible. */
+interface GuaranteeLoopProps {
+  bg?: string;
+}
+
+export function GuaranteeLoop({ bg = "#55108C" }: GuaranteeLoopProps) {
   return (
-    <div className="gl-card">
+    <div>
       <style>{`
-        .gl-card {
-          --gl-bg: var(--ink-deep);
-          background-color: var(--gl-bg);
-          padding: 1rem 2rem;
-          border-radius: 1.25rem;
-        }
         .gl-loader {
           color: #FFFFFF;
           font-family: var(--font-display);
@@ -18,10 +18,8 @@ export function GuaranteeLoop() {
           letter-spacing: 0.04em;
           box-sizing: content-box;
           height: 40px;
-          padding: 10px;
           display: flex;
           align-items: center;
-          border-radius: 8px;
         }
         .gl-words {
           overflow: hidden;
@@ -61,7 +59,11 @@ export function GuaranteeLoop() {
           .gl-word { animation: none; }
         }
       `}</style>
-      <div className="gl-loader" aria-label="Sin letra pequeña. Sin excusas. Sin depende.">
+      <div
+        className="gl-loader"
+        style={{ "--gl-bg": bg } as React.CSSProperties}
+        aria-label="Sin letra pequeña. Sin excusas. Sin depende."
+      >
         <span style={{ color: "#FFFFFF" }}>Sin&nbsp;</span>
         <div className="gl-words" aria-hidden>
           <span className="gl-word">letra pequeña.</span>

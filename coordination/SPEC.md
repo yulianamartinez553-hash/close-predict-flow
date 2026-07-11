@@ -248,4 +248,19 @@ respetar dependencias (`depende de:`).
     `NotForYouSection`/`ForYouSection`.
   - **Done cuando:** ambos bloques reflejan la jerarquía descrita. — **Hecho 2026-07-10.**
 
-> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-036`+) y reflejalas en PROGRESS.
+- [x] **T-036** — Fix layout slide Garantía: overflow, caja del loop, reorden y tarjeta lateral · _alta_ · depende de: T-031
+  - **Contexto:** el slide 1 de `ClosingSection.tsx` desbordaba 100vh (la tarjeta apilada
+    debajo del loop + `margin-top:300px` empujaban el título fuera de vista). Fixes:
+    (1) `GuaranteeLoop` pierde la caja/fondo propio (`.gl-card`), ahora recibe `bg` por
+    prop para que el mask del loop siga matcheando el fondo real de la diapositiva;
+    (2) orden dentro de la columna centrada: badge → titleLead → título → subtítulo →
+    body → loop (sin caja) → párrafo de cierre, igual que Diagnóstico/Llamada;
+    (3) `ConditionsCard` sale del flujo central y pasa a `.garantia-card-slot`
+    (absolute, izquierda, `top:62%` — a la altura del body, no del título) en desktop;
+    en mobile (`max-width:860px`) esa versión se oculta y aparece una segunda instancia
+    en flujo normal debajo del párrafo de cierre (`.garantia-card-slot-mobile`).
+  - **Done cuando:** el slide entra completo en 100vh sin recorte; el loop no tiene
+    recuadro; la tarjeta queda a la izquierda a la altura del body en desktop.
+    — **Hecho 2026-07-10.**
+
+> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-037`+) y reflejalas en PROGRESS.

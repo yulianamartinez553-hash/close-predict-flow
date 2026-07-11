@@ -272,6 +272,12 @@ respetar dependencias (`depende de:`).
     transparent) y `Testimonios` (Sections.tsx, era transparent). Las 5 secciones
     quedan visualmente uniformes en vez de mezclar sólido/transparent/tonos distintos.
   - **Done cuando:** las 5 secciones muestran el mismo degradé. — **Hecho 2026-07-10.**
+  - **Corrección (2026-07-10):** Yuli pidió específicamente manchas difusas de blur
+    (varios tamaños, sin línea que divida colores), no un lineal de dos puntos. Se
+    reemplazó `--gradient-section` por 5 `radial-gradient` de `#A78BEA` (tamaños y
+    opacidades distintas vía `color-mix`, todas con `transparent` como stop final)
+    sobre base sólida `#1A1038` — mismo enfoque que `--gradient-aurora` ya existente.
+    Como las 5 secciones referencian el token, no hizo falta tocar los componentes.
 
 - [x] **T-038** — Continuidad de scroll IntroPortada → Hero (capa pineada) · _alta_ · depende de: T-032
   - **Contexto:** Yuli reportó que la capa de degradé se veía "movida" y tapaba el logo

@@ -263,7 +263,7 @@ respetar dependencias (`depende de:`).
     recuadro; la tarjeta queda a la izquierda a la altura del body en desktop.
     — **Hecho 2026-07-10.**
 
-- [x] **T-037** — Fondo compartido (degradé `#1A1038`→`#A78BEA`) en secciones 4-8 · _media_ · depende de: —
+- [ ] **T-037** — Fondo compartido (degradé `#1A1038`→`#A78BEA`) en secciones 4-8 · _media_ · depende de: —
   - **Contexto:** nuevo token `--gradient-section: linear-gradient(145deg, #1A1038 0%, #A78BEA 100%)`
     en `styles.css`. Aplicado como `background` en: `PhasesDetail` (Phases.tsx, era
     transparent), `Sistema` (Sections.tsx, era `#281a52` sólido), `QualificationSections`
@@ -278,6 +278,12 @@ respetar dependencias (`depende de:`).
     opacidades distintas vía `color-mix`, todas con `transparent` como stop final)
     sobre base sólida `#1A1038` — mismo enfoque que `--gradient-aurora` ya existente.
     Como las 5 secciones referencian el token, no hizo falta tocar los componentes.
+  - **Revertida (2026-07-10):** Yuli pidió deshacer por completo esta tarea — volver
+    al fondo de las 5 secciones tal como estaba antes de T-037 (`PhasesDetail`/
+    `AboutMe`/`Testimonios` en `transparent`, `Sistema`/`QualificationSections` en
+    `#281a52` sólido), manteniendo intactos los cambios de fondo del Hero/IntroPortada
+    (T-032/T-038, de la misma tanda de pedidos) que **no** se tocan. Token
+    `--gradient-section` eliminado de `styles.css`. Queda `[ ]` — no implementada.
 
 - [x] **T-038** — Continuidad de scroll IntroPortada → Hero (capa pineada) · _alta_ · depende de: T-032
   - **Contexto:** Yuli reportó que la capa de degradé se veía "movida" y tapaba el logo

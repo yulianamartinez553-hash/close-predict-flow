@@ -795,7 +795,7 @@ export function PhasesDetail() {
         overflowX: "clip" — CRÍTICO para que position: sticky funcione.
         "hidden" crea un nuevo contexto de formato que rompe el sticky.
       */}
-      <div style={{ background: "var(--gradient-section)", overflowX: "clip" }}>
+      <div style={{ background: "transparent", overflowX: "clip" }}>
         <PhaseCardsSection />
       </div>
     </>

@@ -174,16 +174,13 @@ export function IntroPortada() {
     offset: ["start start", "end end"],
   });
 
-  /* Color: oscuro (tono del video) → clarísimo, igual que el arranque del Hero */
+  /* Color: oscuro (tono del video) → clarísimo, igual que el arranque del Hero.
+     La forma de la capa NO se anima (nada de "cuadrado creciendo") — el degradé
+     ya está presente de entrada, tapando siempre la misma porción inferior del
+     video; lo único que cambia con el scroll es su color, hasta llegar al mismo
+     tono con el que arranca el fondo del Hero. */
   const scrimColor = useTransform(scrollYProgress, [0, 1], [SCRIM_FROM, SCRIM_TO]);
-  /* Cobertura: al inicio solo tapa el borde inferior del video (como antes);
-     de la mitad del recorrido en adelante, la capa crece hasta cubrir
-     TODO el marco — en ese punto es indistinguible del fondo del Hero,
-     que arranca con el mismo color (SCRIM_TO), dando la sensación de
-     scroll continuo en vez de un corte entre secciones. */
-  const coverStart = useTransform(scrollYProgress, [0.5, 1], [78, -15]);
-  const fadeStart  = useTransform(scrollYProgress, [0.5, 1], [40, -40]);
-  const scrimBackground = useMotionTemplate`linear-gradient(to bottom, transparent 0%, transparent ${fadeStart}%, ${scrimColor} ${coverStart}%, ${scrimColor} 100%)`;
+  const scrimBackground = useMotionTemplate`linear-gradient(to bottom, transparent 0%, transparent 40%, ${scrimColor} 78%, ${scrimColor} 100%)`;
 
   /* El texto/botón de la primera pantalla se desvanece antes de que la
      capa empiece a cubrir el video, para no quedar ilegible sobre el

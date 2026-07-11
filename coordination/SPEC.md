@@ -279,18 +279,20 @@ respetar dependencias (`depende de:`).
     que el scroll se sienta continuo, no "por partes". `IntroPortada.tsx` pasa de
     sección normal `100vh` a wrapper `180vh` con un marco interno
     `position: sticky; top:0; height:100vh` (mismo patrón que `CaosToSistema.tsx`).
-    Con `useScroll(offset:["start start","end end"])` sobre ese wrapper: durante la
-    primera mitad del recorrido pineado el degradé se comporta igual que antes (tapa
-    solo el borde inferior del video); de la mitad en adelante, su cobertura crece
-    hasta cubrir todo el marco mientras el color sigue aclarando hacia `#F0ECFF` —
-    exactamente el color de arranque del fondo del Hero — así que al soltarse el pin
-    la transición es imperceptible. El texto/botón de la primera pantalla se
-    desvanece (`opacity`+`y`) antes de que la capa empiece a cubrir el video, para no
-    quedar sobre fondo claro. El botón "Conocer Close Predict" ahora hace scroll hasta
-    el final real del wrapper (`rootRef.offsetHeight`), no solo un viewport.
-  - **Done cuando:** al scrollear, la capa se pinea tapando el video, se expande y
-    entrega el control al Hero sin salto de color perceptible, sin tapar el logo.
-    — **Hecho 2026-07-10; timing (umbrales 0.5, alto del pin) es una primera
+    Con `useScroll(offset:["start start","end end"])` sobre ese wrapper el color de la
+    capa (no su forma) va de `#1E0A33` a `#F0ECFF` — el mismo tono con el que arranca
+    el fondo del Hero. **Corrección post-review:** la primera versión animaba también
+    el porcentaje de cobertura (crecía de "solo el borde inferior" a "todo el marco"),
+    pero Yuli lo vio como "un cuadrado que se va haciendo grande" y pidió que la capa
+    esté **ya presente en el fondo desde el inicio, sin animar su forma** — se revirtió
+    esa parte: la capa tapa siempre la misma porción inferior del video (stops fijos
+    40%/78%), solo el color transiciona. El texto/botón de la primera pantalla se
+    desvanece (`opacity`+`y`) antes de que la capa llegue a su tono final. El botón
+    "Conocer Close Predict" hace scroll hasta el final real del wrapper
+    (`rootRef.offsetHeight`), no solo un viewport.
+  - **Done cuando:** al scrollear, la capa (con forma fija, ya presente) solo cambia de
+    color hasta empalmar con el fondo del Hero; sin tapar el logo.
+    — **Hecho 2026-07-10; timing (alto del pin) es una primera
     aproximación — necesita ajuste fino visual en `bun run dev`.**
 
 > ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-039`+) y reflejalas en PROGRESS.

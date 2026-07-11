@@ -263,4 +263,34 @@ respetar dependencias (`depende de:`).
     recuadro; la tarjeta queda a la izquierda a la altura del body en desktop.
     — **Hecho 2026-07-10.**
 
-> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-037`+) y reflejalas en PROGRESS.
+- [x] **T-037** — Fondo compartido (degradé `#1A1038`→`#A78BEA`) en secciones 4-8 · _media_ · depende de: —
+  - **Contexto:** nuevo token `--gradient-section: linear-gradient(145deg, #1A1038 0%, #A78BEA 100%)`
+    en `styles.css`. Aplicado como `background` en: `PhasesDetail` (Phases.tsx, era
+    transparent), `Sistema` (Sections.tsx, era `#281a52` sólido), `QualificationSections`
+    (era `#281a52` sólido — el color plano `BG` para las máscaras del video-bridge pasa
+    a `#1A1038`, y el wrapper usa el nuevo token vía `BG_GRADIENT`), `AboutMe` (era
+    transparent) y `Testimonios` (Sections.tsx, era transparent). Las 5 secciones
+    quedan visualmente uniformes en vez de mezclar sólido/transparent/tonos distintos.
+  - **Done cuando:** las 5 secciones muestran el mismo degradé. — **Hecho 2026-07-10.**
+
+- [x] **T-038** — Continuidad de scroll IntroPortada → Hero (capa pineada) · _alta_ · depende de: T-032
+  - **Contexto:** Yuli reportó que la capa de degradé se veía "movida" y tapaba el logo
+    al hacer scroll, y pidió que esa misma capa se convierta en el fondo del Hero para
+    que el scroll se sienta continuo, no "por partes". `IntroPortada.tsx` pasa de
+    sección normal `100vh` a wrapper `180vh` con un marco interno
+    `position: sticky; top:0; height:100vh` (mismo patrón que `CaosToSistema.tsx`).
+    Con `useScroll(offset:["start start","end end"])` sobre ese wrapper: durante la
+    primera mitad del recorrido pineado el degradé se comporta igual que antes (tapa
+    solo el borde inferior del video); de la mitad en adelante, su cobertura crece
+    hasta cubrir todo el marco mientras el color sigue aclarando hacia `#F0ECFF` —
+    exactamente el color de arranque del fondo del Hero — así que al soltarse el pin
+    la transición es imperceptible. El texto/botón de la primera pantalla se
+    desvanece (`opacity`+`y`) antes de que la capa empiece a cubrir el video, para no
+    quedar sobre fondo claro. El botón "Conocer Close Predict" ahora hace scroll hasta
+    el final real del wrapper (`rootRef.offsetHeight`), no solo un viewport.
+  - **Done cuando:** al scrollear, la capa se pinea tapando el video, se expande y
+    entrega el control al Hero sin salto de color perceptible, sin tapar el logo.
+    — **Hecho 2026-07-10; timing (umbrales 0.5, alto del pin) es una primera
+    aproximación — necesita ajuste fino visual en `bun run dev`.**
+
+> ➕ Nuevas tareas: agregalas aquí con el siguiente ID libre (`T-039`+) y reflejalas en PROGRESS.

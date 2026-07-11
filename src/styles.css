@@ -87,6 +87,8 @@
                      radial-gradient(50% 70% at 80% 30%, #6B2BB5 0%, transparent 60%),
                      radial-gradient(70% 90% at 50% 90%, #2B1142 0%, transparent 65%),
                      linear-gradient(135deg, #1E0A33 0%, #2B1142 100%);
+  /* Fondo compartido de las secciones 4-8 (Fases/Entregables/Calificación/Sobre mí/Testimonios) */
+  --gradient-section: linear-gradient(145deg, #1A1038 0%, #A78BEA 100%);
   --gradient-violet: linear-gradient(135deg, #49215F 0%, #5A13B1 100%);
   --gradient-gold: linear-gradient(135deg, #49215F 0%, #5A13B1 100%);
   --shadow-violet: 0 20px 60px -20px color-mix(in oklab, #5A13B1 45%, transparent);

@@ -610,7 +610,7 @@ function EntregablesCarousel3D() {
 
 export function Sistema() {
   return (
-    <section id="entregables" className="relative overflow-hidden py-28" style={{ background: "#281a52" }}>
+    <section id="entregables" className="relative overflow-hidden py-28" style={{ background: "var(--gradient-section)" }}>
       <div className="relative mx-auto max-w-7xl px-6">
         {/* Nuevo encabezado — eyebrow + h2 + subtítulo */}
         <div className="mx-auto mb-16 max-w-3xl text-center">
@@ -792,7 +792,7 @@ export function Testimonios() {
   const reduced = useReducedMotion();
 
   return (
-    <section id="testimonios" className="relative py-28" style={{ background: "transparent" }}>
+    <section id="testimonios" className="relative py-28" style={{ background: "var(--gradient-section)" }}>
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <div className="display mb-4 text-xs uppercase tracking-[0.3em]" style={{ color: "#c084fc" }}>Prueba social</div>

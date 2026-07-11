@@ -49,7 +49,7 @@ export function AboutMe() {
         }
       `}</style>
 
-      <section id="sobre-mi" className="relative overflow-hidden py-28" style={{ background: "transparent" }}>
+      <section id="sobre-mi" className="relative overflow-hidden py-28" style={{ background: "var(--gradient-section)" }}>
         {/* Halos de ambiente */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           <div className="absolute -left-32 top-1/4 h-[460px] w-[460px] rounded-full"

@@ -30,7 +30,8 @@ const FOR_YOU: string[] = [
 /* ─────────────────────────────────────────────────────────────────
    TOKENS
 ───────────────────────────────────────────────────────────────── */
-const BG      = "#281a52";
+const BG      = "#1A1038"; /* color plano — usado para las máscaras de fundido del video-bridge */
+const BG_GRADIENT = "var(--gradient-section)"; /* fondo real del wrapper — igual al de las secciones 4-8 */
 const POPPINS  = "'Poppins', 'Inter', system-ui, sans-serif";
 const ACCENT_SERIF = "'Cormorant Garamond', 'Playfair Display', Georgia, serif";
 const BULLET   = "#7209B7";
@@ -295,7 +296,7 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
 ───────────────────────────────────────────────────────────────── */
 export function QualificationSections() {
   return (
-    <div data-qs-wrapper="" style={{ position: "relative", background: BG }}>
+    <div data-qs-wrapper="" style={{ position: "relative", background: BG_GRADIENT }}>
       <VideoBridge />
       <Block
         eyebrow="ANTES DE EMPEZAR"

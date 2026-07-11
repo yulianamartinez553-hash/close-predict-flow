@@ -158,25 +158,45 @@ function BackgroundVideo() {
    COMPONENTE PRINCIPAL — preportada en flujo normal, scrolleable.
    El navbar NO vive acá a propósito: emerge en el Hero (ver Hero.tsx).
 ───────────────────────────────────────────────────────────────── */
+/* Alto extra de scroll "pineado" antes de ceder el paso al Hero.
+   180vh = 100vh visibles + 80vh de recorrido para que el degradé
+   termine de cubrir el video antes de que la capa se libere. */
+const PIN_HEIGHT_VH = 180;
+
 export function IntroPortada() {
   const reduced = useReducedMotion();
   const btnRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  /* progreso 0→1 a medida que esta pantalla (100vh) scrollea fuera de vista */
+  /* progreso 0→1 mientras la capa está "pineada" (fija en el viewport) */
   const { scrollYProgress } = useScroll({
     target: rootRef,
-    offset: ["start start", "end start"],
+    offset: ["start start", "end end"],
   });
 
+  /* Color: oscuro (tono del video) → clarísimo, igual que el arranque del Hero */
   const scrimColor = useTransform(scrollYProgress, [0, 1], [SCRIM_FROM, SCRIM_TO]);
-  const scrimBackground = useMotionTemplate`linear-gradient(to bottom, transparent 0%, transparent 40%, ${scrimColor} 78%, ${scrimColor} 100%)`;
+  /* Cobertura: al inicio solo tapa el borde inferior del video (como antes);
+     de la mitad del recorrido en adelante, la capa crece hasta cubrir
+     TODO el marco — en ese punto es indistinguible del fondo del Hero,
+     que arranca con el mismo color (SCRIM_TO), dando la sensación de
+     scroll continuo en vez de un corte entre secciones. */
+  const coverStart = useTransform(scrollYProgress, [0.5, 1], [78, -15]);
+  const fadeStart  = useTransform(scrollYProgress, [0.5, 1], [40, -40]);
+  const scrimBackground = useMotionTemplate`linear-gradient(to bottom, transparent 0%, transparent ${fadeStart}%, ${scrimColor} ${coverStart}%, ${scrimColor} 100%)`;
 
-  /* Clic / teclado: ya no dispara un wipe — hace scroll natural hacia el Hero.
-     Se mantiene la intención (llevar al visitante a la siguiente sección). */
+  /* El texto/botón de la primera pantalla se desvanece antes de que la
+     capa empiece a cubrir el video, para no quedar ilegible sobre el
+     fondo claro final. */
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const contentY = useTransform(scrollYProgress, [0, 0.4], [0, -24]);
+
+  /* Clic / teclado: ya no dispara un wipe — hace scroll natural hasta el
+     final de la capa pineada, directo al Hero. */
   const handleClick = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    window.scrollTo({ top: window.innerHeight, behavior: reduced ? "auto" : "smooth" });
+    const target = rootRef.current?.offsetHeight ?? window.innerHeight;
+    window.scrollTo({ top: target, behavior: reduced ? "auto" : "smooth" });
   }, [reduced]);
 
   useEffect(() => {
@@ -188,76 +208,82 @@ export function IntroPortada() {
   }, []);
 
   return (
-    <div ref={rootRef} style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
+    <div ref={rootRef} style={{ position: "relative", height: `${PIN_HEIGHT_VH}vh` }}>
       <style>{`
         @media (max-width: 600px) {
           .ip-line1, .ip-line2 { white-space: normal !important; }
         }
       `}</style>
 
-      <BackgroundVideo />
+      {/* Marco pineado — se mantiene fijo en el viewport mientras se scrollea
+          el alto extra del wrapper; al agotarse, cede el paso al Hero. */}
+      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
+        <BackgroundVideo />
 
-      {/* Capa de degradé sobre el video — reemplaza el overlay plano */}
-      <motion.div
-        aria-hidden
-        style={{
-          position: "absolute", inset: 0, zIndex: 1,
-          background: reduced ? SCRIM_TO : scrimBackground,
-        }}
-      />
-
-      {/* Contenido */}
-      <div
-        style={{
-          position: "absolute", inset: 0, zIndex: 2,
-          display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center",
-          padding: "0 1.5rem", textAlign: "center",
-        }}
-      >
-        {/* Línea 1 — serif editorial grande (Cormorant Garamond) */}
-        <motion.p
-          className="ip-line1"
-          initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(6px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.7, delay: 0.15, ease: EXPO }}
+        {/* Capa de degradé sobre el video — misma capa que termina siendo el fondo del Hero */}
+        <motion.div
+          aria-hidden
           style={{
-            fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-            fontSize: "clamp(36px, 6vw, 80px)",
-            fontWeight: 600,
-            lineHeight: 1.05,
-            letterSpacing: "-0.01em",
-            color: "#fff",
-            whiteSpace: "nowrap",
-            marginBottom: "0.45em",
+            position: "absolute", inset: 0, zIndex: 1,
+            background: reduced ? SCRIM_TO : scrimBackground,
+          }}
+        />
+
+        {/* Contenido */}
+        <motion.div
+          style={{
+            position: "absolute", inset: 0, zIndex: 2,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            padding: "0 1.5rem", textAlign: "center",
+            opacity: reduced ? 1 : contentOpacity,
+            y: reduced ? 0 : contentY,
           }}
         >
-          Los dueños que escalan no venden
-        </motion.p>
+          {/* Línea 1 — serif editorial grande (Cormorant Garamond) */}
+          <motion.p
+            className="ip-line1"
+            initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.7, delay: 0.15, ease: EXPO }}
+            style={{
+              fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
+              fontSize: "clamp(36px, 6vw, 80px)",
+              fontWeight: 600,
+              lineHeight: 1.05,
+              letterSpacing: "-0.01em",
+              color: "#fff",
+              whiteSpace: "nowrap",
+              marginBottom: "0.45em",
+            }}
+          >
+            Los dueños que escalan no venden
+          </motion.p>
 
-        {/* Línea 2 — Poppins limpio (sans-serif de la página) */}
-        <motion.p
-          className="ip-line2"
-          initial={reduced ? false : { opacity: 0, y: 18, filter: "blur(6px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.7, delay: 0.32, ease: EXPO }}
-          style={{
-            fontFamily: "'Poppins', 'Inter', sans-serif",
-            fontSize: "clamp(14px, 1.6vw, 20px)",
-            fontWeight: 400,
-            lineHeight: 1.5,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.60)",
-            whiteSpace: "nowrap",
-            marginBottom: "2.8em",
-          }}
-        >
-          Tienen sistemas que venden por ellos
-        </motion.p>
+          {/* Línea 2 — Poppins limpio (sans-serif de la página) */}
+          <motion.p
+            className="ip-line2"
+            initial={reduced ? false : { opacity: 0, y: 18, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.7, delay: 0.32, ease: EXPO }}
+            style={{
+              fontFamily: "'Poppins', 'Inter', sans-serif",
+              fontSize: "clamp(14px, 1.6vw, 20px)",
+              fontWeight: 400,
+              lineHeight: 1.5,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.60)",
+              whiteSpace: "nowrap",
+              marginBottom: "2.8em",
+            }}
+          >
+            Tienen sistemas que venden por ellos
+          </motion.p>
 
-        {/* Glass pill — con su propia animación de entrada */}
-        <GlassPill onClickFn={handleClick} btnRef={btnRef} reduced={reduced} />
+          {/* Glass pill — con su propia animación de entrada */}
+          <GlassPill onClickFn={handleClick} btnRef={btnRef} reduced={reduced} />
+        </motion.div>
       </div>
     </div>
   );

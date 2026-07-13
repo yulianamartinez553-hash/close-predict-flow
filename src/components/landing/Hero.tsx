@@ -1,505 +1,361 @@
-import { useRef, useCallback, useState, useEffect, type MouseEvent } from "react";
-import { motion, useMotionValue, useSpring, useTransform, useScroll } from "framer-motion";
-import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 
-/* ─────────────────────────────────────────────────────────────────
-   CONSTANTES
-───────────────────────────────────────────────────────────────── */
-const EXPO = [0.16, 1, 0.3, 1] as const;
+/* ═══════════════════════════════════════════════════════════════
+   CANVAS PARTICLE FUNNEL  (portado de hero-v3.html)
+   · Canvas lógico: 500 × 650
+   · 4 piezas trapezoidales con 27 px de GAP entre sí
+   · Cada pieza: vidrio + glow violeta + sombra flotante
+   · Partículas: anillos morados con física spring + repulsión
+═══════════════════════════════════════════════════════════════ */
 
-const NAV_LINKS = [
-  { label: "Sobre mí",        href: "#sobre-mi"    },
-  { label: "Close Predict™",  href: "#detalle"     },
-  { label: "Herramientas",    href: "#entregables" },
-  { label: "Contáctame",      href: "#contacto"    },
+const W = 500, H = 650, CX = 250;
+
+/* Piezas: [yTop, yBot, wTop, wBot, n_desktop, n_mobile]
+   Los gaps de 27 px entre piezas son explícitos en los valores de yTop/yBot */
+const PIECES: [number, number, number, number, number, number][] = [
+  [  26, 149, 430, 340,  900, 360 ],   // Pieza 1 (más ancha)
+  [ 176, 299, 320, 250,  680, 270 ],   // gap 27 px ↑
+  [ 326, 429, 230, 175,  460, 185 ],   // gap 27 px ↑
+  [ 456, 546, 160, 105,  290, 115 ],   // gap 27 px ↑
 ];
 
-/* ─────────────────────────────────────────────────────────────────
-   HERO
-───────────────────────────────────────────────────────────────── */
-export function Hero() {
-  const reduced      = useReducedMotion();
-  const funnelRef     = useRef<HTMLDivElement>(null);
-  const navRef        = useRef<HTMLElement>(null);
-  const sectionRef     = useRef<HTMLElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+interface Pt {
+  ox: number; oy: number;
+  x: number;  y: number;
+  vx: number; vy: number;
+  r: number;  alpha: number;
+}
 
-  /* Entrada de embudo/texto/navbar ligada al scroll — cada elemento
-     "sube" de forma independiente hacia su posición final, escalonado. */
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "start start"],
+function buildParticles(mobile: boolean): Pt[] {
+  const pts: Pt[] = [];
+  PIECES.forEach(([yT, yB, wT, wB, nd, nm]) => {
+    const n = mobile ? nm : nd;
+    for (let i = 0; i < n; i++) {
+      const t = Math.random();
+      const y = yT + t * (yB - yT);
+      const w = wT + t * (wB - wT);
+      const x = CX - w / 2 + Math.random() * w;
+      pts.push({
+        ox: x, oy: y,
+        x: x + (Math.random() - 0.5) * 3,
+        y: y + (Math.random() - 0.5) * 3,
+        vx: 0, vy: 0,
+        r:     1.0 + Math.random() * 1.5,    // radio 1–2.5 px
+        alpha: 0.45 + Math.random() * 0.55,
+      });
+    }
   });
+  return pts;
+}
 
-  const logoOpacity = useTransform(scrollYProgress, [0, 0.6], [0, 1]);
-  const logoY       = useTransform(scrollYProgress, [0, 0.6], [40, 0]);
-  const textOpacity = useTransform(scrollYProgress, [0.1, 0.65], [0, 1]);
-  const textY       = useTransform(scrollYProgress, [0.1, 0.65], [32, 0]);
-  const navOpacity  = useTransform(scrollYProgress, [0.3, 0.8], [0, 1]);
-  const navY        = useTransform(scrollYProgress, [0.3, 0.8], [24, 0]);
+function initFunnel(canvas: HTMLCanvasElement): () => void {
+  const ctx = canvas.getContext("2d")!;
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* Cerrar dropdown al hacer click fuera del nav */
-  useEffect(() => {
-    if (!menuOpen) return;
-    const handler = (e: Event) => {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
+  /* Física — cambiar aquí para ajustar el comportamiento:
+     R   = radio de influencia del cursor (px)
+     STR = fuerza de empuje
+     SP  = velocidad de retorno al origen
+     DM  = amortiguación (0.80 = más fricción, 0.90 = más deslizamiento) */
+  const R = 70, STR = 6.5, SP = 0.065, DM = 0.82;
+
+  let pts: Pt[] = [];
+  let mx = -9999, my = -9999;
+  let rafId = 0;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width  = "100%";
+    canvas.style.height = "100%";
+    ctx.scale(dpr, dpr);
+  }
+
+  function rebuild() {
+    pts = buildParticles(window.innerWidth < 900);
+  }
+
+  function update() {
+    const RR = R * R;
+    pts.forEach(p => {
+      const dx = p.x - mx, dy = p.y - my, d2 = dx * dx + dy * dy;
+      if (d2 < RR && d2 > 0.01) {
+        const d = Math.sqrt(d2), f = ((R - d) / R) * STR;
+        p.vx += (dx / d) * f; p.vy += (dy / d) * f;
       }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [menuOpen]);
+      p.vx += (p.ox - p.x) * SP; p.vy += (p.oy - p.y) * SP;
+      p.vx *= DM; p.vy *= DM;
+      p.x += p.vx; p.y += p.vy;
+    });
+  }
 
-  /* Mouse → tilt del embudo */
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const sx   = useSpring(rawX, { stiffness: 110, damping: 22 });
-  const sy   = useSpring(rawY, { stiffness: 110, damping: 22 });
-  const rotateY = useTransform(sx, [-0.5, 0.5], [-8,  8]);
-  const rotateX = useTransform(sy, [-0.5, 0.5], [ 6, -6]);
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
 
-  const onMouseMove = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (reduced) return;
-      const rect = funnelRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      rawX.set((e.clientX - rect.left  - rect.width  / 2) / rect.width);
-      rawY.set((e.clientY - rect.top   - rect.height / 2) / rect.height);
-    },
-    [reduced, rawX, rawY],
-  );
-  const onMouseLeave = useCallback(() => {
-    rawX.set(0); rawY.set(0);
-  }, [rawX, rawY]);
+    /* ── Partículas (anillos morados) ── */
+    ctx.save();
+    ctx.strokeStyle = "#8B3FD6"; ctx.lineWidth = 1.2;
+    pts.forEach(p => {
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.stroke();
+    });
+    ctx.restore();
+  }
 
-  const scrollTo = (e: { preventDefault(): void }, id: string) => {
+  function loop() {
+    if (!REDUCED) update();
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  resize();
+  rebuild();
+
+  const onMouseMove = (e: MouseEvent) => {
+    const r = canvas.getBoundingClientRect();
+    mx = (e.clientX - r.left) * (W / r.width);
+    my = (e.clientY - r.top)  * (H / r.height);
+  };
+  const onTouchMove = (e: TouchEvent) => {
+    const r = canvas.getBoundingClientRect();
+    mx = (e.touches[0].clientX - r.left) * (W / r.width);
+    my = (e.touches[0].clientY - r.top)  * (H / r.height);
+  };
+  const onLeave = () => { mx = -9999; my = -9999; };
+
+  canvas.addEventListener("mousemove",  onMouseMove,  { passive: true });
+  canvas.addEventListener("touchmove",  onTouchMove,  { passive: true });
+  canvas.addEventListener("mouseleave", onLeave);
+  canvas.addEventListener("touchend",   onLeave);
+
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  const onResize = () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { resize(); rebuild(); }, 250);
+  };
+  window.addEventListener("resize", onResize);
+
+  rafId = requestAnimationFrame(loop);
+
+  return () => {
+    cancelAnimationFrame(rafId);
+    canvas.removeEventListener("mousemove",  onMouseMove);
+    canvas.removeEventListener("touchmove",  onTouchMove);
+    canvas.removeEventListener("mouseleave", onLeave);
+    canvas.removeEventListener("touchend",   onLeave);
+    window.removeEventListener("resize", onResize);
+    clearTimeout(resizeTimer);
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAV + COMPONENT
+═══════════════════════════════════════════════════════════════ */
+
+const NAV_LINKS = [
+  { label: "Sobre mí",      href: "#sobre-mi" },
+  { label: "Close Predict", href: "#sistema" },
+  { label: "Recursos",      href: "#no-momento" },
+  { label: "Contacto",      href: "#contacto" },
+];
+
+export function Hero() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    return initFunnel(canvasRef.current);
+  }, []);
+
+  const scrollTo = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    setMenuOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
+      {/* ── CSS keyframes inyectados una sola vez ── */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Dancing+Script:wght@400&display=swap');
-
-        /* ── Logo personal Caro Chaparro ── */
-        .cp-logo {
-          text-decoration: none;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 2px;
-          line-height: 1;
+        @keyframes heroShine {
+          0%   { background-position: -200% center; }
+          30%  { background-position:  200% center; }
+          100% { background-position:  200% center; }
         }
-        .cp-logo-name {
-          font-family: 'Dancing Script', cursive;
-          font-weight: 400;
-          font-size: 28px;
-          line-height: 1;
-          letter-spacing: 0.01em;
-          white-space: nowrap;
-          color: #6C39B3;
+        .hero-title {
+          background: linear-gradient(90deg,#8B3FD6 0%,#9D4EDD 35%,#c4b5fd 50%,#9D4EDD 65%,#8B3FD6 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: heroShine 3s linear infinite;
         }
-        .cp-logo-sub {
-          display: flex;
-          align-items: center;
-          gap: 7px;
+        .sistema-word {
+          background: linear-gradient(90deg,#8B3FD6 0%,#9D4EDD 30%,#e9d5ff 50%,#9D4EDD 70%,#8B3FD6 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: heroShine 3s linear infinite;
+          filter: drop-shadow(0 0 8px rgba(139,63,214,.55));
         }
-        .cp-logo-sub::before,
-        .cp-logo-sub::after {
-          content: '';
-          display: block;
-          width: 20px;
-          height: 1px;
-          background: rgba(108,57,179,0.28);
-        }
-        .cp-logo-sub span {
-          font-family: 'Montserrat','Inter',sans-serif;
-          font-size: 9.5px;
-          font-weight: 600;
-          letter-spacing: 0.42em;
-          text-transform: uppercase;
-          color: rgba(70,50,117,0.62);
-        }
-
-        /* ── Botón Agendar — brillo diagonal en loop ── */
-        .cp-agendar {
+        .nav-pill {
           position: relative;
-          overflow: hidden;
-          padding: 8px 22px;
-          border-width: 1.5px;
-          border-style: solid;
-          border-radius: 100px;
-          font-size: 13px;
-          font-weight: 600;
-          text-decoration: none;
-          display: inline-block;
-          color: #6C39B3;
-          border-color: rgba(108,57,179,0.45);
-          background: rgba(108,57,179,0.10);
-          transition: border-color 350ms ease, background 350ms ease;
-        }
-        .cp-agendar:hover {
-          border-color: rgba(108,57,179,0.75);
-          background: rgba(108,57,179,0.16);
-        }
-        .cp-agendar::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -120%;
-          width: 55%;
-          height: 200%;
-          background: linear-gradient(
-            to right,
-            transparent 0%,
-            rgba(255,255,255,0.80) 50%,
-            transparent 100%
-          );
-          transform: skewX(-18deg);
-          animation: cpShine 2.8s ease-in-out infinite;
-        }
-        @keyframes cpShine {
-          0%        { left: -120%; }
-          55%, 100% { left: 180%;  }
-        }
-
-        /* ── Hamburger icon button ── */
-        .cp-menu-btn {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          gap: 4.5px;
-          padding: 7px 8px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          border-radius: 8px;
-          transition: background 200ms;
-        }
-        .cp-menu-btn span {
-          display: block;
-          width: 20px;
-          height: 2px;
-          border-radius: 2px;
-          background: #6C39B3;
-        }
-        .cp-menu-btn:hover { background: rgba(108,57,179,0.08); }
-
-        /* ── Dropdown menú ── */
-        .cp-dropdown {
-          position: absolute;
-          top: calc(100% + 10px);
-          right: 1rem;
-          background: #ffffff;
-          border: 1px solid rgba(108,57,179,0.14);
-          border-radius: 14px;
-          box-shadow: 0 8px 32px rgba(70,50,117,0.14), 0 2px 8px rgba(0,0,0,0.06);
-          min-width: 210px;
-          overflow: hidden;
-          z-index: 200;
-        }
-        .cp-dropdown a {
-          display: block;
-          padding: 13px 20px;
-          color: #3d2470;
-          font-family: 'Poppins','Inter',system-ui,sans-serif;
-          font-size: 14px;
+          color: #8B3FD6;
+          font-size: 13.5px;
           font-weight: 500;
           text-decoration: none;
-          transition: background 180ms, color 180ms;
-          border-bottom: 1px solid rgba(108,57,179,0.07);
+          padding-bottom: 2px;
         }
-        .cp-dropdown a:last-child { border-bottom: none; }
-        .cp-dropdown a:hover {
-          background: rgba(108,57,179,0.06);
-          color: #6C39B3;
+        .nav-pill::after {
+          content: '';
+          position: absolute;
+          bottom: -2px; left: 0; right: 0;
+          height: 1.5px;
+          background: #8B3FD6;
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 300ms ease;
         }
-
-        /* ── Logo Close Predict® — morado sólido con brillo diagonal interno en loop ── */
-        .cp-word {
-          font-family: 'Plus Jakarta Sans', 'Outfit', 'Manrope', system-ui, sans-serif;
-          font-weight: 800;
-          line-height: 0.93;
-          letter-spacing: -0.028em;
-          display: inline-block;
-          color: #1A1038;
-          background-image: linear-gradient(
-            115deg,
-            #1A1038 0%, #1A1038 42%,
-            #FFFFFF 50%,
-            #1A1038 58%, #1A1038 100%
-          );
-          background-size: 260% 260%;
-          background-repeat: no-repeat;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: cpWordShine 3.6s linear infinite;
-          will-change: background-position;
-        }
-        .cp-sup {
-          font-size: 0.40em;
-          vertical-align: super;
-          letter-spacing: 0;
-          font-weight: 800;
-          color: #1A1038;
-          background-image: linear-gradient(
-            115deg,
-            #1A1038 0%, #1A1038 42%,
-            #FFFFFF 50%,
-            #1A1038 58%, #1A1038 100%
-          );
-          background-size: 260% 260%;
-          background-repeat: no-repeat;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: cpWordShine 3.6s linear infinite;
-        }
-        @keyframes cpWordShine {
-          0%   { background-position: 100% 100%; }
-          100% { background-position: 0% 0%; }
-        }
-
-        /* ── Aurora keyframes — manchas moradas sobre blanco ── */
-        @keyframes aurora1 {
-          0%, 100% { transform: translate(0,    0)    scale(1);    }
-          25%       { transform: translate(8%,  -7%)   scale(1.09); }
-          50%       { transform: translate(-6%,  10%)  scale(0.94); }
-          75%       { transform: translate(11%,  5%)   scale(1.05); }
-        }
-        @keyframes aurora2 {
-          0%, 100% { transform: translate(0,    0)    scale(1);    }
-          33%       { transform: translate(-10%, 9%)   scale(1.12); }
-          66%       { transform: translate(7%,  -11%)  scale(0.91); }
-        }
-        @keyframes aurora3 {
-          0%, 100% { transform: translate(0,    0)    scale(1);    }
-          40%       { transform: translate(9%,   13%)  scale(1.07); }
-          80%       { transform: translate(-7%, -5%)   scale(0.97); }
-        }
-        @keyframes aurora4 {
-          0%, 100% { transform: translate(0,    0)    scale(1);    }
-          45%       { transform: translate(-5%,  8%)   scale(1.08); }
-          70%       { transform: translate(9%,  -6%)   scale(0.95); }
-        }
-
+        .nav-pill:hover::after { transform: scaleX(1); }
         @media (prefers-reduced-motion: reduce) {
-          .cp-agendar::after { animation: none !important; }
-          .cp-word, .cp-sup { animation: none !important; background-position: 50% 50%; }
+          .hero-title, .sistema-word { animation: none; -webkit-text-fill-color: #8B3FD6; }
         }
       `}</style>
 
-      {/* ── NAV — fondo blanco fijo, presente en todo el sitio salvo la preportada ── */}
-      <motion.nav
-        ref={navRef}
-        className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
-        style={{
-          background: "#FFFFFF",
-          boxShadow: "0 1px 0 rgba(108,57,179,0.08)",
-          opacity: reduced ? 1 : navOpacity,
-          y: reduced ? 0 : navY,
-        }}
-      >
-        {/* ── Logo personal — izquierda ── */}
-        <a href="#" className="cp-logo">
-          <span className="cp-logo-name">Caro Chaparro</span>
-          <div className="cp-logo-sub"><span>Ventas</span></div>
-        </a>
+      <section className="relative min-h-screen" style={{ background: "#fff" }}>
 
-        {/* ── Derecha: botón Agendar + ícono hamburger ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <a
-            href="https://calendly.com/caroventascoach/30min?month=2026-06"
-            target="_blank" rel="noopener noreferrer"
-            className="cp-agendar"
-          >
-            Agendar
+        {/* ── Navegación ── */}
+        <nav
+          className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 md:px-16 py-[18px]"
+          style={{
+            background: "rgba(255,255,255,.90)",
+            backdropFilter: "blur(14px)",
+            borderBottom: "1px solid rgba(139,63,214,.07)",
+          }}
+        >
+          <a href="#" style={{ fontFamily: "var(--font-serif)", fontSize: "21px", fontWeight: 700, color: "#1E0A33", textDecoration: "none" }}>
+            Caro <em style={{ fontStyle: "italic", color: "#8B3FD6" }}>Chaparro</em>
           </a>
-
-          <button
-            className="cp-menu-btn"
-            onClick={() => setMenuOpen(o => !o)}
-            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-            aria-expanded={menuOpen}
-          >
-            <span /><span /><span />
-          </button>
-        </div>
-
-        {/* ── Dropdown de navegación ── */}
-        {menuOpen && (
-          <div className="cp-dropdown">
+          <div className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map(({ label, href }) => (
-              <a key={href} href={href} onClick={e => scrollTo(e, href.slice(1))}>
+              <a key={href} href={href} className="nav-pill" onClick={e => scrollTo(e, href.slice(1))}>
                 {label}
               </a>
             ))}
-          </div>
-        )}
-      </motion.nav>
-
-      {/* ── HERO — degradé violeta clarísimo → blanco (continúa el fondo del video) con manchas aurora ── */}
-      <section
-        ref={sectionRef}
-        className="relative flex items-center justify-center overflow-hidden"
-        style={{
-          minHeight: "100vh",
-          background: "linear-gradient(180deg, #F0ECFF 0%, #FFFFFF 600px)",
-        }}
-      >
-        {/* ── Manchas aurora moradas (puntuales, difuminadas, en movimiento) ── */}
-        <div aria-hidden style={{
-          position: "absolute", top: "-12%", left: "-10%",
-          width: "46vw", height: "46vw",
-          background: "#463275", borderRadius: "50%",
-          filter: "blur(130px)", opacity: 0.13,
-          animation: "aurora1 20s ease-in-out infinite",
-          pointerEvents: "none",
-        }} />
-        <div aria-hidden style={{
-          position: "absolute", top: "20%", right: "-8%",
-          width: "34vw", height: "34vw",
-          background: "#463275", borderRadius: "50%",
-          filter: "blur(110px)", opacity: 0.10,
-          animation: "aurora2 26s ease-in-out infinite",
-          pointerEvents: "none",
-        }} />
-        <div aria-hidden style={{
-          position: "absolute", bottom: "-10%", left: "22%",
-          width: "38vw", height: "38vw",
-          background: "#463275", borderRadius: "50%",
-          filter: "blur(120px)", opacity: 0.11,
-          animation: "aurora3 22s ease-in-out infinite",
-          pointerEvents: "none",
-        }} />
-        <div aria-hidden style={{
-          position: "absolute", top: "40%", left: "40%",
-          width: "20vw", height: "20vw",
-          background: "#6B2BB5", borderRadius: "50%",
-          filter: "blur(90px)", opacity: 0.07,
-          animation: "aurora4 30s ease-in-out infinite",
-          pointerEvents: "none",
-        }} />
-
-        {/* Textura noise sutil */}
-        <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden>
-          <filter id="cp-noise">
-            <feTurbulence type="fractalNoise" baseFrequency="0.70" numOctaves="4" stitchTiles="stitch"/>
-            <feColorMatrix type="saturate" values="0"/>
-          </filter>
-        </svg>
-        <div aria-hidden style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          filter: "url(#cp-noise)", opacity: 0.022,
-        }}/>
-
-        {/* ── Composición principal ── */}
-        <div style={{
-          position: "relative", zIndex: 10,
-          width: "88%", maxWidth: 1060,
-          display: "flex", alignItems: "center",
-          justifyContent: "center",
-          gap: "clamp(2rem, 5vw, 5.5rem)",
-          flexWrap: "wrap",
-        }}>
-
-          {/* ══════════ EMBUDO SVG ══════════ */}
-          <div
-            ref={funnelRef}
-            onMouseMove={onMouseMove}
-            onMouseLeave={onMouseLeave}
-            style={{ position: "relative", width: "min(44%, 400px)", flexShrink: 0 }}
-          >
-            <div aria-hidden style={{
-              position: "absolute",
-              top: "-28%", left: "-22%", right: "-22%", bottom: "-28%",
-              background: "radial-gradient(circle at 42% 52%, rgba(70,50,117,0.10) 0%, transparent 60%)",
-              pointerEvents: "none",
-            }}/>
-
-            <motion.div
+            <a
+              href="/diagnostico.html"
               style={{
-                rotateX,
-                rotateY,
-                perspective: "900px",
-                willChange: "transform",
-                transformStyle: "preserve-3d",
+                padding: "7px 22px",
+                border: "1.5px solid rgba(139,63,214,.35)",
+                borderRadius: "100px",
+                fontSize: "13px",
+                fontWeight: 600,
+                color: "#8B3FD6",
+                textDecoration: "none",
               }}
             >
-              <motion.div
-                style={{ filter: "drop-shadow(0 0 24px rgba(108,57,179,0.30))", willChange: "transform" }}
-                animate={reduced ? undefined : { scale: [1, 1.012, 1] }}
-                transition={reduced ? undefined : { duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                {/* Embudo — sube de forma independiente, sin fondo/caja propia */}
-                <motion.div
-                  style={{
-                    willChange: "transform",
-                    opacity: reduced ? 1 : logoOpacity,
-                    y: reduced ? 0 : logoY,
-                  }}
-                >
-                  <picture>
-                    <source srcSet="/images/embudo-close-predict.avif" type="image/avif" />
-                    <source srcSet="/images/embudo-close-predict.webp" type="image/webp" />
-                    <img
-                      src="/images/embudo-close-predict.png"
-                      alt="Embudo Close Predict"
-                      draggable={false}
-                      width={532}
-                      height={552}
-                      style={{ width: "100%", height: "auto", display: "block", userSelect: "none" }}
-                    />
-                  </picture>
-                </motion.div>
-              </motion.div>
-            </motion.div>
+              Agendar
+            </a>
           </div>
+        </nav>
 
-          {/* ══════════ TEXTO — Close Predict® (sube como pieza suelta, sin fondo/caja propia) ══════════ */}
+        {/* ── Hero grid ── */}
+        <div
+          className="mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-6 lg:px-[64px] pt-[148px] pb-24"
+          style={{ maxWidth: "1280px" }}
+        >
+          {/* Columna texto */}
           <motion.div
-            translate="no"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              flexShrink: 0,
-              minWidth: 200,
-              opacity: reduced ? 1 : textOpacity,
-              y: reduced ? 0 : textY,
-            }}
+            className="flex flex-col gap-7"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* "Close" */}
-            <div style={{ display: "flex" }}>
-              <span className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)" }}>Close</span>
-            </div>
-
-            {/* "Predict®" */}
-            <div style={{ display: "flex", alignItems: "baseline", marginTop: "0.04em" }}>
-              <span className="cp-word" style={{ fontSize: "clamp(54px, 6vw, 96px)" }}>Predict</span>
-              <sup className="cp-sup">®</sup>
-            </div>
-
-            {/* Tagline */}
-            <p
+            <span
+              className="inline-flex items-center gap-2 w-fit rounded-full px-4 py-[5px]"
               style={{
-                margin: 0,
-                marginTop: "1.7rem",
-                fontSize: "clamp(9px, 0.92vw, 11px)",
-                fontFamily: "'Montserrat','Inter',sans-serif",
-                fontWeight: 700,
-                letterSpacing: "0.32em",
-                textTransform: "uppercase",
-                color: "rgba(70,50,117,0.50)",
+                fontSize: "10.5px", fontWeight: 700, letterSpacing: ".22em",
+                textTransform: "uppercase", color: "#8B3FD6",
+                border: "1px solid rgba(139,63,214,.22)",
+                background: "rgba(139,63,214,.05)",
               }}
             >
-              Sistema Comercial Predecible
+              <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: "#8B3FD6" }} />
+              CLOSE-PREDICT™ · Mentoría high-ticket
+            </span>
+
+            <h1
+              className="hero-title"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "clamp(38px, 5vw, 72px)",
+                fontWeight: 900,
+                lineHeight: 1.05,
+                letterSpacing: "-.015em",
+              }}
+            >
+              TU NEGOCIO NO TIENE<br />
+              UN PROBLEMA DE VENTAS.<br />
+              TIENE UN PROBLEMA DE{" "}
+              <span className="sistema-word">SISTEMA.</span>
+            </h1>
+
+            <p style={{ fontSize: "15.5px", lineHeight: 1.85, color: "#64748B", maxWidth: "450px" }}>
+              Transformo ventas que dependen del dueño en un{" "}
+              <strong style={{ color: "#1E0A33", fontWeight: 600 }}>sistema comercial predecible</strong>{" "}
+              y escalable en 12 semanas.
             </p>
+
+            {/* Botón SOBRE MÍ con shine continuo */}
+            <button
+              onClick={e => scrollTo(e as unknown as React.MouseEvent, "sobre-mi")}
+              className="relative overflow-hidden text-white font-black uppercase w-fit"
+              style={{
+                height: 52,
+                padding: "0 48px",
+                borderRadius: "100px",
+                background: "#8B3FD6",
+                fontSize: "14px",
+                letterSpacing: ".1em",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 0 30px rgba(139,63,214,.6)",
+              }}
+            >
+              <span className="relative z-10">SOBRE MÍ</span>
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -skew-x-12"
+                style={{
+                  background:
+                    "linear-gradient(90deg,transparent 0%,rgba(255,255,255,.30) 50%,transparent 100%)",
+                }}
+                animate={{ x: ["-120%", "220%"] }}
+                transition={{ duration: 1.0, repeat: Infinity, repeatDelay: 2.0, ease: "linear" }}
+              />
+            </button>
           </motion.div>
 
+          {/* Columna canvas */}
+          <motion.div
+            className="flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.0, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div
+              className="relative w-full cursor-crosshair"
+              style={{ maxWidth: "480px", aspectRatio: "500/650" }}
+            >
+              <canvas
+                ref={canvasRef}
+                aria-label="Embudo de ventas interactivo CLOSE-PREDICT™"
+                className="absolute inset-0 w-full h-full block"
+              />
+            </div>
+          </motion.div>
         </div>
       </section>
     </>

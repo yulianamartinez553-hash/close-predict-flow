@@ -1,6 +1,5 @@
 import { useRef, type ReactNode } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
-import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 /* ─── Data ──────────────────────────────────────────────────────────── */
 
@@ -51,30 +50,7 @@ const PARTICLES = Array.from({ length: 16 }, (_, i) => ({
 
 type ChaosItem = typeof CHAOS[number];
 
-function ChaosCard({ item, opacity, reduced }: { item: ChaosItem; opacity: MotionValue<number>; reduced: boolean }) {
-  if (reduced) {
-    return (
-      <div
-        className="pointer-events-none absolute"
-        style={{ left: `${item.x}%`, top: `${item.y}%` }}
-      >
-        <div
-          className="min-w-[130px] max-w-[190px] rounded-xl border bg-white px-3 py-2 shadow-lg"
-          style={{
-            borderColor: `${item.accent}35`,
-            boxShadow: `0 4px 16px ${item.accent}18`,
-          }}
-        >
-          <div className="mb-0.5 flex items-center gap-1.5">
-            <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: item.accent }} />
-            <span className="truncate text-[11px] font-medium text-gray-700">{item.line1}</span>
-          </div>
-          <span className="text-[10px] leading-tight text-gray-400">{item.line2}</span>
-        </div>
-      </div>
-    );
-  }
-
+function ChaosCard({ item, opacity }: { item: ChaosItem; opacity: MotionValue<number> }) {
   return (
     <motion.div
       className="pointer-events-none absolute"
@@ -105,7 +81,7 @@ function ChaosCard({ item, opacity, reduced }: { item: ChaosItem; opacity: Motio
 
 /* ─── Network SVG ────────────────────────────────────────────────────── */
 
-function Network({ opacity, reduced }: { opacity: MotionValue<number>; reduced: boolean }) {
+function Network({ opacity }: { opacity: MotionValue<number> }) {
   const nodeMap: Record<string, Node> = Object.fromEntries(NODES.map(n => [n.id, n]));
 
   return (
@@ -148,7 +124,7 @@ function Network({ opacity, reduced }: { opacity: MotionValue<number>; reduced: 
         })}
 
         {/* Pulse rings */}
-        {!reduced && NODES.map((n, i) => (
+        {NODES.map((n, i) => (
           <motion.circle
             key={`ring-${n.id}`}
             cx={n.x} cy={n.y}
@@ -196,7 +172,7 @@ function Network({ opacity, reduced }: { opacity: MotionValue<number>; reduced: 
         ))}
 
         {/* Traveling gold particles along edges */}
-        {!reduced && EDGES.slice(0, 7).map(([a, b], i) => {
+        {EDGES.slice(0, 7).map(([a, b], i) => {
           const na = nodeMap[a], nb = nodeMap[b];
           return (
             <motion.circle
@@ -242,7 +218,6 @@ function SceneTitle({ opacity, className = "", children }: {
 /* ─── Main component ─────────────────────────────────────────────────── */
 
 export function CaosToSistema() {
-  const reduced = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: prog } = useScroll({
     target: containerRef,
@@ -282,11 +257,10 @@ export function CaosToSistema() {
 
         {/* ── Chaos cards ── */}
         {CHAOS.map(item => (
-          <ChaosCard key={item.id} item={item} opacity={chaosOpacity} reduced={reduced} />
+          <ChaosCard key={item.id} item={item} opacity={chaosOpacity} />
         ))}
 
         {/* ── Escape particles ── */}
-        {!reduced && (
         <motion.div
           className="pointer-events-none absolute inset-0"
           style={{ opacity: particlesOpacity }}
@@ -318,10 +292,9 @@ export function CaosToSistema() {
             />
           ))}
         </motion.div>
-        )}
 
         {/* ── Network (scenes 3-6) ── */}
-        <Network opacity={netOpacity} reduced={reduced} />
+        <Network opacity={netOpacity} />
 
         {/* ── Scene 1: ¿Te suena familiar? ── */}
         <SceneTitle opacity={s1} className="top-1/2 -translate-y-1/2">
@@ -344,14 +317,12 @@ export function CaosToSistema() {
             Estás perdiendo{" "}
             <span className="relative inline-block">
               <span className="relative z-10 text-[#9D4EDD]">seguimiento.</span>
-              {!reduced && (
               <motion.span
                 className="absolute inset-0 -z-0 rounded-md"
                 style={{ background: "#9D4EDD1A" }}
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 2.2, repeat: Infinity }}
               />
-              )}
             </span>
           </h2>
         </SceneTitle>
@@ -397,7 +368,7 @@ export function CaosToSistema() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a
               href="/diagnostico.html"
-              className="rounded-full bg-[#9D4EDD] px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-[0_0_32px_#9D4EDD50] transition-all duration-300 hover:scale-[1.04] hover:shadow-[0_0_48px_#9D4EDD70] motion-reduce:hover:scale-100"
+              className="rounded-full bg-[#9D4EDD] px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-[0_0_32px_#9D4EDD50] transition-all duration-300 hover:scale-[1.04] hover:shadow-[0_0_48px_#9D4EDD70]"
             >
               Diagnosticar mi proceso comercial
             </a>
@@ -410,7 +381,7 @@ export function CaosToSistema() {
           </div>
         </motion.div>
 
-        {!reduced && (
+        {/* ── Scroll hint (scene 1 only) ── */}
         <motion.div
           className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
           style={{ opacity: s1 }}
@@ -426,7 +397,6 @@ export function CaosToSistema() {
             </svg>
           </motion.div>
         </motion.div>
-        )}
 
       </motion.div>
     </section>

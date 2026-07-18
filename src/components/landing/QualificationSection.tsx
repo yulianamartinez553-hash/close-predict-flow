@@ -150,6 +150,7 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
       }}
     >
       <div
+        className="qs-row"
         style={{
           maxWidth:      "1360px",
           width:         "100%",
@@ -164,6 +165,7 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
         {/* ── Columna del título ── */}
         <motion.div
           ref={titleRef}
+          className="qs-title"
           style={{
             flex:          "0 0 38%",
             display:       "flex",
@@ -241,6 +243,7 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
         {/* ── Columna de la lista ── */}
         <motion.div
           ref={listRef}
+          className="qs-list"
           style={{
             flex:          "0 0 50%",
             display:       "flex",
@@ -296,6 +299,23 @@ function Block({ eyebrow, prefix, accent, phrases, listSide }: BlockProps) {
 export function QualificationSections() {
   return (
     <div data-qs-wrapper="" style={{ position: "relative", background: BG }}>
+      <style>{`
+        /* En móvil/tablet angosto las dos columnas se apilan (antes quedaban 38%/50%
+           lado a lado con tipografía enorme y el título se recortaba con nowrap). */
+        @media (max-width: 820px) {
+          [data-qs-wrapper] .qs-row {
+            flex-direction: column !important;
+            gap: 2.5rem !important;
+          }
+          [data-qs-wrapper] .qs-title,
+          [data-qs-wrapper] .qs-list {
+            flex: 1 1 auto !important;
+            width: 100%;
+          }
+          /* el título grande deja de forzar una sola línea y se quiebra si hace falta */
+          [data-qs-wrapper] .qs-title p { white-space: normal !important; }
+        }
+      `}</style>
       <VideoBridge />
       <Block
         eyebrow="ANTES DE EMPEZAR"

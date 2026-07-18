@@ -144,7 +144,11 @@ function Slide({
       <div style={{
         position: "absolute", inset: 0, zIndex: 10,
         display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
+        alignItems: "center",
+        /* "safe center": centra cuando entra, pero si el contenido es más alto que
+           el viewport se alinea al tope (alcanzable con overflowY) en vez de
+           recortar la parte de arriba. Evita que el slide de Garantía se corte. */
+        justifyContent: "safe center",
         padding: "2rem", textAlign: "center",
         overflowY: "auto",
       }}>
@@ -283,6 +287,7 @@ export function ClosingSection() {
   /* Refs para el handler de wheel (sin stale closures) */
   const activeIndexRef = useRef(0);
   const isTransitioningRef = useRef(false);
+  const wheelSettleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* Muestra dots solo cuando la sección está completamente en vista */
   useEffect(() => {
@@ -341,22 +346,31 @@ export function ClosingSection() {
       const isDown = e.deltaY > 0;
       const curIdx = activeIndexRef.current;
 
-      /* En los límites dejamos pasar el scroll de la página */
+      /* En los límites dejamos pasar el scroll de la página (hacia el Footer o hacia arriba) */
       if (isDown && curIdx >= SLIDES.length - 1) return;
       if (!isDown && curIdx <= 0) return;
 
-      /* Entre slides intermedios: bloquear página y navegar internamente */
+      /* Entre slides intermedios: capturamos el gesto y navegamos internamente */
       e.preventDefault();
+
+      /* Modelo "settle": la inercia del trackpad dispara decenas de eventos wheel
+         por gesto. En vez de un lock fijo de ~1 s (que congelaba la página y hacía
+         sentir todo trabado), mantenemos el lock mientras sigan llegando eventos y
+         lo liberamos 140 ms después del último. Resultado: un gesto = un slide, sin
+         que la página quede muerta entre medio. */
+      if (wheelSettleRef.current) clearTimeout(wheelSettleRef.current);
+      wheelSettleRef.current = setTimeout(() => { isTransitioningRef.current = false; }, 140);
 
       if (isTransitioningRef.current) return;
       isTransitioningRef.current = true;
-      setTimeout(() => { isTransitioningRef.current = false; }, 950);
-
       scrollToSlide(isDown ? curIdx + 1 : curIdx - 1);
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      if (wheelSettleRef.current) clearTimeout(wheelSettleRef.current);
+    };
   }, [scrollToSlide]);
 
   const current = SLIDES[activeIndex];

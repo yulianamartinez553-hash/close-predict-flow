@@ -207,9 +207,10 @@ export function IntroPortada() {
   return (
     <div ref={rootRef} style={{ position: "relative", height: `${PIN_HEIGHT_VH}vh` }}>
       <style>{`
-        @media (max-width: 600px) {
-          .ip-line1, .ip-line2 { white-space: normal !important; }
-        }
+        /* Las frases se quiebran a 2 líneas balanceadas cuando no entran en una
+           (tablets ~600–1333px), en vez de desbordar/recortarse con nowrap.
+           En pantallas anchas siguen en una sola línea. */
+        .ip-line1, .ip-line2 { text-wrap: balance; }
       `}</style>
 
       {/* Marco pineado — se mantiene fijo en el viewport mientras se scrollea
@@ -250,7 +251,6 @@ export function IntroPortada() {
               lineHeight: 1.05,
               letterSpacing: "-0.01em",
               color: "#fff",
-              whiteSpace: "nowrap",
               marginBottom: "0.45em",
             }}
           >
@@ -271,7 +271,6 @@ export function IntroPortada() {
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               color: "rgba(255,255,255,0.60)",
-              whiteSpace: "nowrap",
               marginBottom: "2.8em",
             }}
           >

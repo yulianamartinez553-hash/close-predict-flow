@@ -8,7 +8,7 @@ import { useReducedMotion } from "@/lib/use-reduced-motion";
 const EXPO = [0.16, 1, 0.3, 1] as const;
 
 const NAV_LINKS = [
-  { label: "Sobre mí",        href: "#sobre-mi"    },
+  { label: "Sobre mí",        href: "/sobre-mi"    },
   { label: "Close Predict™",  href: "#detalle"     },
   { label: "Herramientas",    href: "#entregables" },
   { label: "Contáctame",      href: "#contacto"    },
@@ -332,11 +332,18 @@ export function Hero() {
         {/* ── Dropdown de navegación ── */}
         {menuOpen && (
           <div className="cp-dropdown">
-            {NAV_LINKS.map(({ label, href }) => (
-              <a key={href} href={href} onClick={e => scrollTo(e, href.slice(1))}>
-                {label}
-              </a>
-            ))}
+            {NAV_LINKS.map(({ label, href }) =>
+              href.startsWith("#") ? (
+                <a key={href} href={href} onClick={e => scrollTo(e, href.slice(1))}>
+                  {label}
+                </a>
+              ) : (
+                /* Enlace a otra ruta (ej. /sobre-mi): navegación normal, sin scroll interno */
+                <a key={href} href={href} onClick={() => setMenuOpen(false)}>
+                  {label}
+                </a>
+              ),
+            )}
           </div>
         )}
       </motion.nav>

@@ -868,6 +868,10 @@ function InlineField({
 export function AboutPage() {
   return (
     <main className="about-root">
+      {/* Vuelta a la landing — la página vive en su propia ruta /sobre-mi */}
+      <a href="/" className="about-back" aria-label="Volver al inicio">
+        <span aria-hidden>←</span> Inicio
+      </a>
       <S1Hero />
       <S2Positioning />
       <S3Mosaic />
